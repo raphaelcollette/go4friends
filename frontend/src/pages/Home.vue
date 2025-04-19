@@ -15,8 +15,8 @@
           find friends on campus! 
         </p>
         <div class="flex space-x-6">
-          <RouterLink to="/signup" class="btn">Sign Up</RouterLink>
-          <RouterLink to="/login" class="btn">Login</RouterLink>
+          <RouterLink to="/signup" class="btn">sign up</RouterLink>
+          <RouterLink to="/login" class="btn">login</RouterLink>
         </div>
       </div>
     </div>
