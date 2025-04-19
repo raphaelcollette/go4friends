@@ -7,6 +7,21 @@ from rest_framework.decorators import permission_classes
 from django_ratelimit.decorators import ratelimit
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
+from rest_framework.permissions import IsAuthenticated
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='ip', rate='60/m', block=True)
+def me(request):
+    user = request.user
+    data = {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email
+    }
+    return Response(data)
+
 
 @api_view(['POST'])
 @ratelimit(key='ip', rate='5/m', block=True)
