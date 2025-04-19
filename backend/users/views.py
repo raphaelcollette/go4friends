@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import User
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import check_password
 
 @api_view(['GET', 'POST'])
 def users_list(request):
@@ -39,3 +40,21 @@ def signup(request):
     user = User.objects.create(username=username, email=email, password=hashed_password)
 
     return Response({"message": "User created successfully!"}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    if not username or not password:
+        return Response({"error": "Both username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({"error": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if check_password(password, user.password):
+        return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
