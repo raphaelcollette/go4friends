@@ -5,5 +5,5 @@
 This project features:
 - **Frontend:** Vue
 - **Backend:** Django with DRF
-- **Database:** Coming soon (PostgreSQL or MongoDB)
+- **Database:** PostgreSQL
 - **Dockerization:** Planned for fullstack containerized deployment
