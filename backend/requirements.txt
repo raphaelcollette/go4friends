@@ -1,5 +1,6 @@
 asgiref==3.8.1
 Django==5.2
+django-ratelimit==4.1.0
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 git-filter-repo==2.47.0
