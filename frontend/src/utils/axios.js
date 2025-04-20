@@ -1,10 +1,16 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/', 
+// BASE axios = No Authorization header attached
+const base = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/',
 })
 
-api.interceptors.request.use(config => {
+// AUTH axios = Auto attach Authorization header if token exists
+const authAxios = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/',
+})
+
+authAxios.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -12,4 +18,4 @@ api.interceptors.request.use(config => {
   return config
 })
 
-export default api
+export { base, authAxios }

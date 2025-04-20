@@ -15,24 +15,19 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/utils/axios'
-import Navbar from '@/components/Navbar.vue' 
+import { authAxios } from '@/utils/axios'  // 👈 Correct now!
+import Navbar from '@/components/Navbar.vue'
 
 const user = ref(null)
 const router = useRouter()
 
 const fetchUser = async () => {
   try {
-    const res = await axios.get('me/')
+    const res = await authAxios.get('users/me/')  // 👈 Correct now!
     user.value = res.data
   } catch (error) {
-    router.push('/login')
+    router.push('/login')  // If not logged in, kick back to login
   }
-}
-
-const logout = () => {
-  localStorage.removeItem('access_token')
-  router.push('/')
 }
 
 onMounted(fetchUser)

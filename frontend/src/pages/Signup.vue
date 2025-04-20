@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from '@/utils/axios'
+import { base } from '@/utils/axios'  // 👈 Correct now!
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 
@@ -64,7 +64,7 @@ onMounted(() => {
 
 const signup = async () => {
   try {
-    await axios.post('signup/', {
+    await base.post('users/signup/', {
       email: email.value,
       username: username.value,
       password: password.value,

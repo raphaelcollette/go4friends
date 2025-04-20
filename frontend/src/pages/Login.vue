@@ -50,7 +50,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from '@/utils/axios'
+import { base } from '@/utils/axios'  // ⬅️ use base here!
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 
@@ -66,7 +66,7 @@ onMounted(() => {
 
 const login = async () => {
   try {
-    const res = await axios.post('login/', {
+    const res = await base.post('users/login/', {
       username: username.value,
       password: password.value,
     })

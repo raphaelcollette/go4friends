@@ -1,10 +1,11 @@
 <template>
   <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
-    <RouterLink to="/" class="text-2xl font-bold text-purple-700">whatsurmajor</RouterLink>
+    <RouterLink to="/" class="text-2xl font-bold text-purple-700">
+      whatsurmajor
+    </RouterLink>
 
     <div class="flex space-x-4">
-      <RouterLink to="/signup" class="btn">Sign Up</RouterLink>
-      <RouterLink to="/login" class="btn">Log In</RouterLink>
+      <RouterLink to="/profile" class="btn">Profile</RouterLink>
     </div>
   </nav>
 </template>
