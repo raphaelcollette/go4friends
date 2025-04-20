@@ -23,7 +23,7 @@
           <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
   
           <div class="mt-8 flex justify-center space-x-4">
-            <RouterLink to="#" class="btn">Friends</RouterLink>
+            <RouterLink to="/friends" class="btn">Friends</RouterLink>
             <RouterLink to="#" class="btn">Edit Profile</RouterLink>
           </div>
         </div>

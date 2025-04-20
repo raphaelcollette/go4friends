@@ -3,6 +3,7 @@ from .models import FriendRequest, Notification
 from .serializers import FriendRequestSerializer
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 

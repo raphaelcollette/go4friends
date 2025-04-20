@@ -4,6 +4,7 @@ import Login from '@/pages/Login.vue'
 import Main from '@/pages/Main.vue'
 import Home from '@/pages/Home.vue'
 import Profile from '@/pages/Profile.vue'
+import Friends from '@/pages/Friends.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -18,6 +19,11 @@ const routes = [
     name: 'Profile',
     component: Profile,
     meta: { requiresAuth: true }
+   },
+   { path: '/friends',
+     name: 'Friends',
+     component: Friends,
+     meta: { requiresAuth: true}
    },
 ]
 
