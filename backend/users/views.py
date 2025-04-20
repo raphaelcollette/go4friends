@@ -8,6 +8,7 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 
 User = get_user_model()
 
@@ -19,7 +20,11 @@ def me(request):
     data = {
         "id": user.id,
         "username": user.username,
-        "email": user.email
+        "email": user.email,
+        "full_name": user.full_name,
+        "bio": user.bio,
+        "location": user.location,
+        "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
     }
     return Response(data)
 
@@ -55,4 +60,31 @@ class MyTokenObtainPairView(TokenObtainPairView):
     @method_decorator(ratelimit(key='ip', rate='10/m', block=True)) 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+@ratelimit(key='ip', rate='30/m', block=True)
+def update_me(request):
+    user = request.user
+
+    # Allow JSON and form uploads
+    parser_classes = [MultiPartParser, FormParser]
+
+    full_name = request.data.get('full_name')
+    bio = request.data.get('bio')
+    location = request.data.get('location')
+    profile_picture = request.FILES.get('profile_picture')
+
+    if full_name is not None:
+        user.full_name = full_name
+    if bio is not None:
+        user.bio = bio
+    if location is not None:
+        user.location = location
+    if profile_picture is not None:
+        user.profile_picture = profile_picture
+
+    user.save()
+
+    return Response({"message": "Profile updated successfully!"})
 

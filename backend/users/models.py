@@ -10,7 +10,7 @@ class UserManager(BaseUserManager):
 
         email = self.normalize_email(email)
         user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)  # 🔥 hashes the password properly
+        user.set_password(password) 
         user.save(using=self._db)
         return user
 
@@ -23,14 +23,20 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
+
+    full_name = models.CharField(max_length=255, blank=True)
+    bio = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'username'  # 🔥 used to log in
-    REQUIRED_FIELDS = ['email']   # 🔥 required when creating superuser
+    USERNAME_FIELD = 'username' 
+    REQUIRED_FIELDS = ['email']   
 
     def __str__(self):
         return self.username

@@ -139,3 +139,45 @@ class NotificationListAPIView(generics.ListAPIView):
         ]
         return Response(data, status=status.HTTP_200_OK)
 
+class MarkNotificationsReadAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        notifications = Notification.objects.filter(user=request.user, is_read=False)
+        notifications.update(is_read=True)
+        return Response({'message': 'All notifications marked as read.'}, status=status.HTTP_200_OK)
+
+class FriendListAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        friends = FriendRequest.objects.filter(
+            (models.Q(from_user=user) | models.Q(to_user=user)),
+            status='accepted'
+        )
+
+        friend_list = []
+        for friend_request in friends:
+            if friend_request.from_user == user:
+                friend = friend_request.to_user
+            else:
+                friend = friend_request.from_user
+
+            friend_list.append({
+                'username': friend.username,
+                'email': friend.email
+            })
+
+        return Response(friend_list, status=status.HTTP_200_OK)
+
+class ClearNotificationsAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        Notification.objects.filter(user=request.user).delete()
+        return Response({'message': 'All notifications cleared.'}, status=status.HTTP_200_OK)
+
+
+
