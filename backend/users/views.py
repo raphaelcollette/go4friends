@@ -88,3 +88,11 @@ def update_me(request):
 
     return Response({"message": "Profile updated successfully!"})
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_users(request):
+    query = request.GET.get('q', '')
+    if query:
+        users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
+        return Response([{'id': u.id, 'username': u.username} for u in users])
+    return Response([])
