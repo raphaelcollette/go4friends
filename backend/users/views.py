@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import User
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from django.contrib.auth.hashers import make_password
 from rest_framework.decorators import permission_classes
@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 
+User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
