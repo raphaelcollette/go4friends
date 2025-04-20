@@ -2,7 +2,7 @@
   <div class="landing-container">
     <!-- Left Side: Full Image -->
     <div class="w-1/2 h-full">
-      <img src="@/assets/middlebrook.png" alt="city from middlebrook" class="w-full h-full object-cover" />
+      <img src="@/assets/middlebrook.webp" alt="city from middlebrook" class="w-full h-full object-cover" />
     </div>
 
     <!-- Right Side: Login Form -->

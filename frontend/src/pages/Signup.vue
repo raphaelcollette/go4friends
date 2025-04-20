@@ -2,7 +2,7 @@
   <div class="landing-container">
     <!-- Left Side: Full Image -->
     <div class="w-1/2 h-full">
-      <img src="@/assets/bridge.png" alt="bridge at sunset" class="w-full h-full object-cover" />
+      <img src="@/assets/bridge.webp" alt="bridge at sunset" class="w-full h-full object-cover" />
     </div>
 
     <!-- Right Side: Signup Form -->

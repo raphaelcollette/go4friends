@@ -1,14 +1,20 @@
 <template>
-  <nav class="w-full flex items-center justify-between p-4 bg-white shadow-md fixed top-0 left-0 z-50">
-    <div class="text-xl font-bold">
-      <router-link to="/">whatsurmajor?</router-link>
-    </div>
-    <div>
-      <router-link to="/main" class="hover:underline">Profile</router-link>
+  <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
+    <RouterLink to="/" class="text-2xl font-bold text-purple-700">whatsurmajor</RouterLink>
+
+    <div class="flex space-x-4">
+      <RouterLink to="/signup" class="btn">Sign Up</RouterLink>
+      <RouterLink to="/login" class="btn">Log In</RouterLink>
     </div>
   </nav>
 </template>
 
 <script setup>
-// No need for anything fancy yet
+// no script needed
 </script>
+
+<style scoped>
+.btn {
+  @apply bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl text-base transition-all duration-300;
+}
+</style>

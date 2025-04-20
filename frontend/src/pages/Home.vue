@@ -1,26 +1,25 @@
 <template>
-    <div class="landing-container">
-      <!-- Left Side: Full Image -->
-      <div class="w-1/2 h-full">
-        <img src="@/assets/test1.png" alt="City at sunset" class="w-full h-full object-cover" />
-      </div>
-      
-      <!-- Right Side: Text + Buttons with background -->
-      <div class="w-1/2 h-full bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex flex-col justify-center items-start p-16">
-        <h1 class="text-6xl font-bold leading-tight mb-6 text-gray-800">
-        <br />
-          whatsurmajor?
-        </h1>
-        <p class="text-2xl text-gray-600 mb-10">
-          find friends on campus! 
-        </p>
-        <div class="flex space-x-6">
-          <RouterLink to="/signup" class="btn">sign up</RouterLink>
-          <RouterLink to="/login" class="btn">login</RouterLink>
-        </div>
+  <div class="landing-container">
+    <!-- Left Side: Full Image -->
+    <div class="w-1/2 h-full">
+      <img src="@/assets/test1.webp" alt="City at sunset" class="w-full h-full object-cover" />
+    </div>
+    
+    <!-- Right Side: Text + Buttons with background -->
+    <div class="w-1/2 h-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex flex-col justify-center items-center p-16">
+      <h1 class="text-6xl font-bold leading-tight mb-6 text-gray-800 text-center">
+        whatsurmajor?
+      </h1>
+      <p class="text-2xl text-gray-600 mb-10 text-center">
+        find friends on campus! 
+      </p>
+      <div class="flex space-x-6">
+        <RouterLink to="/signup" class="btn">sign up</RouterLink>
+        <RouterLink to="/login" class="btn">login</RouterLink>
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
   <script setup>
   // No JS needed
