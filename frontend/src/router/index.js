@@ -8,12 +8,27 @@ const routes = [
   { path: '/', component: Home },
   { path: '/signup', component: Signup },
   { path: '/login', component: Login },
-  { path: '/profile', component: Profile },
+  { path: '/profile', component: Profile,
+    component: Profile,
+    meta: { requiresAuth: true }
+   },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = !!localStorage.getItem('access_token')
+
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    // If trying to go to a protected page and not logged in ➔ Redirect to Login
+    next('/login')
+  } else {
+    // Otherwise, continue normally
+    next()
+  }
 })
 
 export default router
