@@ -25,7 +25,7 @@ const login = async () => {
       password: password.value,
     })
     localStorage.setItem('access_token', res.data.access)
-    router.push('/profile')
+    router.push('/main')
   } catch (error) {
     alert('Login failed.')
   }

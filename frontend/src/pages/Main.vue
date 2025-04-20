@@ -32,7 +32,7 @@ const fetchUser = async () => {
 
 const logout = () => {
   localStorage.removeItem('access_token')
-  router.push('/login')
+  router.push('/')
 }
 
 onMounted(fetchUser)
