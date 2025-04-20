@@ -5,6 +5,7 @@
     </RouterLink>
 
     <div class="flex space-x-4">
+      <RouterLink to="/main" class="btn">Feed</RouterLink>   <!-- NEW BUTTON -->
       <RouterLink to="/profile" class="btn">Profile</RouterLink>
     </div>
   </nav>

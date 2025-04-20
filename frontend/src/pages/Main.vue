@@ -15,22 +15,31 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAxios } from '@/utils/axios'  // 👈 Correct now!
+import { authAxios } from '@/utils/axios'  // 
 import Navbar from '@/components/Navbar.vue'
+import { useToast } from 'vue-toastification'
 
 const user = ref(null)
 const router = useRouter()
+const toast = useToast()
 
 const fetchUser = async () => {
   try {
-    const res = await authAxios.get('users/me/')  // 👈 Correct now!
+    const res = await authAxios.get('users/me/')  //
     user.value = res.data
   } catch (error) {
     router.push('/login')  // If not logged in, kick back to login
   }
 }
 
+const logout = () => {
+  localStorage.removeItem('access_token')
+  toast.success('You have been logged out.')
+  router.push('/login')
+}
+
 onMounted(fetchUser)
+
 </script>
 
 <style scoped>
