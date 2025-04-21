@@ -24,7 +24,7 @@
   
             <div class="flex flex-col space-y-2">
               <label class="text-sm font-medium text-gray-700">Profile Picture URL</label>
-              <input v-model="profile_picture" type="text" class="input" placeholder="Paste image URL (for now)" />
+              <input type="file" @change="handleFileChange" class="input" />
             </div>
   
             <div class="flex justify-between items-center mt-8">
@@ -67,25 +67,36 @@
   }
   
   const updateProfile = async () => {
-    try {
-      await authAxios.patch('users/me/update/', {
-        full_name: full_name.value,
-        bio: bio.value,
-        location: location.value,
-        profile_picture: profile_picture.value,
-      })
-      toast.success('Profile updated successfully!')
-      router.push('/profile')
-    } catch (error) {
-      console.error('Failed to update profile:', error)
-      toast.error('Failed to update profile.')
+  try {
+    const formData = new FormData();
+    formData.append('full_name', full_name.value);
+    formData.append('bio', bio.value);
+    formData.append('location', location.value);
+    if (profile_picture.value) {
+      formData.append('profile_picture', profile_picture.value);
     }
+
+    await authAxios.patch('users/me/update/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    toast.success('Profile updated successfully!');
+    router.push('/profile');
+  } catch (error) {
+    console.error('Failed to update profile:', error);
+    toast.error('Failed to update profile.');
   }
+}
   
   const cancel = () => {
     router.push('/profile')
   }
   
+  const handleFileChange = (event) => {
+  profile_picture.value = event.target.files[0]
+}
   onMounted(fetchProfile)
   </script>
   
