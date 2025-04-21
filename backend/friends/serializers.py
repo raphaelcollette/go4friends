@@ -15,21 +15,24 @@ class FriendRequestSerializer(serializers.ModelSerializer):
             'to_user', 'to_username', 'to_profile_picture',
             'status', 'created_at'
         ]
-        read_only_fields = fields
+        read_only_fields = (
+            'id',
+            'from_user', 'from_username', 'from_profile_picture',
+            'to_user', 'to_username', 'to_profile_picture',
+            'status', 'created_at'
+        )
 
     def get_from_profile_picture(self, obj):
+        user = obj.from_user
         request = self.context.get('request')
-        if obj.from_user.profile_picture and request:
-            return request.build_absolute_uri(obj.from_user.profile_picture.url)
+        if user.profile_picture and request:
+            return request.build_absolute_uri(user.profile_picture.url)
         return None
 
     def get_to_profile_picture(self, obj):
+        user = obj.to_user
         request = self.context.get('request')
-        if obj.to_user.profile_picture and request:
-            return request.build_absolute_uri(obj.to_user.profile_picture.url)
+        if user.profile_picture and request:
+            return request.build_absolute_uri(user.profile_picture.url)
         return None
 
-class NotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notification
-        fields = ['id', 'message', 'is_read', 'created_at']
