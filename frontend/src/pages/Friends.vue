@@ -35,7 +35,7 @@
         </div>
       </div>
 
-      <!-- Pending Requests (always show if exist) -->
+      <!-- Pending Requests -->
       <div v-if="pendingRequests.length > 0" class="w-full max-w-6xl mb-16">
         <h2 class="text-2xl font-bold text-gray-700 mb-6">Pending Friend Requests</h2>
 
@@ -59,12 +59,13 @@
         </div>
       </div>
 
-      <!-- Friends (always show if exist) -->
+      <!-- Friends -->
       <div v-if="friends.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
-        <div
+        <RouterLink
           v-for="friend in friends"
           :key="friend.id"
-          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          :to="`/profile/${friend.username}`"
+          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline"
         >
           <div v-if="friend.profile_picture">
             <img
@@ -79,7 +80,7 @@
 
           <p class="mt-4 text-lg font-semibold text-gray-800">{{ friend.full_name || friend.username }}</p>
           <p class="text-sm text-gray-600">@{{ friend.username }}</p>
-        </div>
+        </RouterLink>
       </div>
 
       <!-- No Friends -->
@@ -89,6 +90,7 @@
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'

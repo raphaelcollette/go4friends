@@ -96,3 +96,20 @@ def search_users(request):
         users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
         return Response([{'id': u.id, 'username': u.username} for u in users])
     return Response([])
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_by_username(request, username):
+    try:
+        user = User.objects.get(username=username)
+        data = {
+            "id": user.id,
+            "username": user.username,
+            "full_name": user.full_name,
+            "bio": user.bio,
+            "location": user.location,
+            "profile_picture": user.profile_picture.url if user.profile_picture else None,
+        }
+        return Response(data, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)

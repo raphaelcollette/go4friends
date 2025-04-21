@@ -6,6 +6,7 @@ import Home from '@/pages/Home.vue'
 import Profile from '@/pages/Profile.vue'
 import Friends from '@/pages/Friends.vue'
 import EditProfile from '@/pages/EditProfile.vue'
+import UserProfile from '@/pages/UserProfile.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -30,6 +31,12 @@ const routes = [
     name: 'EditProfile',
     component: EditProfile,
     meta: { requiresAuth: true}
+  },
+  {
+    path: '/profile/:username',
+    name: 'UserProfile',
+    component: UserProfile,
+    meta: { requiresAuth: true },
   },
 ]
 
