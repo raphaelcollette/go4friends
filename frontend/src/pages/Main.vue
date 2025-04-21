@@ -2,13 +2,6 @@
   <div class="landing-container">
     <Navbar />
 
-    <div class="flex flex-col items-center justify-center min-h-screen pt-20">
-      <div v-if="user" class="bg-white p-6 rounded-2xl shadow-xl w-96">
-        <h1 class="text-2xl font-bold mb-4 text-center">Welcome {{ user.username }}</h1>
-        <p class="mb-2 text-center">Email: {{ user.email }}</p>
-        <button class="btn w-full mt-4" @click="logout">Logout</button>
-      </div>
-    </div>
   </div>
 </template>
 
