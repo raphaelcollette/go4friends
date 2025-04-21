@@ -1,7 +1,18 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
     <Navbar />
+    <!-- Remove Friend Modal -->
+    <div v-if="removingUser" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center space-y-6 shadow-lg">
+        <h2 class="text-xl font-bold text-gray-800">Remove Friend?</h2>
+        <p class="text-gray-600">Are you sure you want to remove <span class="font-semibold">@{{ removingUser }}</span> from your friends?</p>
 
+        <div class="flex justify-center space-x-4">
+          <button class="btn bg-gray-300 hover:bg-gray-400 text-gray-800" @click="removingUser = null">Cancel</button>
+          <button class="btn bg-red-500 hover:bg-red-600" @click="confirmRemoveFriend">Remove</button>
+        </div>
+      </div>
+    </div>
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <div class="w-full max-w-6xl flex justify-between items-center mb-10">
         <h1 class="text-4xl font-extrabold text-gray-800">Your Friends</h1>
@@ -65,7 +76,7 @@
           v-for="friend in friends"
           :key="friend.id"
           :to="`/profile/${friend.username}`"
-          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline"
+          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline relative group"
         >
           <div v-if="friend.profile_picture">
             <img
@@ -80,6 +91,14 @@
 
           <p class="mt-4 text-lg font-semibold text-gray-800">{{ friend.full_name || friend.username }}</p>
           <p class="text-sm text-gray-600">@{{ friend.username }}</p>
+
+          <!-- Remove Button (appears on hover) -->
+          <button
+            @click.stop.prevent="removeFriend(friend.username)"
+            class="hidden group-hover:block absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded"
+          >
+            Remove
+          </button>
         </RouterLink>
       </div>
 
@@ -168,6 +187,26 @@ const rejectRequest = async (fromUsername) => {
   } catch (error) {
     console.error('Failed to reject friend request:', error)
     toast.error('Failed to reject request.')
+  }
+}
+
+const removingUser = ref(null)
+
+const removeFriend = (username) => {
+  removingUser.value = username
+}
+
+const confirmRemoveFriend = async () => {
+  if (!removingUser.value) return
+
+  try {
+    await authAxios.post('friends/remove/', { username: removingUser.value })
+    toast.success(`${removingUser.value} has been removed.`)
+    removingUser.value = null
+    fetchFriends()
+  } catch (error) {
+    console.error('Failed to remove friend:', error)
+    toast.error('Failed to remove friend.')
   }
 }
 

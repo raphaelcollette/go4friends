@@ -175,4 +175,26 @@ class ClearNotificationsAPIView(generics.GenericAPIView):
         return Response({'message': 'All notifications cleared.'}, status=status.HTTP_200_OK)
 
 
+class RemoveFriendAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+
+        if not username:
+            return Response({'error': 'username field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            other_user = User.objects.get(username=username)
+            friend_request = FriendRequest.objects.get(
+                (models.Q(from_user=request.user, to_user=other_user) | models.Q(from_user=other_user, to_user=request.user)),
+                status='accepted'
+            )
+        except (User.DoesNotExist, FriendRequest.DoesNotExist):
+            return Response({'error': 'Friend not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Delete the friendship
+        friend_request.delete()
+
+        return Response({'message': 'Friend removed successfully.'}, status=status.HTTP_200_OK)
 
