@@ -11,14 +11,21 @@
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Account</h2>
             <button @click="editProfile" class="btn w-full mt-2">Edit Profile</button>
-            <button @click="changePassword" class="btn w-full mt-2">Change Password</button>
+            <button @click="toggleChangePassword" class="btn w-full mt-2">Change Password</button>
+          </div>
+
+          <!-- Show change password form if toggled -->
+          <div v-if="showChangePassword" class="space-y-4 mt-4">
+            <input v-model="oldPassword" type="password" placeholder="Current Password" class="input w-full" />
+            <input v-model="newPassword" type="password" placeholder="New Password (min 8 chars)" class="input w-full" />
+            <button @click="submitChangePassword" class="btn w-full mt-2">Submit Password Change</button>
           </div>
 
           <!-- Security -->
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Security</h2>
             <button @click="logout" class="btn w-full mt-2">Logout</button>
-            <button @click="deleteAccount" class="btn w-full mt-2 bg-red-600 hover:bg-red-700">Delete Account</button>
+            <button @click="openDeleteModal" class="btn w-full mt-2 bg-red-600 hover:bg-red-700">Delete Account</button>
           </div>
 
           <!-- Preferences -->
@@ -42,17 +49,70 @@
         </div>
       </div>
     </main>
+
+    <!-- Delete Account Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
+        <h2 class="text-xl font-bold text-red-600 mb-4">Delete Account</h2>
+        <p class="text-gray-600 mb-6">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+        <div class="flex space-x-4 justify-center">
+          <button @click="confirmDeleteAccount" class="btn bg-red-600 hover:bg-red-700 w-full">Yes, Delete</button>
+          <button @click="cancelDelete" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800 w-full">Cancel</button>
+        </div>
+      </div>
+    </div>
+
   </div>
-  </template>
+</template>
 
 <script setup>
 import Navbar from '@/components/Navbar.vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { ref } from 'vue'
+import { authAxios } from '@/utils/axios'
 
 const router = useRouter()
 const toast = useToast()
 
+// Change password related
+const showChangePassword = ref(false)
+const oldPassword = ref('')
+const newPassword = ref('')
+
+const toggleChangePassword = () => {
+  showChangePassword.value = !showChangePassword.value
+}
+
+const submitChangePassword = async () => {
+  if (newPassword.value.length < 8) {
+    toast.error('New password must be at least 8 characters long.')
+    return
+  }
+
+  try {
+    await authAxios.patch('/users/change-password/', {
+      old_password: oldPassword.value,
+      new_password: newPassword.value
+    })
+    
+    toast.success('Password changed successfully! Please log in again.')
+    showChangePassword.value = false
+    oldPassword.value = ''
+    newPassword.value = ''
+
+    localStorage.removeItem('access_token')
+    router.push('/login')
+  } catch (error) {
+    if (error.response && error.response.data.error) {
+      toast.error(error.response.data.error)
+    } else {
+      toast.error('Failed to change password. Try again later.')
+    }
+  }
+}
+
+// Profile related
 const editProfile = () => {
   router.push('/profile/edit')
 }
@@ -63,14 +123,31 @@ const logout = () => {
   router.push('/login')
 }
 
-const changePassword = () => {
-  toast.info('Change password feature coming soon!')
+// Delete account related
+const showDeleteModal = ref(false)
+
+const openDeleteModal = () => {
+  showDeleteModal.value = true
 }
 
-const deleteAccount = () => {
-  toast.warning('Delete account feature coming soon! Be careful!')
+const cancelDelete = () => {
+  showDeleteModal.value = false
 }
 
+const confirmDeleteAccount = async () => {
+  try {
+    await authAxios.delete('/users/delete-account/')
+    toast.success('Account deleted successfully.')
+    localStorage.removeItem('access_token')
+    router.push('/signup')
+  } catch (error) {
+    toast.error('Failed to delete account. Please try again.')
+  } finally {
+    showDeleteModal.value = false
+  }
+}
+
+// Dark mode placeholder
 const toggleDarkMode = () => {
   toast.info('Dark mode toggle coming soon!')
 }
@@ -80,4 +157,8 @@ const toggleDarkMode = () => {
 .btn {
   @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
 }
+.input {
+  @apply p-2 rounded-lg bg-white/50 backdrop-blur-sm placeholder-gray-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400;
+}
 </style>
+
