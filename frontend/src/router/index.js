@@ -8,6 +8,8 @@ import Friends from '@/pages/Friends.vue'
 import EditProfile from '@/pages/EditProfile.vue'
 import UserProfile from '@/pages/UserProfile.vue'
 import Settings from '@/pages/Settings.vue'
+import Events from '@/pages/Events.vue'
+import Clubs from '@/pages/Clubs.vue'
 
 const routes = [
   {
@@ -60,7 +62,9 @@ const routes = [
     name: 'Settings',
     component: Settings,
     meta: { requiresAuth: true }
-  }
+  },
+  { path: '/events', name: 'Events', component: Events, meta: { requiresAuth: true } },
+  { path: '/clubs', name: 'Clubs', component: Clubs, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({

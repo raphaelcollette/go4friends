@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'clubs',
     'events',
     'django_filters',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

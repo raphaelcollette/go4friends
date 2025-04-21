@@ -24,6 +24,8 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/friends/', include('friends.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/clubs/', include('clubs.urls')),
+    path('api/events/', include('events.urls')),
 ]
 
 from django.conf import settings

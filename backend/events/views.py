@@ -1,13 +1,16 @@
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, filters
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
 from .models import Event
 from .serializers import EventSerializer
 from clubs.models import Club
 
+# --- Create Event ---
 class EventCreateAPIView(generics.GenericAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # Needed for images
 
     def post(self, request, *args, **kwargs):
         club_name = request.data.get('club_name')
@@ -25,9 +28,11 @@ class EventCreateAPIView(generics.GenericAPIView):
             return Response(EventSerializer(event, context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# --- List All Events ---
 class EventListAPIView(generics.ListAPIView):
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]  # Add ordering!
     ordering_fields = ['date', 'title']
     ordering = ['date']
 
@@ -44,9 +49,11 @@ class EventListAPIView(generics.ListAPIView):
 
         return queryset
 
+# --- List Events by Club ---
 class ClubEventListAPIView(generics.ListAPIView):
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.OrderingFilter]
     ordering_fields = ['date', 'title']
     ordering = ['date']
 
