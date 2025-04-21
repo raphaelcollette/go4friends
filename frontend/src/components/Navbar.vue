@@ -5,6 +5,8 @@
     </RouterLink>
 
     <div class="flex space-x-4">
+      <RouterLink to="/clubs" class="btn">Clubs</RouterLink>
+      <RouterLink to="/events" class="btn">Events</RouterLink>
       <RouterLink to="/friends" class="btn">Friends</RouterLink>
       <RouterLink to="/profile" class="btn">Profile</RouterLink>
       <RouterLink to="/settings" class="btn">Settings</RouterLink>
