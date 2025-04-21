@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'friends',
     'notifications',
+    'clubs',
+    'events',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -79,9 +82,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '60/min',
+        'anon': '30/min',
+    },
+    'EXCEPTION_HANDLER': 'backend.exceptions.custom_exception_handler', 
 }
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
