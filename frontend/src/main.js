@@ -20,6 +20,7 @@ app.use(Toast, {
     closeButton: "button",
     icon: true,
     rtl: false,
+    position: 'bottom-right',
 })
 
 app.use(router)
