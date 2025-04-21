@@ -98,7 +98,7 @@ def search_users(request):
     return Response([])
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])  # (or AllowAny if you want public profiles)
 def get_user_by_username(request, username):
     try:
         user = User.objects.get(username=username)
@@ -108,7 +108,7 @@ def get_user_by_username(request, username):
             "full_name": user.full_name,
             "bio": user.bio,
             "location": user.location,
-            "profile_picture": user.profile_picture.url if user.profile_picture else None,
+            "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
         }
         return Response(data, status=status.HTTP_200_OK)
     except User.DoesNotExist:

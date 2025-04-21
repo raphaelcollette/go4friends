@@ -4,6 +4,7 @@ from .serializers import FriendRequestSerializer
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db import models
+from users.serializers import UserPublicSerializer
 
 User = get_user_model()
 
@@ -45,16 +46,34 @@ class FriendRequestListAPIView(generics.ListAPIView):
         user = self.request.user
         return FriendRequest.objects.filter(to_user=user, status='pending')
 
-class FriendListAPIView(generics.ListAPIView):
-    serializer_class = FriendRequestSerializer
+class FriendListAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.user
-        return FriendRequest.objects.filter(
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        friends = FriendRequest.objects.filter(
             (models.Q(from_user=user) | models.Q(to_user=user)),
             status='accepted'
         )
+
+        friend_list = []
+        for friend_request in friends:
+            if friend_request.from_user == user:
+                friend = friend_request.to_user
+            else:
+                friend = friend_request.from_user
+
+            friend_list.append({
+                'username': friend.username,
+                'full_name': friend.full_name,
+                'email': friend.email,
+                'profile_picture': request.build_absolute_uri(friend.profile_picture.url) if friend.profile_picture else None,
+                'bio': friend.bio,
+                'location': friend.location,
+            })
+
+        return Response(friend_list, status=status.HTTP_200_OK)
 
 class AcceptFriendRequestAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -147,31 +166,6 @@ class MarkNotificationsReadAPIView(generics.GenericAPIView):
         notifications = Notification.objects.filter(user=request.user, is_read=False)
         notifications.update(is_read=True)
         return Response({'message': 'All notifications marked as read.'}, status=status.HTTP_200_OK)
-
-class FriendListAPIView(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-
-        friends = FriendRequest.objects.filter(
-            (models.Q(from_user=user) | models.Q(to_user=user)),
-            status='accepted'
-        )
-
-        friend_list = []
-        for friend_request in friends:
-            if friend_request.from_user == user:
-                friend = friend_request.to_user
-            else:
-                friend = friend_request.from_user
-
-            friend_list.append({
-                'username': friend.username,
-                'email': friend.email
-            })
-
-        return Response(friend_list, status=status.HTTP_200_OK)
 
 class ClearNotificationsAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
