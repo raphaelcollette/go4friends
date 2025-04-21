@@ -5,6 +5,7 @@ import Main from '@/pages/Main.vue'
 import Home from '@/pages/Home.vue'
 import Profile from '@/pages/Profile.vue'
 import Friends from '@/pages/Friends.vue'
+import EditProfile from '@/pages/EditProfile.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -25,6 +26,11 @@ const routes = [
      component: Friends,
      meta: { requiresAuth: true}
    },
+   { path: '/profile/edit',
+    name: 'EditProfile',
+    component: EditProfile,
+    meta: { requiresAuth: true}
+  },
 ]
 
 const router = createRouter({

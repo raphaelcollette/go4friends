@@ -24,7 +24,7 @@
   
           <div class="mt-8 flex justify-center space-x-4">
             <RouterLink to="/friends" class="btn">Friends</RouterLink>
-            <RouterLink to="#" class="btn">Edit Profile</RouterLink>
+            <RouterLink to="/profile/edit" class="btn">Edit Profile</RouterLink>
           </div>
         </div>
       </main>
