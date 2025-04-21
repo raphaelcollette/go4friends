@@ -56,7 +56,15 @@
             :key="request.id"
             class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
           >
-            <div class="w-20 h-20 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
+            <!-- 👇 Fix: Proper profile picture check -->
+            <div v-if="request.from_profile_picture">
+              <img
+                :src="request.from_profile_picture"
+                alt="Profile Picture"
+                class="w-20 h-20 rounded-full object-cover border-4 border-purple-300"
+              />
+            </div>
+            <div v-else class="w-20 h-20 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
               {{ request.from_username.charAt(0).toUpperCase() }}
             </div>
 

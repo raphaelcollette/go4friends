@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
+from .serializers import UserPublicSerializer
 
 User = get_user_model()
 
@@ -16,17 +17,8 @@ User = get_user_model()
 @permission_classes([IsAuthenticated])
 @ratelimit(key='ip', rate='60/m', block=True)
 def me(request):
-    user = request.user
-    data = {
-        "id": user.id,
-        "username": user.username,
-        "email": user.email,
-        "full_name": user.full_name,
-        "bio": user.bio,
-        "location": user.location,
-        "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
-    }
-    return Response(data)
+    serializer = UserPublicSerializer(request.user, context={'request': request})
+    return Response(serializer.data)
 
 
 @api_view(['POST'])
@@ -94,23 +86,17 @@ def search_users(request):
     query = request.GET.get('q', '')
     if query:
         users = User.objects.filter(username__icontains=query).exclude(id=request.user.id)[:10]
-        return Response([{'id': u.id, 'username': u.username} for u in users])
+        serializer = UserPublicSerializer(users, many=True, context={'request': request})
+        return Response(serializer.data)
     return Response([])
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])  # (or AllowAny if you want public profiles)
+@permission_classes([IsAuthenticated])
 def get_user_by_username(request, username):
     try:
         user = User.objects.get(username=username)
-        data = {
-            "id": user.id,
-            "username": user.username,
-            "full_name": user.full_name,
-            "bio": user.bio,
-            "location": user.location,
-            "profile_picture": request.build_absolute_uri(user.profile_picture.url) if user.profile_picture else None,
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        serializer = UserPublicSerializer(user, context={'request': request})
+        return Response(serializer.data)
     except User.DoesNotExist:
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
