@@ -7,6 +7,7 @@ import Profile from '@/pages/Profile.vue'
 import Friends from '@/pages/Friends.vue'
 import EditProfile from '@/pages/EditProfile.vue'
 import UserProfile from '@/pages/UserProfile.vue'
+import Settings from '@/pages/Settings.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -38,6 +39,12 @@ const routes = [
     component: UserProfile,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings,
+    meta: { requiresAuth: true },
+  }
 ]
 
 const router = createRouter({

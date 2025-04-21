@@ -91,7 +91,7 @@
 }
   
   const cancel = () => {
-    router.push('/profile')
+    router.push('/settings')
   }
   
   const handleFileChange = (event) => {

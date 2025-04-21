@@ -1,12 +1,13 @@
 <template>
   <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
-    <RouterLink to="/" class="text-2xl font-bold text-purple-700">
+    <RouterLink to="/main" class="text-2xl font-bold text-purple-700">
       whatsurmajor
     </RouterLink>
 
     <div class="flex space-x-4">
-      <RouterLink to="/main" class="btn">Feed</RouterLink>   <!-- NEW BUTTON -->
+      <RouterLink to="/friends" class="btn">Friends</RouterLink>
       <RouterLink to="/profile" class="btn">Profile</RouterLink>
+      <RouterLink to="/settings" class="btn">Settings</RouterLink>
     </div>
   </nav>
 </template>
