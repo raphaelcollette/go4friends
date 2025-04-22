@@ -1,68 +1,89 @@
 <template>
-    <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-      <Navbar />
-  
-      <main class="flex-1 flex flex-col items-center pt-24 px-6">
-        <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
-  
-        <div v-else-if="!user" class="text-gray-500 text-lg">User not found.</div>
-  
-        <div v-else class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div class="flex justify-center">
-            <img
-              v-if="user.profile_picture"
-              :src="user.profile_picture"
-              alt="Profile Picture"
-              class="w-28 h-28 rounded-full object-cover border-4 border-purple-300"
-            />
-            <div v-else class="w-28 h-28 rounded-full bg-purple-200 flex items-center justify-center text-4xl text-white">
-              {{ user.username.charAt(0).toUpperCase() }}
-            </div>
-          </div>
-  
-          <h1 class="text-3xl font-bold text-gray-800 mt-6">{{ user.full_name || user.username }}</h1>
-          <p class="text-gray-600 mt-2">@{{ user.username }}</p>
-  
-          <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
-          <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
-  
-          <div class="mt-6 flex justify-center space-x-4">
-            <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
+  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+    <Navbar />
+
+    <main class="flex-1 flex flex-col items-center pt-24 px-6">
+      <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
+
+      <div v-else-if="!user" class="text-gray-500 text-lg">User not found.</div>
+
+      <div v-else class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+        <div class="flex justify-center">
+          <img
+            v-if="user.profile_picture"
+            :src="user.profile_picture"
+            alt="Profile Picture"
+            class="w-28 h-28 rounded-full object-cover border-4 border-purple-300"
+          />
+          <div v-else class="w-28 h-28 rounded-full bg-purple-200 flex items-center justify-center text-4xl text-white">
+            {{ user.username.charAt(0).toUpperCase() }}
           </div>
         </div>
-      </main>
-    </div>
-  </template>
+
+        <h1 class="text-3xl font-bold text-gray-800 mt-6">{{ user.full_name || user.username }}</h1>
+        <p class="text-gray-600 mt-2">@{{ user.username }}</p>
+
+        <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
+        <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
+
+        <!-- Clubs Section -->
+        <div v-if="user.clubs?.length" class="mt-8">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
+          <div class="flex flex-wrap justify-center gap-2">
+            <RouterLink
+              v-for="club in user.clubs"
+              :key="club.id"
+              :to="`/clubs/${encodeURIComponent(club.name)}`"
+              class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition-all"
+            >
+              {{ club.name }}
+            </RouterLink>
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-center space-x-4">
+          <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
   
-  <script setup>
-  import { ref, onMounted } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
-  import { authAxios } from '@/utils/axios'
-  import Navbar from '@/components/Navbar.vue'
-  import { useToast } from 'vue-toastification'
-  
-  const route = useRoute()
-  const router = useRouter()
-  const user = ref(null)
-  const loading = ref(true)
-  const toast = useToast()
-  
-  const fetchUser = async () => {
-    try {
-      const username = route.params.username
-      const res = await authAxios.get(`users/profile/${username}/`)
-      user.value = res.data
-    } catch (error) {
-      console.error('Failed to fetch user:', error)
-      toast.error('Failed to load user profile.')
-      user.value = null
-    } finally {
-      loading.value = false
-    }
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { authAxios } from '@/utils/axios'
+import Navbar from '@/components/Navbar.vue'
+import { useToast } from 'vue-toastification'
+
+const route = useRoute()
+const router = useRouter()
+const user = ref(null)
+const loading = ref(true)
+const toast = useToast()
+
+const fetchUser = async () => {
+  try {
+    loading.value = true
+    const username = route.params.username
+    const res = await authAxios.get(`users/profile/${username}/`)
+    user.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch user:', error)
+    toast.error('Failed to load user profile.')
+    user.value = null
+  } finally {
+    loading.value = false
   }
-  
-  onMounted(fetchUser)
-  </script>
+}
+
+// Fetch when mounted
+onMounted(fetchUser)
+
+// 🛠️ Also re-fetch when the route username param changes
+watch(() => route.params.username, fetchUser)
+</script>
   
   <style scoped>
   .btn {

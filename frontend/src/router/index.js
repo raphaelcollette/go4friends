@@ -3,7 +3,6 @@ import Signup from '@/pages/Signup.vue'
 import Login from '@/pages/Login.vue'
 import Main from '@/pages/Main.vue'
 import Home from '@/pages/Home.vue'
-import Profile from '@/pages/Profile.vue'
 import Friends from '@/pages/Friends.vue'
 import EditProfile from '@/pages/EditProfile.vue'
 import UserProfile from '@/pages/UserProfile.vue'
@@ -32,12 +31,6 @@ const routes = [
     path: '/main',
     name: 'Main',
     component: Main,
-    meta: { requiresAuth: true }
-  },
-  { 
-    path: '/profile',
-    name: 'Profile',
-    component: Profile,
     meta: { requiresAuth: true }
   },
   { 

@@ -8,14 +8,34 @@
       <RouterLink to="/clubs" class="btn">Clubs</RouterLink>
       <RouterLink to="/events" class="btn">Events</RouterLink>
       <RouterLink to="/friends" class="btn">Friends</RouterLink>
-      <RouterLink to="/profile" class="btn">Profile</RouterLink>
+      <RouterLink
+        v-if="currentUser"
+        :to="`/profile/${currentUser.username}`"
+        class="btn"
+      >
+        Profile
+      </RouterLink>
       <RouterLink to="/settings" class="btn">Settings</RouterLink>
     </div>
   </nav>
 </template>
 
 <script setup>
-// no script needed
+import { ref, onMounted } from 'vue'
+import { authAxios } from '@/utils/axios'
+
+const currentUser = ref(null)
+
+const fetchCurrentUser = async () => {
+  try {
+    const res = await authAxios.get('/users/me/')
+    currentUser.value = res.data
+  } catch (error) {
+    console.error('Failed to fetch current user:', error)
+  }
+}
+
+onMounted(fetchCurrentUser)
 </script>
 
 <style scoped>
