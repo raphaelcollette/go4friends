@@ -6,6 +6,7 @@ from django.db.models import Q
 from .models import FriendRequest
 from .serializers import FriendRequestSerializer
 from users.serializers import UserPublicSerializer
+from notifications.models import Notification
 
 User = get_user_model()
 

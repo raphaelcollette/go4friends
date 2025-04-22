@@ -26,6 +26,33 @@
         <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
         <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
 
+        <!-- Friend Button Section -->
+        <div class="mt-6">
+          <template v-if="user.username !== currentUsername">
+            <button
+              v-if="user.is_friend"
+              @click="removeFriend"
+              class="btn bg-red-500 hover:bg-red-600"
+            >
+              Unfriend
+            </button>
+            <button
+              v-else-if="user.friend_request_sent"
+              class="btn bg-yellow-500 hover:bg-yellow-600 cursor-default"
+              disabled
+            >
+              Request Sent
+            </button>
+            <button
+              v-else
+              @click="sendFriendRequest"
+              class="btn bg-purple-600 hover:bg-purple-700"
+            >
+              + Add Friend
+            </button>
+          </template>
+        </div>
+
         <!-- Clubs Section -->
         <div v-if="user.clubs?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
@@ -49,7 +76,6 @@
   </div>
 </template>
 
-  
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -62,13 +88,18 @@ const router = useRouter()
 const user = ref(null)
 const loading = ref(true)
 const toast = useToast()
+const currentUsername = ref('')
 
+// Fetch profile user
 const fetchUser = async () => {
   try {
     loading.value = true
     const username = route.params.username
     const res = await authAxios.get(`users/profile/${username}/`)
     user.value = res.data
+
+    const me = await authAxios.get('/users/me/')
+    currentUsername.value = me.data.username
   } catch (error) {
     console.error('Failed to fetch user:', error)
     toast.error('Failed to load user profile.')
@@ -78,15 +109,38 @@ const fetchUser = async () => {
   }
 }
 
-// Fetch when mounted
-onMounted(fetchUser)
+// Send Friend Request
+const sendFriendRequest = async () => {
+  try {
+    await authAxios.post('/friends/send/', { to_username: user.value.username })
+    toast.success('Friend request sent!')
+    user.value.friend_request_sent = true
+  } catch (error) {
+    console.error('Failed to send friend request:', error)
+    toast.error('Failed to send friend request.')
+  }
+}
 
-// 🛠️ Also re-fetch when the route username param changes
+// Remove Friend
+const removeFriend = async () => {
+  try {
+    await authAxios.post('/friends/remove/', { username: user.value.username })
+    toast.success('Friend removed.')
+    user.value.is_friend = false
+  } catch (error) {
+    console.error('Failed to remove friend:', error)
+    toast.error('Failed to remove friend.')
+  }
+}
+
+// Initial fetch
+onMounted(fetchUser)
 watch(() => route.params.username, fetchUser)
 </script>
-  
-  <style scoped>
-  .btn {
-    @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
-  }
-  </style>
+
+<style scoped>
+.btn {
+  @apply text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
+}
+</style>
+
