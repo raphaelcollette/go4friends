@@ -56,7 +56,27 @@
             :key="notif.id"
             class="text-sm text-gray-800 bg-purple-50 px-3 py-2 rounded hover:bg-purple-100 transition"
           >
-            {{ notif.message }}
+            <div class="flex justify-between items-center">
+              <span>{{ notif.message }}</span>
+
+              <button
+                v-if="!notif.is_read"
+                @click="markOneRead(notif.id)"
+                class="text-xs text-blue-600 hover:text-blue-800 font-semibold ml-4"
+              >
+                Mark Read
+              </button>
+            </div>
+
+            <!-- Optional: friend request logic -->
+            <div v-if="notif.type === 'friend_request'" class="mt-2 flex justify-end">
+              <button
+                class="text-xs font-semibold text-green-600 hover:text-green-800"
+                @click="acceptFriendFromNotif(notif)"
+              >
+                Accept Friend
+              </button>
+            </div>
           </div>
         </div>
     </div>
@@ -126,6 +146,37 @@ const toggleDropdown = () => {
     fetchNotifications()
   }
 }
+
+const acceptFriendFromNotif = async (notif) => {
+  try {
+    await authAxios.post('/friends/accept/', {
+      from_username: extractUsernameFromMessage(notif.message),
+    })
+    toast.success('Friend request accepted!')
+    await authAxios.post('/notifications/mark-read/')  // Optional if you want to mark it
+    fetchNotifications()
+  } catch (error) {
+    console.error('Failed to accept friend request:', error)
+    toast.error('Error accepting friend request.')
+  }
+}
+
+const extractUsernameFromMessage = (message) => {
+  // Assumes the message is like "brocoder sent you a friend request!"
+  return message.split(' ')[0]
+}
+
+const markOneRead = async (id) => {
+  try {
+    await authAxios.post(`/notifications/${id}/mark-read/`)
+    toast.success('Marked as read')
+    fetchNotifications()
+  } catch (error) {
+    console.error('Failed to mark notification as read:', error)
+    toast.error('Failed to mark as read')
+  }
+}
+
 
 onMounted(() => {
   fetchCurrentUser()
