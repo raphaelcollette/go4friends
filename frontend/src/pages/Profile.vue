@@ -24,8 +24,28 @@
         <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
         <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
 
-        <div class="mt-6 flex justify-center space-x-4">
-          <!-- Optional buttons here -->
+        <!-- My Clubs Section -->
+        <div v-if="clubs.length > 0" class="mt-8">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">My Clubs</h2>
+          <ul class="space-y-2">
+            <li
+              v-for="club in clubs"
+              :key="club.id"
+              class="bg-white/30 rounded-xl p-3 text-gray-700 hover:bg-white/50 transition-all"
+            >
+              {{ club.name }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- No Clubs Message + Create Button -->
+        <div v-else class="mt-8 text-center">
+          <p class="text-gray-500 text-sm mb-4">
+            You haven't joined any clubs yet.
+          </p>
+          <button class="btn" @click="goToClubs">
+            + Create Your First Club
+          </button>
         </div>
       </div>
     </main>
@@ -39,22 +59,38 @@ import { authAxios } from '@/utils/axios'
 import Navbar from '@/components/Navbar.vue'
 
 const user = ref({})
+const clubs = ref([])
 const loading = ref(true)
 const router = useRouter()
 
 const fetchUser = async () => {
   try {
-    const res = await authAxios.get('users/me/')
+    const res = await authAxios.get('/users/me/')
     user.value = res.data
   } catch (error) {
     console.error('Failed to fetch profile:', error)
     router.push('/login')
-  } finally {
-    loading.value = false
   }
 }
 
-onMounted(fetchUser)
+const fetchMyClubs = async () => {
+  try {
+    const res = await authAxios.get('/clubs/')
+    clubs.value = res.data.filter(club => club.is_member)
+  } catch (error) {
+    console.error('Failed to fetch clubs:', error)
+  }
+}
+
+const goToClubs = () => {
+  router.push('/clubs')  // assumes you have a /clubs route
+}
+
+onMounted(async () => {
+  await fetchUser()
+  await fetchMyClubs()
+  loading.value = false
+})
 </script>
 
 <style scoped>
@@ -62,5 +98,3 @@ onMounted(fetchUser)
   @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
 }
 </style>
-
-  

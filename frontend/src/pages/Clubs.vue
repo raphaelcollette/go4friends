@@ -28,10 +28,29 @@
           <div
             v-for="club in clubs"
             :key="club.id"
-            class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300"
+            @click="club.name && goToClub(club.name)"
+            class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer"
           >
             <h3 class="text-2xl font-bold text-gray-800">{{ club.name }}</h3>
             <p class="text-gray-600 mt-2">{{ club.description || 'No description provided.' }}</p>
+  
+            <div class="mt-4">
+              <button
+                v-if="!club.is_member"
+                class="btn bg-green-500 hover:bg-green-600"
+                @click.stop="joinClub(club.name)"
+              >
+                Join
+              </button>
+  
+              <button
+                v-else
+                class="btn bg-red-500 hover:bg-red-600"
+                @click.stop="leaveClub(club.name)"
+              >
+                Leave
+              </button>
+            </div>
           </div>
         </div>
   
@@ -45,12 +64,14 @@
   
   <script setup>
   import { ref, onMounted } from 'vue'
+  import { useRouter } from 'vue-router'
   import { authAxios } from '@/utils/axios'
   import Navbar from '@/components/Navbar.vue'
   import { useToast } from 'vue-toastification'
   
   const clubs = ref([])
   const toast = useToast()
+  const router = useRouter()
   
   const showCreate = ref(false)
   const newClubName = ref('')
@@ -77,19 +98,34 @@
         name: newClubName.value.trim(),
         description: newClubDescription.value.trim(),
       })
-      toast.success('Club created!')
+      toast.success('Club created successfully!')
       resetCreateModal()
       fetchClubs()
     } catch (error) {
       console.error('Create club error:', error)
-      if (error.response?.data) {
-        const errors = error.response.data
-        for (const key in errors) {
-          toast.error(`${key}: ${errors[key]}`)
-        }
-      } else {
-        toast.error('Failed to create club.')
-      }
+      toast.error('Failed to create club.')
+    }
+  }
+  
+  const joinClub = async (clubName) => {
+    try {
+      await authAxios.post(`/clubs/${encodeURIComponent(clubName)}/join/`)
+      toast.success(`Successfully joined ${clubName}!`)
+      fetchClubs()
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to join club.')
+    }
+  }
+  
+  const leaveClub = async (clubName) => {
+    try {
+      await authAxios.post(`/clubs/${encodeURIComponent(clubName)}/leave/`)
+      toast.success(`Successfully left ${clubName}.`)
+      fetchClubs()
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to leave club.')
     }
   }
   
@@ -98,6 +134,14 @@
     newClubName.value = ''
     newClubDescription.value = ''
   }
+  
+  const goToClub = (clubName) => {
+  if (!clubName) {
+    toast.error('Invalid club name!')
+    return
+  }
+  router.push(`/clubs/${encodeURIComponent(clubName)}`)
+}
   
   onMounted(fetchClubs)
   </script>
