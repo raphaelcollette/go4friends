@@ -52,6 +52,17 @@
               @keydown.enter.prevent="addInterest"
             />
           </div>
+          <!-- Major -->
+          <div class="space-y-2">
+            <label for="major" class="block text-sm font-medium text-gray-700">Major</label>
+            <input id="major" type="text" v-model="major" class="input" placeholder="Enter your major" />
+          </div>
+
+          <!--Grad Year-->
+          <div class="space-y-2">
+            <label for="graduation_year" class="block text-sm font-medium text-gray-700">Graduation Year</label>
+            <input id="graduation_year" type="number" v-model="graduationYear" class="input" placeholder="2025" />
+          </div>
 
           <!-- Save/Cancel -->
           <div class="flex justify-between items-center mt-8">
@@ -82,6 +93,8 @@ const interests = ref([])
 const newInterest = ref('')
 const profile_picture = ref(null)
 const currentUsername = ref('')
+const major = ref('')
+const graduationYear = ref('')
 
 // Fetch the current user's profile
 const fetchProfile = async () => {
@@ -92,6 +105,8 @@ const fetchProfile = async () => {
     location.value = res.data.location || ''
     interests.value = res.data.interests || []
     currentUsername.value = res.data.username
+    major.value = res.data.major
+    graduationYear.value = res.data.graduation_year
   } catch (error) {
     console.error('Failed to fetch profile:', error)
     toast.error('Failed to load your profile.')
@@ -113,6 +128,8 @@ const updateProfile = async () => {
       payload.append('location', location.value);
       payload.append('profile_picture', profile_picture.value);
       payload.append('interests', JSON.stringify(interests.value));
+      payload.append('major', major.value)
+      payload.append('graduation_year', graduationYear.value)
 
       headers = { 'Content-Type': 'multipart/form-data' };
     } else {
@@ -121,15 +138,18 @@ const updateProfile = async () => {
         full_name: full_name.value,
         bio: bio.value,
         location: location.value,
-        interests: interests.value, 
+        interests: interests.value,
+        major: major.value,
+        graduation_year: graduationYear.value,
       };
 
       headers = { 'Content-Type': 'application/json' };
     }
 
     await authAxios.patch('users/me/update/', payload, { headers });
-
     toast.success('Profile updated successfully!');
+    await fetchProfile();
+    
     router.push(`/profile/${currentUsername.value}`);
   } catch (error) {
     console.error('Failed to update profile:', error.response?.data || error.message);

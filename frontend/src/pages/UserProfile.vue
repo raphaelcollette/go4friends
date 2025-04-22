@@ -82,6 +82,9 @@
           </div>
         </div>
 
+        <p v-if="user.major" class="mt-2 text-gray-600 text-sm">🎓 Major: {{ user.major }}</p>
+        <p v-if="user.graduation_year" class="text-gray-600 text-sm">🎓 Class of {{ user.graduation_year }}</p>
+
         <div class="mt-6 flex justify-center space-x-4">
           <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
         </div>

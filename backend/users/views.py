@@ -66,6 +66,8 @@ def update_me(request):
     location = request.data.get('location')
     interests = request.data.get('interests')
     profile_picture = request.FILES.get('profile_picture')
+    major = request.data.get('major')
+    graduation_year = request.data.get('graduation_year')
 
     if full_name is not None:
         user.full_name = full_name
@@ -75,6 +77,10 @@ def update_me(request):
         user.location = location
     if profile_picture is not None:
         user.profile_picture = profile_picture
+    if major is not None:
+        user.major = major
+    if graduation_year is not None:
+        user.graduation_year = graduation_year    
 
     if interests is not None:
         if isinstance(interests, list):

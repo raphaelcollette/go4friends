@@ -24,6 +24,8 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'is_friend',
             'friend_request_sent',
             'interests',
+            'major',
+            'graduation_year',
         ]
         read_only_fields = fields
 
