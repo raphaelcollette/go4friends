@@ -66,7 +66,6 @@
             :key="request.id"
             class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transition-all duration-300"
           >
-            <!-- 👇 Fix: Proper profile picture check -->
             <div v-if="request.from_profile_picture">
               <img
                 :src="request.from_profile_picture"

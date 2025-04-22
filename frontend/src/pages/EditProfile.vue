@@ -121,7 +121,7 @@ const updateProfile = async () => {
         full_name: full_name.value,
         bio: bio.value,
         location: location.value,
-        interests: interests.value,  // ✅ send as array
+        interests: interests.value, 
       };
 
       headers = { 'Content-Type': 'application/json' };

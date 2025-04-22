@@ -26,7 +26,7 @@
   </script>
   
   <style>
-  /* Reset styles to eliminate gaps and scrollbars */
+
   * {
     margin: 0;
     padding: 0;

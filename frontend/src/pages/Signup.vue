@@ -47,7 +47,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { base } from '@/utils/axios'  // 👈 Correct now!
+import { base } from '@/utils/axios' 
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 
