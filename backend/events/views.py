@@ -5,6 +5,8 @@ from django.utils import timezone
 from .models import Event
 from .serializers import EventSerializer
 from clubs.models import Club
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 # --- Create Event ---
 class EventCreateAPIView(generics.GenericAPIView):
@@ -71,3 +73,23 @@ class ClubEventListAPIView(generics.ListAPIView):
             queryset = queryset.filter(date__gte=timezone.now())
 
         return queryset
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def rsvp_event(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+        event.attendees.add(request.user)
+        return Response({'message': 'RSVP successful!'})
+    except Event.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cancel_rsvp(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+        event.attendees.remove(request.user)
+        return Response({'message': 'RSVP cancelled.'})
+    except Event.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)

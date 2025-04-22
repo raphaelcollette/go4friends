@@ -62,6 +62,11 @@
                 School Event
               </span>
             </div>
+
+            <!-- Attendee Count -->
+            <p class="text-sm text-gray-600 mt-1">
+              👥 {{ event.attendee_count }} going
+            </p>
   
             <img
               v-if="event.image"
@@ -77,6 +82,23 @@
             <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">
               {{ event.description }}
             </p>
+            <!-- RSVP Button -->
+            <div class="mt-4">
+              <button
+                v-if="event.is_going"
+                @click.stop="cancelRsvp(event.id)"
+                class="btn bg-red-500 hover:bg-red-600"
+              >
+                Cancel RSVP
+              </button>
+              <button
+                v-else
+                @click.stop="rsvp(event.id)"
+                class="btn bg-green-500 hover:bg-green-600"
+              >
+                RSVP
+              </button>
+            </div>
           </div>
         </div>
   
@@ -179,6 +201,28 @@
   const sortedEvents = computed(() => {
     return [...events.value].sort((a, b) => new Date(a.date) - new Date(b.date))
   })
+
+  const rsvp = async (eventId) => {
+  try {
+    await authAxios.post(`/events/${eventId}/rsvp/`)
+    toast.success('You’re going!')
+    fetchEvents()  // refresh is_going
+  } catch (e) {
+    toast.error('Could not RSVP')
+  }
+}
+
+const cancelRsvp = async (eventId) => {
+  try {
+    await authAxios.post(`/events/${eventId}/cancel-rsvp/`)
+    toast.success('RSVP cancelled.')
+    fetchEvents()
+  } catch (e) {
+    toast.error('Could not cancel RSVP')
+  }
+}
+
+
   
   onMounted(() => {
     fetchEvents()
