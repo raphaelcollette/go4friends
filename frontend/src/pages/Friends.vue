@@ -31,19 +31,29 @@
       <!-- Loading -->
       <div v-if="loading" class="text-gray-600 text-lg">Loading friends...</div>
 
+      
       <!-- Search Results -->
       <div v-else-if="searchResults.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl mb-16">
-        <div
+        <RouterLink
           v-for="user in searchResults"
           :key="user.id"
-          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          :to="`/profile/${user.username}`"
+          class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline relative group cursor-pointer"
         >
-          <div class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
+          <div v-if="user.profile_picture">
+            <img
+              :src="user.profile_picture"
+              alt="Profile Picture"
+              class="w-24 h-24 rounded-full object-cover border-4 border-purple-300"
+            />
+          </div>
+          <div v-else class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
             {{ user.username.charAt(0).toUpperCase() }}
           </div>
-          <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.username }}</p>
-          <button @click="sendFriendRequest(user.username)" class="btn mt-4">Add Friend</button>
-        </div>
+
+          <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.full_name || user.username }}</p>
+          <p class="text-sm text-gray-600">@{{ user.username }}</p>
+        </RouterLink>
       </div>
 
       <!-- Pending Requests -->
