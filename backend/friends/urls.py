@@ -6,7 +6,8 @@ from .views import (
     AcceptFriendRequestAPIView,
     RejectFriendRequestAPIView,
     CancelFriendRequestAPIView,
-    RemoveFriendAPIView
+    RemoveFriendAPIView,
+    friend_suggestions
 )
 
 urlpatterns = [
@@ -16,7 +17,7 @@ urlpatterns = [
     path('reject/', RejectFriendRequestAPIView.as_view(), name='friend-request-reject'),
     path('cancel/', CancelFriendRequestAPIView.as_view(), name='friend-request-cancel'),
 
-    
+    path('suggestions/', friend_suggestions, name='friend-suggestions'),
     
     path('friends/', FriendListAPIView.as_view(), name='friend-list'),
     path('remove/', RemoveFriendAPIView.as_view(), name='friend-remove'),

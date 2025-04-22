@@ -42,3 +42,20 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    @property
+    def friends(self):
+        from friends.models import FriendRequest
+        accepted = FriendRequest.objects.filter(
+            models.Q(from_user=self) | models.Q(to_user=self),
+            status='accepted'
+        )
+
+        friend_ids = set()
+        for fr in accepted:
+            if fr.from_user == self:
+                friend_ids.add(fr.to_user.id)
+            else:
+                friend_ids.add(fr.from_user.id)
+
+        return User.objects.filter(id__in=friend_ids)

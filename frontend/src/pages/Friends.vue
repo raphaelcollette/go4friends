@@ -87,6 +87,45 @@
         </div>
       </div>
 
+      <!-- Suggested Friends -->
+      <div v-if="suggestedFriends.length > 0" class="w-full max-w-6xl mb-16">
+        <h2 class="text-2xl font-bold text-gray-700 mb-6">Suggested Friends</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <RouterLink
+            v-for="user in suggestedFriends"
+            :key="user.id"
+            :to="`/profile/${user.username}`"
+            class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline relative group cursor-pointer"
+          >
+            <div v-if="user.profile_picture">
+              <img
+                :src="user.profile_picture"
+                alt="Profile Picture"
+                class="w-24 h-24 rounded-full object-cover border-4 border-purple-300"
+              />
+            </div>
+            <div v-else class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
+              {{ user.username.charAt(0).toUpperCase() }}
+            </div>
+
+            <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.full_name || user.username }}</p>
+            <p class="text-sm text-gray-600">@{{ user.username }}</p>
+
+            <!-- Match Reason Tags -->
+            <div class="flex flex-wrap justify-center gap-2 mt-2">
+              <span
+                v-for="(reason, idx) in user.match_reasons"
+                :key="idx"
+                class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full"
+              >
+                {{ reason }}
+              </span>
+            </div>
+          </RouterLink>
+        </div>
+      </div>
+
       <!-- Friends -->
       <div v-if="friends.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
         <RouterLink
@@ -138,7 +177,7 @@ const friends = ref([])
 const pendingRequests = ref([])
 const loading = ref(true)
 const toast = useToast()
-
+const suggestedFriends = ref([])
 const searchQuery = ref('')
 const searchResults = ref([])
 
@@ -227,7 +266,20 @@ const confirmRemoveFriend = async () => {
   }
 }
 
-onMounted(fetchFriends)
+const fetchSuggestedFriends = async () => {
+  try {
+    const res = await authAxios.get('/friends/suggestions/')
+    suggestedFriends.value = res.data
+  } catch (error) {
+    console.error('Failed to load suggestions:', error)
+    toast.error('Failed to load friend suggestions.')
+  }
+}
+
+onMounted(() => {
+  fetchFriends()
+  fetchSuggestedFriends()
+})
 </script>
 
 <style scoped>

@@ -2,11 +2,13 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-
+from rest_framework.decorators import api_view, permission_classes
 from .models import FriendRequest
 from .serializers import FriendRequestSerializer
 from users.serializers import UserPublicSerializer
 from notifications.models import Notification
+from rest_framework.permissions import IsAuthenticated
+from clubs.models import Club
 
 User = get_user_model()
 
@@ -135,5 +137,34 @@ class RemoveFriendAPIView(generics.GenericAPIView):
         return Response({'message': 'Friend removed successfully.'}, status=status.HTTP_200_OK)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def friend_suggestions(request):
+    me = request.user
 
+    # Exclude already friends or pending requests
+    friends = me.friends.all()
+    sent_requests = FriendRequest.objects.filter(from_user=me).values_list('to_user', flat=True)
+    received_requests = FriendRequest.objects.filter(to_user=me).values_list('from_user', flat=True)
+    excluded_ids = set(friends.values_list('id', flat=True)) | set(sent_requests) | set(received_requests) | {me.id}
+
+    # Filter candidates
+    candidates = User.objects.exclude(id__in=excluded_ids)
+
+    # Build suggestions based on shared clubs or grad year
+    suggestions = []
+    for user in candidates:
+        reasons = []
+
+        if user.graduation_year and user.graduation_year == me.graduation_year:
+            reasons.append("Same graduation year")
+        if user.clubs.filter(id__in=me.clubs.values_list('id', flat=True)).exists():
+            reasons.append("Same club")
+
+        if reasons:
+            serialized = UserPublicSerializer(user, context={'request': request}).data
+            serialized['match_reasons'] = reasons
+            suggestions.append(serialized)
+
+    return Response(suggestions)
 
