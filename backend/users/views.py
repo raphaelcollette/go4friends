@@ -59,12 +59,12 @@ class MyTokenObtainPairView(TokenObtainPairView):
 def update_me(request):
     user = request.user
 
-    # Allow JSON and form uploads
     parser_classes = [MultiPartParser, FormParser]
 
     full_name = request.data.get('full_name')
     bio = request.data.get('bio')
     location = request.data.get('location')
+    interests = request.data.get('interests')
     profile_picture = request.FILES.get('profile_picture')
 
     if full_name is not None:
@@ -76,9 +76,18 @@ def update_me(request):
     if profile_picture is not None:
         user.profile_picture = profile_picture
 
-    user.save()
+    if interests is not None:
+        if isinstance(interests, list):
+            user.interests = interests
+        else:
+            try:
+                user.interests = json.loads(interests)
+            except Exception:
+                return Response({"error": "Invalid interests format."}, status=status.HTTP_400_BAD_REQUEST)
 
+    user.save()
     return Response({"message": "Profile updated successfully!"})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

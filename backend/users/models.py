@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
@@ -23,7 +24,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
-
+    interests = models.JSONField(default=list, blank=True)
     full_name = models.CharField(max_length=255, blank=True)
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=255, blank=True)

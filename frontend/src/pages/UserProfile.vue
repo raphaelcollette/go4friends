@@ -68,6 +68,20 @@
           </div>
         </div>
 
+        <!-- Interests Section -->
+        <div v-if="user.interests?.length" class="mt-8">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
+          <div class="flex flex-wrap justify-center gap-2">
+            <span
+              v-for="(interest, idx) in user.interests"
+              :key="idx"
+              class="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full"
+            >
+              {{ interest }}
+            </span>
+          </div>
+        </div>
+
         <div class="mt-6 flex justify-center space-x-4">
           <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
         </div>
@@ -143,4 +157,5 @@ watch(() => route.params.username, fetchUser)
   @apply text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
 }
 </style>
+
 
