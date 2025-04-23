@@ -41,7 +41,7 @@ class MessageListAPIView(generics.ListAPIView):
         )
 
 
-@method_decorator(ratelimit(key='user', rate='10/m', block=True), name='dispatch')
+
 class SendMessageAPIView(generics.CreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -67,40 +67,40 @@ class StartPrivateThreadAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        usernames = request.data.get('usernames', [])
+        usernames = request.data.get('usernames') or []
+        
+        # Handle legacy 'username' key for private 1-1 chat
+        single_username = request.data.get('username')
+        if single_username:
+            usernames = [single_username]
 
-        if not isinstance(usernames, list):
-            return Response({'error': 'Usernames must be a list.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not usernames:
+            return Response({'error': 'Username(s) required.'}, status=400)
 
-        # Add current user if not included
-        if request.user.username not in usernames:
-            usernames.append(request.user.username)
-
-        # Get unique usernames
-        usernames = list(set(usernames))
-
-        if len(usernames) < 2:
-            return Response({'error': 'At least two users are required to start a thread.'}, status=400)
-
-        # Get user objects
-        users = list(User.objects.filter(username__in=usernames))
+        users = list(User.objects.filter(username__in=usernames).distinct())
         if len(users) != len(usernames):
             return Response({'error': 'One or more users not found.'}, status=404)
 
-        # Try to find an existing thread with the exact same users
-        possible_threads = Thread.objects.annotate(num_participants=Count('participants')).filter(
-            num_participants=len(users),
-            is_group=(len(users) > 2)
-        )
+        # Private 1-1 chat
+        if len(users) == 1:
+            other_user = users[0]
+            existing = Thread.objects.filter(
+                is_group=False,
+                participants__user=request.user
+            ).filter(participants__user=other_user).distinct()
+            if existing.exists():
+                return Response({'thread_id': existing.first().id})
+            thread = Thread.objects.create(is_group=False)
+            ThreadParticipant.objects.bulk_create([
+                ThreadParticipant(thread=thread, user=request.user),
+                ThreadParticipant(thread=thread, user=other_user)
+            ])
+            return Response({'thread_id': thread.id})
 
-        for thread in possible_threads:
-            thread_usernames = list(thread.participants.values_list('user__username', flat=True))
-            if sorted(thread_usernames) == sorted(usernames):
-                return Response({'thread_id': thread.id})
-
-        # No existing thread, create one
-        thread = Thread.objects.create(is_group=(len(users) > 2))
+        # Group chat
+        thread = Thread.objects.create(is_group=True)
+        ThreadParticipant.objects.create(thread=thread, user=request.user)
         for user in users:
-            ThreadParticipant.objects.create(thread=thread, user=user)
-
+            if user != request.user:
+                ThreadParticipant.objects.create(thread=thread, user=user)
         return Response({'thread_id': thread.id})
