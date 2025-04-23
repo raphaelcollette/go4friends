@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = []
 
-
+FIELD_ENCRYPTION_KEY = os.getenv('ENCRYPTED_MODEL_FIELDS_KEY')
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'events',
     'django_filters',
     'django_extensions',
+    'direct_messages',
 ]
 
 MIDDLEWARE = [

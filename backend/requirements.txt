@@ -1,6 +1,9 @@
 asgiref==3.8.1
+cffi==1.17.1
+cryptography==44.0.2
 Django==5.2
 django-cors-headers==4.7.0
+django-encrypted-model-fields==0.6.5
 django-extensions==4.1
 django-filter==25.1
 django-ratelimit==4.1.0
@@ -9,6 +12,7 @@ djangorestframework_simplejwt==5.5.0
 git-filter-repo==2.47.0
 pillow==11.2.1
 psycopg2-binary==2.9.10
+pycparser==2.22
 PyJWT==2.9.0
 python-dotenv==1.1.0
 sqlparse==0.5.3

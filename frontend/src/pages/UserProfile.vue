@@ -53,6 +53,16 @@
           </template>
         </div>
 
+        <!-- Message Button -->
+        <div class="mt-4" v-if="user.username !== currentUsername">
+          <RouterLink
+            :to="`/messages/thread/${user.username}`"
+            class="btn bg-blue-500 hover:bg-blue-600"
+          >
+            💬 Message
+          </RouterLink>
+        </div>
+
         <!-- Clubs Section -->
         <div v-if="user.clubs?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>

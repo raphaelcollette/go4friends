@@ -10,6 +10,7 @@ import Settings from '@/pages/Settings.vue'
 import Events from '@/pages/Events.vue'
 import Clubs from '@/pages/Clubs.vue'
 import ClubProfile from '@/pages/ClubProfile.vue'
+import MessageThread from '@/pages/MessageThread.vue'
 
 const routes = [
   {
@@ -59,7 +60,12 @@ const routes = [
   },
   { path: '/events', name: 'Events', component: Events, meta: { requiresAuth: true } },
   { path: '/clubs', name: 'Clubs', component: Clubs, meta: { requiresAuth: true } },
-  { path: '/clubs/:clubName', name: 'ClubProfile', component: ClubProfile, meta: { requiresAuth: true }}
+  { path: '/clubs/:clubName', name: 'ClubProfile', component: ClubProfile, meta: { requiresAuth: true }},
+  {
+    path: '/messages/thread/:username',
+    name: 'MessageThread',
+    component: MessageThread,
+  },
 ]
 
 const router = createRouter({

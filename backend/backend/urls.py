@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/notifications/', include('notifications.urls')),
     path('api/clubs/', include('clubs.urls')),
     path('api/events/', include('events.urls')),
+    path('api/messages/', include('direct_messages.urls')),
 ]
 
 from django.conf import settings
