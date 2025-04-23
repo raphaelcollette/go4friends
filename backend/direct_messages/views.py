@@ -5,10 +5,11 @@ from .models import Message
 from .serializers import MessageSerializer
 from django.db import models
 from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 
 User = get_user_model()
 
-@ratelimit(key='user', rate='10/m', block=True)
+@method_decorator(ratelimit(key='user', rate='10/m', block=True), name='post')
 class SendMessageAPIView(generics.CreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
