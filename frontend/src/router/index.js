@@ -62,9 +62,10 @@ const routes = [
   { path: '/clubs', name: 'Clubs', component: Clubs, meta: { requiresAuth: true } },
   { path: '/clubs/:clubName', name: 'ClubProfile', component: ClubProfile, meta: { requiresAuth: true }},
   {
-    path: '/messages/thread/:username',
+    path: '/messages/thread/:threadId',
     name: 'MessageThread',
     component: MessageThread,
+    meta: { requiresAuth: true }
   },
 ]
 

@@ -62,15 +62,17 @@
           </template>
         </div>
 
+        <!-- Message button -->
         <div class="mt-4" v-if="user.username !== currentUsername">
-          <RouterLink
-            :to="`/messages/thread/${user.username}`"
+          <button
+            @click="startOrNavigateToThread"
             class="btn bg-blue-500 hover:bg-blue-600"
           >
             💬 Message
-          </RouterLink>
+          </button>
         </div>
 
+        <!-- Clubs -->
         <div v-if="user.clubs?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
           <div class="flex flex-wrap justify-center gap-2">
@@ -85,6 +87,7 @@
           </div>
         </div>
 
+        <!-- Interests -->
         <div v-if="user.interests?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
           <div class="flex flex-wrap justify-center gap-2">
@@ -123,7 +126,6 @@ const loading = ref(true)
 const toast = useToast()
 const currentUsername = ref('')
 
-// Fetch profile user
 const fetchUser = async () => {
   try {
     loading.value = true
@@ -145,31 +147,38 @@ const fetchUser = async () => {
   }
 }
 
-// Send Friend Request
 const sendFriendRequest = async () => {
   try {
     await authAxios.post('/friends/send/', { to_username: user.value.username })
     toast.success('Friend request sent!')
     user.value.friend_request_sent = true
   } catch (error) {
-    console.error('Failed to send friend request:', error)
     toast.error('Failed to send friend request.')
   }
 }
 
-// Remove Friend
 const removeFriend = async () => {
   try {
     await authAxios.post('/friends/remove/', { username: user.value.username })
     toast.success('Friend removed.')
     user.value.is_friend = false
   } catch (error) {
-    console.error('Failed to remove friend:', error)
     toast.error('Failed to remove friend.')
   }
 }
 
-// Initial fetch
+const startOrNavigateToThread = async () => {
+  try {
+    const res = await authAxios.post('/messages/threads/start-private/', {
+      username: user.value.username
+    })
+    const threadId = res.data.thread_id
+    router.push(`/messages/thread/${threadId}`)
+  } catch (e) {
+    toast.error('Could not start chat.')
+  }
+}
+
 onMounted(fetchUser)
 watch(() => route.params.username, fetchUser)
 </script>
