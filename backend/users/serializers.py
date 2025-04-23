@@ -26,8 +26,27 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'interests',
             'major',
             'graduation_year',
+            'is_private'
         ]
         read_only_fields = fields
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request = self.context.get('request')
+
+        if instance.is_private:
+            if request.user != instance and not rep['is_friend']:
+                # Hide most fields if not self or friend
+                return {
+                    'id': rep['id'],
+                    'username': rep['username'],
+                    'is_private': True,
+                    'is_friend': rep['is_friend'],
+                    'friend_request_sent': rep['friend_request_sent'],
+                    'message': 'This profile is private.'
+                }
+
+        return rep
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
@@ -44,8 +63,8 @@ class UserPublicSerializer(serializers.ModelSerializer):
             return False
 
         if obj == request.user:
-            return False  # You can't be "friends" with yourself
-        
+            return False
+
         return FriendRequest.objects.filter(
             (Q(from_user=request.user, to_user=obj) | Q(from_user=obj, to_user=request.user)),
             status='accepted'

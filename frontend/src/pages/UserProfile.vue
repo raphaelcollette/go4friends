@@ -5,7 +5,17 @@
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
-      <div v-else-if="!user" class="text-gray-500 text-lg">User not found.</div>
+      <!-- Private Profile Message -->
+      <div v-else-if="user?.private" class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold text-gray-800">🔒 Private Profile</h2>
+        <p class="text-gray-600 mt-2">This user's profile is private and only visible to friends.</p>
+      </div>
+
+      <!-- User Not Found Message -->
+      <div v-else-if="!user" class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold text-gray-800">❌ User Not Found</h2>
+        <p class="text-gray-600 mt-2">We couldn't find anyone with that username.</p>
+      </div>
 
       <div v-else class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
         <div class="flex justify-center">
@@ -26,7 +36,6 @@
         <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
         <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
 
-        <!-- Friend Button Section -->
         <div class="mt-6">
           <template v-if="user.username !== currentUsername">
             <button
@@ -53,7 +62,6 @@
           </template>
         </div>
 
-        <!-- Message Button -->
         <div class="mt-4" v-if="user.username !== currentUsername">
           <RouterLink
             :to="`/messages/thread/${user.username}`"
@@ -63,7 +71,6 @@
           </RouterLink>
         </div>
 
-        <!-- Clubs Section -->
         <div v-if="user.clubs?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
           <div class="flex flex-wrap justify-center gap-2">
@@ -78,7 +85,6 @@
           </div>
         </div>
 
-        <!-- Interests Section -->
         <div v-if="user.interests?.length" class="mt-8">
           <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
           <div class="flex flex-wrap justify-center gap-2">
@@ -128,9 +134,12 @@ const fetchUser = async () => {
     const me = await authAxios.get('/users/me/')
     currentUsername.value = me.data.username
   } catch (error) {
-    console.error('Failed to fetch user:', error)
-    toast.error('Failed to load user profile.')
-    user.value = null
+    if (error.response && error.response.status === 403) {
+      user.value = { private: true }
+    } else {
+      toast.error('Failed to load user profile.')
+      user.value = null
+    }
   } finally {
     loading.value = false
   }

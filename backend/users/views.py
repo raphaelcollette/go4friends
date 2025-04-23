@@ -10,6 +10,8 @@ from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import UserPublicSerializer
+from friends.models import FriendRequest
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -68,6 +70,7 @@ def update_me(request):
     profile_picture = request.FILES.get('profile_picture')
     major = request.data.get('major')
     graduation_year = request.data.get('graduation_year')
+    is_private = request.data.get('is_private')
 
     if full_name is not None:
         user.full_name = full_name
@@ -81,6 +84,9 @@ def update_me(request):
         user.major = major
     if graduation_year is not None:
         user.graduation_year = graduation_year    
+
+    if is_private is not None:
+        user.is_private = is_private in [True, 'true', 'True', 1, '1']    
 
     if interests is not None:
         if isinstance(interests, list):
@@ -110,8 +116,27 @@ def search_users(request):
 def get_user_by_username(request, username):
     try:
         user = User.objects.get(username=username)
+
+        # Allow viewing if you're the owner
+        if request.user == user:
+            serializer = UserPublicSerializer(user, context={'request': request})
+            return Response(serializer.data)
+
+        # If profile is private, check if viewer is a friend
+        if user.is_private:
+            is_friend = FriendRequest.objects.filter(
+                Q(from_user=request.user, to_user=user) |
+                Q(from_user=user, to_user=request.user),
+                status='accepted'
+            ).exists()
+
+            if not is_friend:
+                return Response({"error": "This profile is private."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Otherwise, allow viewing
         serializer = UserPublicSerializer(user, context={'request': request})
         return Response(serializer.data)
+
     except User.DoesNotExist:
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 

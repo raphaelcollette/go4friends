@@ -29,6 +29,16 @@
           </div>
 
           <!-- Preferences -->
+          
+          <!-- Privacy Settings -->
+          <div>
+            <h2 class="text-lg font-semibold text-gray-700">Privacy</h2>
+            <div class="flex items-center justify-between mt-2">
+              <label class="text-sm text-gray-700">Private Profile</label>
+              <input type="checkbox" v-model="isPrivate" @change="updatePrivacy" class="form-checkbox h-5 w-5 text-purple-600">
+            </div>
+          </div>
+          
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Preferences</h2>
             <button @click="toggleDarkMode" class="btn w-full mt-2">Toggle Dark Mode</button>
@@ -71,6 +81,7 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { ref } from 'vue'
 import { authAxios } from '@/utils/axios'
+import {onMounted } from 'vue'
 
 const router = useRouter()
 const toast = useToast()
@@ -79,6 +90,7 @@ const toast = useToast()
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
+const isPrivate = ref(false)
 
 const toggleChangePassword = () => {
   showChangePassword.value = !showChangePassword.value
@@ -151,6 +163,26 @@ const confirmDeleteAccount = async () => {
 const toggleDarkMode = () => {
   toast.info('Dark mode toggle coming soon!')
 }
+
+const fetchPrivacy = async () => {
+  try {
+    const res = await authAxios.get('/users/me/')
+    isPrivate.value = res.data.is_private
+  } catch (e) {
+    toast.error('Failed to load privacy setting.')
+  }
+}
+
+const updatePrivacy = async () => {
+  try {
+    await authAxios.patch('/users/me/update/', { is_private: isPrivate.value })
+    toast.success('Privacy setting updated.')
+  } catch (e) {
+    toast.error('Failed to update privacy.')
+  }
+}
+
+onMounted(fetchPrivacy)
 </script>
 
 <style scoped>
