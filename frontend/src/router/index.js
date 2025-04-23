@@ -11,6 +11,7 @@ import Events from '@/pages/Events.vue'
 import Clubs from '@/pages/Clubs.vue'
 import ClubProfile from '@/pages/ClubProfile.vue'
 import MessageThread from '@/pages/MessageThread.vue'
+import ThreadList from '@/pages/ThreadList.vue' // <-- Add this import
 
 const routes = [
   {
@@ -28,39 +29,60 @@ const routes = [
   },
   { path: '/signup', component: Signup },
   { path: '/login', component: Login },
-  { 
+  {
     path: '/main',
     name: 'Main',
     component: Main,
     meta: { requiresAuth: true }
   },
-  { 
+  {
     path: '/friends',
     name: 'Friends',
     component: Friends,
     meta: { requiresAuth: true }
   },
-  { 
+  {
     path: '/profile/edit',
     name: 'EditProfile',
     component: EditProfile,
     meta: { requiresAuth: true }
   },
-  { 
+  {
     path: '/profile/:username',
     name: 'UserProfile',
     component: UserProfile,
     meta: { requiresAuth: true }
   },
-  { 
+  {
     path: '/settings',
     name: 'Settings',
     component: Settings,
     meta: { requiresAuth: true }
   },
-  { path: '/events', name: 'Events', component: Events, meta: { requiresAuth: true } },
-  { path: '/clubs', name: 'Clubs', component: Clubs, meta: { requiresAuth: true } },
-  { path: '/clubs/:clubName', name: 'ClubProfile', component: ClubProfile, meta: { requiresAuth: true }},
+  {
+    path: '/events',
+    name: 'Events',
+    component: Events,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/clubs',
+    name: 'Clubs',
+    component: Clubs,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/clubs/:clubName',
+    name: 'ClubProfile',
+    component: ClubProfile,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/messages',
+    name: 'Messages',
+    component: ThreadList, // <-- Shows recent chats
+    meta: { requiresAuth: true }
+  },
   {
     path: '/messages/thread/:threadId',
     name: 'MessageThread',
@@ -77,9 +99,8 @@ const router = createRouter({
 // Global auth guard
 router.beforeEach((to, from, next) => {
   const isLoggedIn = !!localStorage.getItem('access_token')
-
   if (to.meta.requiresAuth && !isLoggedIn) {
-    next('/login') // If trying to access a protected page without login
+    next('/login')
   } else {
     next()
   }

@@ -5,6 +5,12 @@
     </RouterLink>
 
     <div class="flex space-x-4 items-center relative">
+      <RouterLink
+        to="/messages"
+        class="btn"
+      >
+        💬 Messages
+      </RouterLink>
       <RouterLink to="/clubs" class="btn">Clubs</RouterLink>
       <RouterLink to="/events" class="btn">Events</RouterLink>
       <RouterLink to="/friends" class="btn">Friends</RouterLink>
