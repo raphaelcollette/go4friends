@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_extensions',
     'direct_messages',
+    'search',
 ]
 
 MIDDLEWARE = [
@@ -90,14 +91,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
         'rest_framework.filters.SearchFilter',
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.UserRateThrottle',
-        'rest_framework.throttling.AnonRateThrottle',
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'user': '60/min',
-        'anon': '30/min',
-    },
+    
     'EXCEPTION_HANDLER': 'backend.exceptions.custom_exception_handler', 
 }
 # Database

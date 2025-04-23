@@ -4,6 +4,79 @@
       whatsurmajor
     </RouterLink>
 
+    <!-- Global Search Bar -->
+<div class="flex-1 mx-8 relative">
+  <form @submit.prevent class="relative w-full max-w-md mx-auto">
+    <input
+      v-model="searchQuery"
+      @input="handleSearch"
+      type="text"
+      placeholder="Search users, clubs, events..."
+      class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
+    />
+    <button
+      type="submit"
+      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-600 hover:text-purple-800"
+    >
+      🔍
+    </button>
+  </form>
+
+  <!-- Search Dropdown -->
+  <div
+    v-if="showDropdown"
+    class="absolute mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
+      >
+        <div v-if="loading" class="p-4 text-center text-gray-500">Searching...</div>
+
+        <template v-else>
+          <div v-if="hasResults">
+            <!-- Users -->
+            <div v-if="results.users.length" class="p-2 border-b border-gray-200">
+              <div class="text-xs text-gray-500 mb-1">Users</div>
+              <div
+                v-for="user in results.users"
+                :key="user.username"
+                @click="goToUser(user.username)"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+              >
+                @{{ user.username }} <span v-if="user.full_name">– {{ user.full_name }}</span>
+              </div>
+            </div>
+
+            <!-- Clubs -->
+            <div v-if="results.clubs.length" class="p-2 border-b border-gray-200">
+              <div class="text-xs text-gray-500 mb-1">Clubs</div>
+              <div
+                v-for="club in results.clubs"
+                :key="club.id"
+                @click="goToClub(club.name)"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+              >
+                {{ club.name }}
+              </div>
+            </div>
+
+            <!-- Events -->
+            <div v-if="results.events.length" class="p-2">
+              <div class="text-xs text-gray-500 mb-1">Events</div>
+              <div
+                v-for="event in results.events"
+                :key="event.id"
+                @click="goToEvent(event.id)"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+              >
+                {{ event.title }}
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="p-4 text-sm text-gray-500 text-center">No results found.</div>
+        </template>
+      </div>
+    </div>
+
+
     <div class="flex space-x-4 items-center relative">
       <RouterLink
         to="/messages"
@@ -94,15 +167,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { authAxios } from '@/utils/axios'
 import { useToast } from 'vue-toastification'
+import { useRouter } from 'vue-router'
 
 const currentUser = ref(null)
 const notifications = ref([])
 const unreadCount = ref(0)
 const showNotifs = ref(false)
 const toast = useToast()
+const searchQuery = ref('')
+const showDropdown = ref(false)
+const loading = ref(false)
+const results = ref({ users: [], clubs: [], events: [] })
+const router = useRouter()
+let searchTimeout = null
+
 
 const fetchCurrentUser = async () => {
   try {
@@ -183,6 +264,47 @@ const markOneRead = async (id) => {
   }
 }
 
+const handleSearch = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+
+  if (!searchQuery.value.trim()) {
+    showDropdown.value = false
+    return
+  }
+
+  loading.value = true
+  showDropdown.value = true
+
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await authAxios.get(`/search/?q=${encodeURIComponent(searchQuery.value)}`)
+      results.value = res.data
+    } catch (error) {
+      console.error('Search failed', error)
+    } finally {
+      loading.value = false
+    }
+  }, 300) // debounce
+}
+
+const hasResults = computed(() =>
+  results.value.users.length || results.value.clubs.length || results.value.events.length
+)
+
+const goToUser = (username) => {
+  showDropdown.value = false
+  router.push(`/profile/${username}`)
+}
+
+const goToClub = (clubName) => {
+  showDropdown.value = false
+  router.push(`/clubs/${encodeURIComponent(clubName)}`)
+}
+
+const goToEvent = (id) => {
+  showDropdown.value = false
+  router.push(`/events`) // or `/events/${id}` if you have detail pages
+}
 
 onMounted(() => {
   fetchCurrentUser()
