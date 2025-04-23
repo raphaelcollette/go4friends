@@ -33,7 +33,7 @@ class GlobalSearchAPIView(APIView):
         )[:5]
 
         return Response({
-            'users': UserPublicSerializer(users, many=True).data,
+            'users': UserPublicSerializer(users, many=True, context={'request': request}).data,
             'clubs': ClubSerializer(clubs, many=True).data,
             'events': EventSerializer(events, many=True).data,
         })
