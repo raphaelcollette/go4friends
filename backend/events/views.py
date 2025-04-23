@@ -7,6 +7,7 @@ from .serializers import EventSerializer
 from clubs.models import Club
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 
 # --- Create Event ---
 class EventCreateAPIView(generics.GenericAPIView):
@@ -34,20 +35,34 @@ class EventCreateAPIView(generics.GenericAPIView):
 class EventListAPIView(generics.ListAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
-    filter_backends = [filters.OrderingFilter]  # Add ordering!
+    filter_backends = [filters.OrderingFilter]
     ordering_fields = ['date', 'title']
     ordering = ['date']
 
     def get_queryset(self):
+        user = self.request.user
         queryset = Event.objects.all()
         query = self.request.GET.get('q')
         upcoming = self.request.GET.get('upcoming')
+        club_name = self.request.GET.get('club')
+        rsvp = self.request.GET.get('rsvp')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
 
         if query:
             queryset = queryset.filter(title__icontains=query)
 
         if upcoming == 'true':
             queryset = queryset.filter(date__gte=timezone.now())
+
+        if club_name:
+            queryset = queryset.filter(club__name__iexact=club_name)
+
+        if rsvp == 'true':
+            queryset = queryset.filter(attendees=user)
+
+        if start_date and end_date:
+            queryset = queryset.filter(date__range=[start_date, end_date])
 
         return queryset
 
