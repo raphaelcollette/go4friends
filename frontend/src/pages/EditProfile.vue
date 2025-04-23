@@ -1,7 +1,5 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-    <Navbar />
-
     <main class="flex-1 flex items-center justify-center pt-24 px-4">
       <div class="bg-white/20 backdrop-blur-md rounded-2xl p-8 w-full max-w-lg shadow-lg">
         <h1 class="text-3xl font-extrabold text-center text-gray-800 mb-8">Edit Profile</h1>

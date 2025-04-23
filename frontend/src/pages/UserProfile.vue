@@ -1,7 +1,5 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-    <Navbar />
-
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
@@ -127,16 +125,24 @@ const toast = useToast()
 const currentUsername = ref('')
 
 const fetchUser = async () => {
-  try {
-    loading.value = true
-    const username = route.params.username
-    const res = await authAxios.get(`users/profile/${username}/`)
-    user.value = res.data
+  loading.value = true
+  const username = route.params.username
 
-    const me = await authAxios.get('/users/me/')
-    currentUsername.value = me.data.username
+  try {
+    // Always fetch current user once and store the username
+    if (!currentUsername.value) {
+      const me = await authAxios.get('/users/me/')
+      currentUsername.value = me.data.username
+    }
+
+    // Use /me/ endpoint if viewing your own profile
+    const res = username === currentUsername.value
+      ? await authAxios.get('/users/me/')
+      : await authAxios.get(`/users/profile/${username}/`)
+
+    user.value = res.data
   } catch (error) {
-    if (error.response && error.response.status === 403) {
+    if (error.response?.status === 403) {
       user.value = { private: true }
     } else {
       toast.error('Failed to load user profile.')

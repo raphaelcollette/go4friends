@@ -1,7 +1,5 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-    <Navbar />
-
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <div class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Settings</h1>

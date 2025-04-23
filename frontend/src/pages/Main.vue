@@ -1,6 +1,5 @@
 <template>
   <div class="landing-container">
-    <Navbar />
 
   </div>
 </template>

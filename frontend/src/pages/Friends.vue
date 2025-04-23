@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-    <Navbar />
     <!-- Remove Friend Modal -->
     <div v-if="removingUser" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center space-y-6 shadow-lg">

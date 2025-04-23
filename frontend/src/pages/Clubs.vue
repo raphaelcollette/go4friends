@@ -1,7 +1,5 @@
 <template>
     <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-      <Navbar />
-  
       <main class="flex-1 flex flex-col items-center pt-24 px-6">
         <div class="w-full max-w-6xl flex justify-between items-center mb-10">
           <h1 class="text-4xl font-extrabold text-gray-800">Clubs</h1>
