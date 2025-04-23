@@ -7,6 +7,7 @@ from .models import Thread, ThreadParticipant, Message
 from .serializers import MessageSerializer, ThreadSerializer
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
+from django.db.models import Count
 
 User = get_user_model()
 
@@ -66,28 +67,40 @@ class StartPrivateThreadAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        username = request.data.get('username')
-        if not username:
-            return Response({'error': 'Username required.'}, status=400)
+        usernames = request.data.get('usernames', [])
 
-        try:
-            other_user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response({'error': 'User not found.'}, status=404)
+        if not isinstance(usernames, list):
+            return Response({'error': 'Usernames must be a list.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Look for existing private thread
-        threads = Thread.objects.filter(
-            is_group=False,
-            participants__user=request.user
-        ).filter(
-            participants__user=other_user
-        ).distinct()
+        # Add current user if not included
+        if request.user.username not in usernames:
+            usernames.append(request.user.username)
 
-        if threads.exists():
-            thread = threads.first()
-        else:
-            thread = Thread.objects.create(is_group=False)
-            ThreadParticipant.objects.create(thread=thread, user=request.user)
-            ThreadParticipant.objects.create(thread=thread, user=other_user)
+        # Get unique usernames
+        usernames = list(set(usernames))
+
+        if len(usernames) < 2:
+            return Response({'error': 'At least two users are required to start a thread.'}, status=400)
+
+        # Get user objects
+        users = list(User.objects.filter(username__in=usernames))
+        if len(users) != len(usernames):
+            return Response({'error': 'One or more users not found.'}, status=404)
+
+        # Try to find an existing thread with the exact same users
+        possible_threads = Thread.objects.annotate(num_participants=Count('participants')).filter(
+            num_participants=len(users),
+            is_group=(len(users) > 2)
+        )
+
+        for thread in possible_threads:
+            thread_usernames = list(thread.participants.values_list('user__username', flat=True))
+            if sorted(thread_usernames) == sorted(usernames):
+                return Response({'thread_id': thread.id})
+
+        # No existing thread, create one
+        thread = Thread.objects.create(is_group=(len(users) > 2))
+        for user in users:
+            ThreadParticipant.objects.create(thread=thread, user=user)
 
         return Response({'thread_id': thread.id})

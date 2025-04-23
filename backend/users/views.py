@@ -17,14 +17,12 @@ User = get_user_model()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@ratelimit(key='ip', rate='60/m', block=True)
 def me(request):
     serializer = UserPublicSerializer(request.user, context={'request': request})
     return Response(serializer.data)
 
 
 @api_view(['POST'])
-@ratelimit(key='ip', rate='5/m', block=True)
 def signup(request):
     username = request.data.get('username')
     email = request.data.get('email')
@@ -57,7 +55,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
-@ratelimit(key='ip', rate='30/m', block=True)
 def update_me(request):
     user = request.user
 
@@ -142,7 +139,6 @@ def get_user_by_username(request, username):
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
-@ratelimit(key='ip', rate='10/m', block=True)
 def change_password(request):
     user = request.user
     old_password = request.data.get('old_password')
@@ -164,7 +160,6 @@ def change_password(request):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-@ratelimit(key='ip', rate='5/m', block=True)
 def delete_account(request):
     user = request.user
     user.delete()
