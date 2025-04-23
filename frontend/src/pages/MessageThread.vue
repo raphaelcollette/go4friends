@@ -7,12 +7,21 @@
         <h2 class="text-2xl font-bold text-gray-800">Chat</h2>
 
         <!-- Messages -->
-        <div class="flex flex-col space-y-2 max-h-[400px] overflow-y-auto">
+        <div ref="messageContainer" class="flex flex-col space-y-4 max-h-[400px] overflow-y-auto">
           <div
-            v-for="msg in messages"
+            v-for="(msg, index) in messages"
             :key="msg.id"
             :class="msg.sender.username === currentUser.username ? 'self-end text-right' : 'self-start text-left'"
           >
+            <!-- Show username above message if sender is different from previous -->
+            <div
+              v-if="index === 0 || messages[index - 1].sender.username !== msg.sender.username"
+              class="text-sm font-semibold text-gray-700 mb-1"
+              :class="msg.sender.username === currentUser.username ? 'text-right' : 'text-left'"
+            >
+              {{ msg.sender.full_name || msg.sender.username }}
+            </div>
+
             <div class="inline-block px-4 py-2 rounded-xl text-white"
               :class="msg.sender.username === currentUser.username ? 'bg-purple-600' : 'bg-gray-500'">
               {{ msg.message }}
@@ -39,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { authAxios } from '@/utils/axios'
 import Navbar from '@/components/Navbar.vue'
@@ -52,6 +61,14 @@ const threadId = route.params.threadId
 const currentUser = ref({})
 const messages = ref([])
 const newMessage = ref('')
+const messageContainer = ref(null)
+
+const scrollToBottom = async () => {
+  await nextTick()
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
+}
 
 const fetchCurrentUser = async () => {
   try {
@@ -65,7 +82,8 @@ const fetchCurrentUser = async () => {
 const fetchMessages = async () => {
   try {
     const res = await authAxios.get(`/messages/threads/${threadId}/messages/`)
-    messages.value = res.data.reverse()
+    messages.value = res.data
+    scrollToBottom()
   } catch (error) {
     toast.error('Failed to load messages.')
   }
@@ -79,7 +97,7 @@ const sendMessage = async () => {
       message: newMessage.value.trim(),
     })
     newMessage.value = ''
-    fetchMessages()
+    await fetchMessages()
   } catch (error) {
     toast.error('Failed to send message.')
   }
@@ -103,3 +121,4 @@ onMounted(async () => {
   @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300;
 }
 </style>
+
