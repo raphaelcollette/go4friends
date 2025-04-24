@@ -19,11 +19,18 @@ class EventCreateAPIView(generics.GenericAPIView):
         club_name = request.data.get('club_name')
         club = None
 
+        # If this is a club event, fetch the club and check if the user is allowed
         if club_name:
             try:
                 club = Club.objects.get(name=club_name)
             except Club.DoesNotExist:
                 return Response({'error': 'Club not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if the user is an admin or moderator in that club
+            membership = club.clubmembership_set.filter(user=request.user).first()
+            if not membership or membership.role not in ['admin', 'moderator']:
+                return Response({'error': 'Only admins or moderators can create events for this club.'},
+                                status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

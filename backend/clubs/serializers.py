@@ -18,7 +18,13 @@ class ClubSerializer(serializers.ModelSerializer):
         return False
 
     def get_members(self, obj):
-        return [membership.user.username for membership in obj.clubmembership_set.all()]
+        return [
+            {
+                "username": membership.user.username,
+                "role": membership.role
+            }
+            for membership in obj.clubmembership_set.all()
+        ]
 
 class ClubMembershipSerializer(serializers.ModelSerializer):
     user = UserPublicSerializer(read_only=True)
@@ -26,7 +32,7 @@ class ClubMembershipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClubMembership
-        fields = ['id', 'user', 'club', 'joined_at', 'is_owner']
+        fields = ['id', 'user', 'club', 'joined_at', 'is_owner', 'role']
 
     def get_is_owner(self, obj):
         return obj.user == obj.club.owner

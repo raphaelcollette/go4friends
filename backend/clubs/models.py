@@ -9,13 +9,21 @@ class Club(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_clubs')
     members = models.ManyToManyField(User, through='ClubMembership', related_name='clubs')
     created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
 class ClubMembership(models.Model):
+    ROLE_CHOICES = [
+        ('member', 'Member'),
+        ('moderator', 'Moderator'),
+        ('admin', 'Admin'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='member')
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
