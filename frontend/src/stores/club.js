@@ -4,6 +4,7 @@ import { authAxios } from '@/utils/axios'
 export const useClubStore = defineStore('club', {
   state: () => ({
     clubs: [],
+    myClubs: [],
     lastFetched: null,
     currentClub: null,
     clubMembers: [],
@@ -56,6 +57,16 @@ export const useClubStore = defineStore('club', {
     async leaveClub(name) {
       await authAxios.post(`/clubs/${encodeURIComponent(name)}/leave/`)
       await this.fetchClubs(true)
+    },
+
+    async fetchMyClubs() {
+      try {
+        const res = await authAxios.get('/clubs/my/')
+        this.myClubs = res.data
+      } catch (error) {
+        console.error('Failed to fetch my clubs:', error)
+        this.myClubs = []
+      }
     },
 
     reset() {

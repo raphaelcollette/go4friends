@@ -57,6 +57,11 @@ export const useEventStore = defineStore('event', {
       await this.fetchEvents(true)
     },
 
+    async deleteEvent(id) {
+      await authAxios.delete(`/events/${id}/delete/`)
+      this.events = this.events.filter(event => event.id !== id)
+    },
+
     reset() {
       this.events = []
       this.lastFetched = null

@@ -8,6 +8,7 @@
             <option value="">All</option>
             <option value="club">Club Events</option>
             <option value="school">School Events</option>
+            <option value="myClubs">My Club Events</option>
           </select>
           <select v-model="sortOrder" class="input">
             <option value="date">Sort by Date</option>
@@ -66,6 +67,16 @@
             </span>
           </div>
 
+          <!-- Delete Button (top right) -->
+          <button
+            v-if="event.club && isClubStaff(event.club)"
+            @click.stop="requestDeleteEvent(event.id)"
+            class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-sm font-bold"
+            title="Delete Event"
+          >
+            ✕
+          </button>
+
           <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
 
           <img
@@ -99,6 +110,18 @@
         </div>
       </div>
 
+      <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
+            <h2 class="text-xl font-bold text-red-600">Delete Event</h2>
+            <p class="text-gray-600">Are you sure you want to permanently delete this event?</p>
+            <div class="flex justify-center space-x-4">
+              <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
+              <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteEvent">Delete</button>
+            </div>
+          </div>
+        </div>
+
       <div v-else class="text-gray-500 text-lg mt-10">No events yet. Be the first to create one!</div>
     </main>
   </div>
@@ -125,6 +148,10 @@ const expandedEventId = ref(null)
 
 const filterType = ref('')
 const sortOrder = ref('date')
+
+const showDeleteConfirm = ref(false)
+const eventToDelete = ref(null)
+
 
 const createEvent = async () => {
   if (!newTitle.value || !newDate.value) {
@@ -176,9 +203,23 @@ const formatDate = (dateString) => {
 
 const filteredEvents = computed(() => {
   if (!filterType.value) return eventStore.events
-  return eventStore.events.filter(event =>
-    filterType.value === 'club' ? event.club : !event.club
-  )
+
+  if (filterType.value === 'club') {
+    return eventStore.events.filter(event => event.club)
+  }
+
+  if (filterType.value === 'school') {
+    return eventStore.events.filter(event => !event.club)
+  }
+
+  if (filterType.value === 'myClubs') {
+    const myClubNames = clubStore.myClubs.map(club => club.name)
+    return eventStore.events.filter(
+      event => event.club && myClubNames.includes(event.club)
+    )
+  }
+
+  return eventStore.events
 })
 
 const sortedEvents = computed(() => {
@@ -206,9 +247,48 @@ const cancelRsvp = async (eventId) => {
   }
 }
 
+const isClubStaff = (clubName) => {
+  const myClub = clubStore.myClubs.find(c => c.name === clubName)
+  return myClub && ['admin', 'moderator'].includes(myClub.role)
+}
+
+const deleteEvent = async (eventId) => {
+  if (!confirm("Are you sure you want to delete this event?")) return
+
+  try {
+    await eventStore.deleteEvent(eventId)
+    toast.success("Event deleted.")
+    await eventStore.fetchEvents()
+  } catch (err) {
+    console.error(err)
+    toast.error("Failed to delete event.")
+  }
+}
+
+const requestDeleteEvent = (eventId) => {
+  eventToDelete.value = eventId
+  showDeleteConfirm.value = true
+}
+
+const confirmDeleteEvent = async () => {
+  if (!eventToDelete.value) return
+  try {
+    await eventStore.deleteEvent(eventToDelete.value)
+    toast.success("Event deleted.")
+    await eventStore.fetchEvents()
+  } catch (err) {
+    console.error(err)
+    toast.error("Failed to delete event.")
+  } finally {
+    showDeleteConfirm.value = false
+    eventToDelete.value = null
+  }
+}
+
 onMounted(() => {
   eventStore.fetchEvents()
   clubStore.fetchClubs()
+  clubStore.fetchMyClubs() // assuming you have this action to get memberships
 })
 </script>
 

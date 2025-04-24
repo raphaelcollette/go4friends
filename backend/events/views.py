@@ -55,6 +55,7 @@ class EventListAPIView(generics.ListAPIView):
         rsvp = self.request.GET.get('rsvp')
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
+        my_clubs = self.request.GET.get('my_clubs')
 
         if query:
             queryset = queryset.filter(title__icontains=query)
@@ -67,6 +68,11 @@ class EventListAPIView(generics.ListAPIView):
 
         if rsvp == 'true':
             queryset = queryset.filter(attendees=user)
+
+        if my_clubs == 'true':
+            # Get the clubs where the user is a member
+            club_ids = user.clubmembership_set.values_list('club_id', flat=True)
+            queryset = queryset.filter(club__id__in=club_ids)
 
         if start_date and end_date:
             queryset = queryset.filter(date__range=[start_date, end_date])
@@ -113,5 +119,23 @@ def cancel_rsvp(request, event_id):
         event = Event.objects.get(id=event_id)
         event.attendees.remove(request.user)
         return Response({'message': 'RSVP cancelled.'})
+    except Event.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_event(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+
+        # Only allow deletion if user is a moderator/admin of the club
+        if event.club:
+            membership = event.club.clubmembership_set.filter(user=request.user).first()
+            if not membership or membership.role not in ['admin', 'moderator']:
+                return Response({"error": "You don't have permission to delete this event."}, status=status.HTTP_403_FORBIDDEN)
+
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     except Event.DoesNotExist:
         return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)

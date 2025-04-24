@@ -130,12 +130,14 @@ import { useToast } from 'vue-toastification'
 import { useClubStore } from '@/stores/club'
 import { useUserStore } from '@/stores/user'
 import { authAxios } from '@/utils/axios'
+import { useEventStore } from '@/stores/events'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const clubStore = useClubStore()
 const userStore = useUserStore()
+const eventStore = useEventStore()
 
 const showCreateModal = ref(false)
 const showManageModal = ref(false)
@@ -196,6 +198,7 @@ const createEvent = async () => {
 
   try {
     await authAxios.post('/events/create/', formData)
+    await eventStore.fetchEvents()
     toast.success('Event created!')
     showCreateModal.value = false
     eventTitle.value = ''
@@ -203,6 +206,7 @@ const createEvent = async () => {
     eventDate.value = ''
     eventImage.value = null
   } catch (err) {
+    console.error('Create event error:', err.response?.data || err.message || err)
     toast.error('Failed to create event.')
   }
 }

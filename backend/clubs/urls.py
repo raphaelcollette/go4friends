@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import update_member_role, remove_member
+from .views import update_member_role, remove_member, my_clubs
 
 urlpatterns = [
     path('create/', views.ClubCreateAPIView.as_view(), name='club-create'),
@@ -12,4 +12,5 @@ urlpatterns = [
     path('<str:club_name>/update-role/', update_member_role, name='update-member-role'),
     path('<str:club_name>/remove-member/', remove_member, name='remove-member'),
     path('<str:club_name>/members/<str:username>/', views.ClubMemberRoleAPIView.as_view(), name='club-member-role'),
+    path('my/', my_clubs, name='my-clubs'),
 ]

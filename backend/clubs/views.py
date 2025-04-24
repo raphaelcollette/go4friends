@@ -205,3 +205,18 @@ class ClubMemberRoleAPIView(APIView):
         target_membership.role = new_role
         target_membership.save()
         return Response({'message': f'{username} is now a {new_role}.'})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_clubs(request):
+    user = request.user
+    memberships = user.clubmembership_set.select_related('club')
+    data = [
+        {
+            "name": m.club.name,
+            "description": m.club.description,
+            "role": m.role,
+        }
+        for m in memberships
+    ]
+    return Response(data)
