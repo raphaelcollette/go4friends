@@ -1,7 +1,7 @@
 <template>
   <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
     <RouterLink to="/main" class="text-2xl font-bold text-purple-700">
-      whatsurmajor
+      placeholder
     </RouterLink>
 
     <!-- Global Search Bar -->
