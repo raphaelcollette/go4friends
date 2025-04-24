@@ -167,102 +167,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { authAxios } from '@/utils/axios'
+import { ref, onMounted, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useRouter } from 'vue-router'
+import { authAxios } from '@/utils/axios'
+import { useUserStore } from '@/stores/user' // ✅ import Pinia store
 
-const currentUser = ref(null)
-const notifications = ref([])
-const unreadCount = ref(0)
-const showNotifs = ref(false)
 const toast = useToast()
+const router = useRouter()
+const userStore = useUserStore() // ✅ store instance
+
+// ✅ Search functionality
 const searchQuery = ref('')
 const showDropdown = ref(false)
 const loading = ref(false)
 const results = ref({ users: [], clubs: [], events: [] })
-const router = useRouter()
 let searchTimeout = null
-
-
-const fetchCurrentUser = async () => {
-  try {
-    const res = await authAxios.get('/users/me/')
-    currentUser.value = res.data
-  } catch (error) {
-    console.error('Failed to fetch current user:', error)
-  }
-}
-
-const fetchNotifications = async () => {
-  try {
-    const res = await authAxios.get('/notifications/')
-    notifications.value = res.data
-    unreadCount.value = res.data.filter(n => !n.is_read).length
-  } catch (error) {
-    console.error('Failed to fetch notifications:', error)
-  }
-}
-
-const markAllRead = async () => {
-  try {
-    await authAxios.post('/notifications/mark-read/')
-    toast.success('All notifications marked as read')
-    fetchNotifications()
-  } catch (error) {
-    console.error('Failed to mark notifications as read:', error)
-    toast.error('Failed to mark as read')
-  }
-}
-
-const clearNotifications = async () => {
-  try {
-    await authAxios.post('/notifications/clear/')
-    toast.success('All notifications cleared')
-    notifications.value = []
-    unreadCount.value = 0
-  } catch (error) {
-    console.error('Failed to clear notifications:', error)
-    toast.error('Failed to clear notifications')
-  }
-}
-
-const toggleDropdown = () => {
-  showNotifs.value = !showNotifs.value
-  if (showNotifs.value) {
-    fetchNotifications()
-  }
-}
-
-const acceptFriendFromNotif = async (notif) => {
-  try {
-    await authAxios.post('/friends/accept/', {
-      from_username: extractUsernameFromMessage(notif.message),
-    })
-    toast.success('Friend request accepted!')
-    await authAxios.post('/notifications/mark-read/')  // Optional if you want to mark it
-    fetchNotifications()
-  } catch (error) {
-    console.error('Failed to accept friend request:', error)
-    toast.error('Error accepting friend request.')
-  }
-}
-
-const extractUsernameFromMessage = (message) => {
-  // Assumes the message is like "brocoder sent you a friend request!"
-  return message.split(' ')[0]
-}
-
-const markOneRead = async (id) => {
-  try {
-    await authAxios.post(`/notifications/${id}/mark-read/`)
-    toast.success('Marked as read')
-    fetchNotifications()
-  } catch (error) {
-    console.error('Failed to mark notification as read:', error)
-    toast.error('Failed to mark as read')
-  }
-}
 
 const handleSearch = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
@@ -284,7 +204,7 @@ const handleSearch = () => {
     } finally {
       loading.value = false
     }
-  }, 300) // debounce
+  }, 300)
 }
 
 const hasResults = computed(() =>
@@ -303,14 +223,75 @@ const goToClub = (clubName) => {
 
 const goToEvent = (id) => {
   showDropdown.value = false
-  router.push(`/events`) // or `/events/${id}` if you have detail pages
+  router.push(`/events`) // change to `/events/${id}` if using detail view
 }
 
+// ✅ Notifications
+const showNotifs = ref(false)
+
+const toggleDropdown = async () => {
+  showNotifs.value = !showNotifs.value
+  if (showNotifs.value) {
+    await userStore.fetchNotifications()
+  }
+}
+
+const markAllRead = async () => {
+  try {
+    await userStore.markAllRead()
+    toast.success('All notifications marked as read')
+  } catch (error) {
+    toast.error('Failed to mark as read')
+  }
+}
+
+const clearNotifications = async () => {
+  try {
+    await userStore.clearNotifications()
+    toast.success('All notifications cleared')
+  } catch (error) {
+    toast.error('Failed to clear notifications')
+  }
+}
+
+const acceptFriendFromNotif = async (notif) => {
+  try {
+    await authAxios.post('/friends/accept/', {
+      from_username: extractUsernameFromMessage(notif.message),
+    })
+    toast.success('Friend request accepted!')
+    await userStore.fetchNotifications()
+  } catch (error) {
+    toast.error('Error accepting friend request.')
+  }
+}
+
+const extractUsernameFromMessage = (message) => {
+  return message.split(' ')[0]
+}
+
+const markOneRead = async (id) => {
+  try {
+    await authAxios.post(`/notifications/${id}/mark-read/`)
+    const notif = userStore.notifications.find(n => n.id === id)
+    if (notif) notif.is_read = true
+    userStore.unreadCount = userStore.notifications.filter(n => !n.is_read).length
+    toast.success('Marked as read')
+  } catch (error) {
+    toast.error('Failed to mark as read')
+  }
+}
+
+// ✅ Initial fetch on mount only once
 onMounted(() => {
-  fetchCurrentUser()
-  fetchNotifications()
+  userStore.fetchCurrentUser()
+  userStore.fetchNotifications()
 })
 
+// ✅ Expose from store
+const currentUser = computed(() => userStore.currentUser)
+const notifications = computed(() => userStore.notifications)
+const unreadCount = computed(() => userStore.unreadCount)
 </script>
 
 <style scoped>

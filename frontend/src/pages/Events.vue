@@ -30,9 +30,10 @@
           <div v-if="eventType === 'club'">
             <select v-model="clubName" class="input w-full">
               <option disabled value="">Select Club</option>
-              <option v-for="club in clubs" :key="club.id" :value="club.name">
+              <option v-for="club in clubStore.clubs" :key="club.id" :value="club.name">
                 {{ club.name }}
               </option>
+
             </select>
           </div>
 
@@ -105,12 +106,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { authAxios } from '@/utils/axios'
-import Navbar from '@/components/Navbar.vue'
 import { useToast } from 'vue-toastification'
+import { useEventStore } from '@/stores/events'
+import { useClubStore } from '@/stores/club'
 
-const events = ref([])
-const clubs = ref([])
+const eventStore = useEventStore()
+const clubStore = useClubStore()
 const toast = useToast()
 
 const showCreate = ref(false)
@@ -125,26 +126,6 @@ const expandedEventId = ref(null)
 const filterType = ref('')
 const sortOrder = ref('date')
 
-const fetchEvents = async () => {
-  try {
-    const res = await authAxios.get('/events/', { params: { upcoming: true } })
-    events.value = res.data
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to load events.')
-  }
-}
-
-const fetchClubs = async () => {
-  try {
-    const res = await authAxios.get('/clubs/')
-    clubs.value = res.data
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to load clubs.')
-  }
-}
-
 const createEvent = async () => {
   if (!newTitle.value || !newDate.value) {
     toast.error('Title and date are required.')
@@ -155,29 +136,29 @@ const createEvent = async () => {
   formData.append('title', newTitle.value)
   formData.append('description', newDescription.value)
   formData.append('date', newDate.value)
-  if (newImage.value) {
-    formData.append('image', newImage.value)
-  }
+  if (newImage.value) formData.append('image', newImage.value)
   if (eventType.value === 'club' && clubName.value) {
     formData.append('club_name', clubName.value)
   }
 
   try {
-    await authAxios.post('/events/create/', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    await eventStore.createEvent(formData)
     toast.success('Event created!')
-    showCreate.value = false
-    newTitle.value = ''
-    newDescription.value = ''
-    newDate.value = ''
-    newImage.value = null
-    clubName.value = ''
-    fetchEvents()
+    resetCreateForm()
   } catch (error) {
     console.error(error)
     toast.error('Failed to create event.')
   }
+}
+
+const resetCreateForm = () => {
+  showCreate.value = false
+  eventType.value = 'school'
+  clubName.value = ''
+  newTitle.value = ''
+  newDescription.value = ''
+  newDate.value = ''
+  newImage.value = null
 }
 
 const handleFileChange = (e) => {
@@ -194,8 +175,8 @@ const formatDate = (dateString) => {
 }
 
 const filteredEvents = computed(() => {
-  if (!filterType.value) return events.value
-  return events.value.filter(event =>
+  if (!filterType.value) return eventStore.events
+  return eventStore.events.filter(event =>
     filterType.value === 'club' ? event.club : !event.club
   )
 })
@@ -209,29 +190,28 @@ const sortedEvents = computed(() => {
 
 const rsvp = async (eventId) => {
   try {
-    await authAxios.post(`/events/${eventId}/rsvp/`)
-    toast.success('You’re going!')
-    fetchEvents()
-  } catch (e) {
-    toast.error('Could not RSVP')
+    await eventStore.rsvp(eventId)
+    toast.success("You’re going!")
+  } catch {
+    toast.error("Could not RSVP")
   }
 }
 
 const cancelRsvp = async (eventId) => {
   try {
-    await authAxios.post(`/events/${eventId}/cancel-rsvp/`)
-    toast.success('RSVP cancelled.')
-    fetchEvents()
-  } catch (e) {
-    toast.error('Could not cancel RSVP')
+    await eventStore.cancelRsvp(eventId)
+    toast.success("RSVP cancelled.")
+  } catch {
+    toast.error("Could not cancel RSVP")
   }
 }
 
 onMounted(() => {
-  fetchEvents()
-  fetchClubs()
+  eventStore.fetchEvents()
+  clubStore.fetchClubs()
 })
 </script>
+
 
 <style scoped>
 .input {

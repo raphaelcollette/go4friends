@@ -74,20 +74,24 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { authAxios } from '@/utils/axios'
-import {onMounted } from 'vue'
+import { useUserStore } from '@/stores/user' // ✅ Import the Pinia store
+import { useFriendStore } from '@/stores/friend'
+import { useMessageStore } from '@/stores/messages'
+import { useClubStore } from '@/stores/club'
+import { useEventStore } from '@/stores/events'
 
 const router = useRouter()
 const toast = useToast()
+const userStore = useUserStore()
 
-// Change password related
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
+
 const isPrivate = ref(false)
 
 const toggleChangePassword = () => {
@@ -110,30 +114,31 @@ const submitChangePassword = async () => {
     showChangePassword.value = false
     oldPassword.value = ''
     newPassword.value = ''
-
     localStorage.removeItem('access_token')
     router.push('/login')
   } catch (error) {
-    if (error.response && error.response.data.error) {
-      toast.error(error.response.data.error)
-    } else {
-      toast.error('Failed to change password. Try again later.')
-    }
+    toast.error(error.response?.data?.error || 'Failed to change password.')
   }
 }
 
-// Profile related
 const editProfile = () => {
   router.push('/profile/edit')
 }
 
 const logout = () => {
   localStorage.removeItem('access_token')
+
+  // Reset all user-related stores
+  useUserStore().reset()
+  useFriendStore().reset()
+  useMessageStore().reset()
+  useClubStore().reset()
+  useEventStore().reset()
+
   toast.success('Logged out successfully!')
   router.push('/login')
 }
 
-// Delete account related
 const showDeleteModal = ref(false)
 
 const openDeleteModal = () => {
@@ -157,30 +162,32 @@ const confirmDeleteAccount = async () => {
   }
 }
 
-// Dark mode placeholder
 const toggleDarkMode = () => {
   toast.info('Dark mode toggle coming soon!')
-}
-
-const fetchPrivacy = async () => {
-  try {
-    const res = await authAxios.get('/users/me/')
-    isPrivate.value = res.data.is_private
-  } catch (e) {
-    toast.error('Failed to load privacy setting.')
-  }
 }
 
 const updatePrivacy = async () => {
   try {
     await authAxios.patch('/users/me/update/', { is_private: isPrivate.value })
     toast.success('Privacy setting updated.')
+    await userStore.fetchCurrentUser()
   } catch (e) {
     toast.error('Failed to update privacy.')
   }
 }
 
-onMounted(fetchPrivacy)
+// Sync privacy checkbox with store
+watch(
+  () => userStore.currentUser,
+  (user) => {
+    if (user) isPrivate.value = user.is_private
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  userStore.fetchCurrentUser()
+})
 </script>
 
 <style scoped>

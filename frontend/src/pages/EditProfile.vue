@@ -74,15 +74,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { authAxios } from '@/utils/axios'
-import Navbar from '@/components/Navbar.vue'
 import { useToast } from 'vue-toastification'
+import { useUserStore } from '@/stores/user'
+import { authAxios } from '@/utils/axios'
 
-// Setup Refs
 const router = useRouter()
 const toast = useToast()
+const userStore = useUserStore()
 
 const full_name = ref('')
 const bio = ref('')
@@ -90,82 +90,83 @@ const location = ref('')
 const interests = ref([])
 const newInterest = ref('')
 const profile_picture = ref(null)
-const currentUsername = ref('')
 const major = ref('')
 const graduationYear = ref('')
 
-// Fetch the current user's profile
-const fetchProfile = async () => {
-  try {
-    const res = await authAxios.get('users/me/')
-    full_name.value = res.data.full_name || ''
-    bio.value = res.data.bio || ''
-    location.value = res.data.location || ''
-    interests.value = res.data.interests || []
-    currentUsername.value = res.data.username
-    major.value = res.data.major
-    graduationYear.value = res.data.graduation_year
-  } catch (error) {
-    console.error('Failed to fetch profile:', error)
-    toast.error('Failed to load your profile.')
-    router.push('/settings')
+const syncFieldsFromStore = () => {
+  const user = userStore.currentUser
+  if (user) {
+    full_name.value = user.full_name || ''
+    bio.value = user.bio || ''
+    location.value = user.location || ''
+    interests.value = user.interests || []
+    major.value = user.major || ''
+    graduationYear.value = user.graduation_year || ''
   }
 }
 
-// Update profile
+onMounted(async () => {
+  await userStore.fetchCurrentUser()
+  syncFieldsFromStore()
+})
+
 const updateProfile = async () => {
   try {
-    let payload;
-    let headers;
+    let payload
+    let headers
 
     if (profile_picture.value) {
-      // If there is a file, use FormData
-      payload = new FormData();
-      payload.append('full_name', full_name.value);
-      payload.append('bio', bio.value);
-      payload.append('location', location.value);
-      payload.append('profile_picture', profile_picture.value);
-      payload.append('interests', JSON.stringify(interests.value));
+      payload = new FormData()
+      payload.append('full_name', full_name.value)
+      payload.append('bio', bio.value)
+      payload.append('location', location.value)
+      payload.append('profile_picture', profile_picture.value)
+      payload.append('interests', JSON.stringify(interests.value))
       payload.append('major', major.value)
-      payload.append('graduation_year', graduationYear.value)
-
-      headers = { 'Content-Type': 'multipart/form-data' };
+      if (graduationYear.value) {
+        payload.append('graduation_year', graduationYear.value)
+      }
+      headers = { 'Content-Type': 'multipart/form-data' }
     } else {
-      // Otherwise send normal JSON
       payload = {
         full_name: full_name.value,
         bio: bio.value,
         location: location.value,
         interests: interests.value,
         major: major.value,
-        graduation_year: graduationYear.value,
-      };
-
-      headers = { 'Content-Type': 'application/json' };
+      }
+      if (graduationYear.value) {
+        payload.graduation_year = graduationYear.value
+      }
+      headers = { 'Content-Type': 'application/json' }
     }
 
-    await authAxios.patch('users/me/update/', payload, { headers });
-    toast.success('Profile updated successfully!');
-    await fetchProfile();
-    
-    router.push(`/profile/${currentUsername.value}`);
+    await authAxios.patch('/users/me/update/', payload, { headers })
+
+    // ✅ Instantly update the store instead of refetching
+    userStore.currentUser = {
+      ...userStore.currentUser,
+      full_name: full_name.value,
+      bio: bio.value,
+      location: location.value,
+      interests: interests.value,
+      major: major.value,
+      graduation_year: graduationYear.value || null,
+    }
+
+    toast.success('Profile updated successfully!')
+    router.push(`/profile/${userStore.currentUser.username}`)
   } catch (error) {
-    console.error('Failed to update profile:', error.response?.data || error.message);
-    toast.error('Failed to update profile.');
+    console.error('Failed to update profile:', error)
+    toast.error('Failed to update profile.')
   }
-};
-
-// Handle file change
-const handleFileChange = (event) => {
-  profile_picture.value = event.target.files[0]
 }
 
-// Cancel editing
-const cancel = () => {
-  router.push('/settings')
+
+const handleFileChange = (e) => {
+  profile_picture.value = e.target.files[0]
 }
 
-// Add an interest
 const addInterest = () => {
   const trimmed = newInterest.value.trim()
   if (trimmed && !interests.value.includes(trimmed)) {
@@ -174,13 +175,13 @@ const addInterest = () => {
   }
 }
 
-// Remove an interest
-const removeInterest = (index) => {
-  interests.value.splice(index, 1)
+const removeInterest = (idx) => {
+  interests.value.splice(idx, 1)
 }
 
-// On Mount
-onMounted(fetchProfile)
+const cancel = () => {
+  router.push('/settings')
+}
 </script>
 
 <style scoped>

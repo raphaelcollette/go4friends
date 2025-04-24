@@ -35,7 +35,7 @@
         <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
 
         <div class="mt-6">
-          <template v-if="user.username !== currentUsername">
+          <template v-if="user.username !== userStore.currentUser?.username">
             <button
               v-if="user.is_friend"
               @click="removeFriend"
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Message button -->
-        <div class="mt-4" v-if="user.username !== currentUsername">
+        <div class="mt-4" v-if="user.username !== userStore.currentUser?.username">
           <button
             @click="startOrNavigateToThread"
             class="btn bg-blue-500 hover:bg-blue-600"
@@ -110,12 +110,13 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authAxios } from '@/utils/axios'
-import Navbar from '@/components/Navbar.vue'
 import { useToast } from 'vue-toastification'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const router = useRouter()
@@ -123,6 +124,7 @@ const user = ref(null)
 const loading = ref(true)
 const toast = useToast()
 const currentUsername = ref('')
+const userStore = useUserStore()
 
 const fetchUser = async () => {
   loading.value = true
@@ -130,14 +132,11 @@ const fetchUser = async () => {
 
   try {
     // Always fetch current user once and store the username
-    if (!currentUsername.value) {
-      const me = await authAxios.get('/users/me/')
-      currentUsername.value = me.data.username
-    }
+    await userStore.fetchCurrentUser()
+    const currentUsername = userStore.currentUser.username
 
-    // Use /me/ endpoint if viewing your own profile
-    const res = username === currentUsername.value
-      ? await authAxios.get('/users/me/')
+    const res = username === currentUsername
+      ? { data: userStore.currentUser } // no need to refetch
       : await authAxios.get(`/users/profile/${username}/`)
 
     user.value = res.data

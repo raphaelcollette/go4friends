@@ -11,7 +11,6 @@
             :key="msg.id"
             :class="msg.sender.username === currentUser.username ? 'self-end text-right' : 'self-start text-left'"
           >
-            <!-- Show username above message if sender is different from previous -->
             <div
               v-if="index === 0 || messages[index - 1].sender.username !== msg.sender.username"
               class="text-sm font-semibold text-gray-700 mb-1"
@@ -46,20 +45,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { authAxios } from '@/utils/axios'
-import Navbar from '@/components/Navbar.vue'
 import { useToast } from 'vue-toastification'
+import { useMessageStore } from '@/stores/messages'
+import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const toast = useToast()
 const threadId = route.params.threadId
 
-const currentUser = ref({})
-const messages = ref([])
+const messageStore = useMessageStore()
+const userStore = useUserStore()
+
 const newMessage = ref('')
 const messageContainer = ref(null)
+
+const currentUser = computed(() => userStore.currentUser)
+const messages = computed(() => messageStore.messagesByThread[threadId] || [])
 
 const scrollToBottom = async () => {
   await nextTick()
@@ -68,35 +71,13 @@ const scrollToBottom = async () => {
   }
 }
 
-const fetchCurrentUser = async () => {
-  try {
-    const res = await authAxios.get('/users/me/')
-    currentUser.value = res.data
-  } catch {
-    toast.error('Failed to load current user.')
-  }
-}
-
-const fetchMessages = async () => {
-  try {
-    const res = await authAxios.get(`/messages/threads/${threadId}/messages/`)
-    messages.value = res.data
-    scrollToBottom()
-  } catch (error) {
-    toast.error('Failed to load messages.')
-  }
-}
-
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return
-
   try {
-    await authAxios.post(`/messages/threads/${threadId}/send/`, {
-      message: newMessage.value.trim(),
-    })
+    await messageStore.sendMessage(threadId, newMessage.value.trim())
     newMessage.value = ''
-    await fetchMessages()
-  } catch (error) {
+    scrollToBottom()
+  } catch {
     toast.error('Failed to send message.')
   }
 }
@@ -106,8 +87,9 @@ const formatTime = (timestamp) => {
 }
 
 onMounted(async () => {
-  await fetchCurrentUser()
-  await fetchMessages()
+  await userStore.fetchCurrentUser()
+  await messageStore.fetchMessages(threadId)
+  scrollToBottom()
 })
 </script>
 
@@ -119,4 +101,6 @@ onMounted(async () => {
   @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300;
 }
 </style>
+
+
 

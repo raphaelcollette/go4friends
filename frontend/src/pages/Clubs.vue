@@ -61,88 +61,79 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue'
-  import { useRouter } from 'vue-router'
-  import { authAxios } from '@/utils/axios'
-  import Navbar from '@/components/Navbar.vue'
-  import { useToast } from 'vue-toastification'
-  
-  const clubs = ref([])
-  const toast = useToast()
-  const router = useRouter()
-  
-  const showCreate = ref(false)
-  const newClubName = ref('')
-  const newClubDescription = ref('')
-  
-  const fetchClubs = async () => {
-    try {
-      const res = await authAxios.get('/clubs/')
-      clubs.value = res.data
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to load clubs.')
-    }
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
+import { useClubStore } from '@/stores/club'
+
+const toast = useToast()
+const router = useRouter()
+const clubStore = useClubStore()
+
+const showCreate = ref(false)
+const newClubName = ref('')
+const newClubDescription = ref('')
+
+// Use Pinia state
+const clubs = computed(() => clubStore.clubs)
+
+const createClub = async () => {
+  if (!newClubName.value.trim()) {
+    toast.error('Club name is required.')
+    return
   }
-  
-  const createClub = async () => {
-    if (!newClubName.value.trim()) {
-      toast.error('Club name is required.')
-      return
-    }
-  
-    try {
-      await authAxios.post('/clubs/create/', {
-        name: newClubName.value.trim(),
-        description: newClubDescription.value.trim(),
-      })
-      toast.success('Club created successfully!')
-      resetCreateModal()
-      fetchClubs()
-    } catch (error) {
-      console.error('Create club error:', error)
-      toast.error('Failed to create club.')
-    }
+
+  try {
+    await clubStore.createClub({
+      name: newClubName.value.trim(),
+      description: newClubDescription.value.trim(),
+    })
+    toast.success('Club created successfully!')
+    resetCreateModal()
+  } catch (error) {
+    console.error('Create club error:', error)
+    toast.error('Failed to create club.')
   }
-  
-  const joinClub = async (clubName) => {
-    try {
-      await authAxios.post(`/clubs/${encodeURIComponent(clubName)}/join/`)
-      toast.success(`Successfully joined ${clubName}!`)
-      fetchClubs()
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to join club.')
-    }
+}
+
+const joinClub = async (clubName) => {
+  try {
+    await clubStore.joinClub(clubName)
+    toast.success(`Successfully joined ${clubName}!`)
+  } catch (error) {
+    console.error(error)
+    toast.error('Failed to join club.')
   }
-  
-  const leaveClub = async (clubName) => {
-    try {
-      await authAxios.post(`/clubs/${encodeURIComponent(clubName)}/leave/`)
-      toast.success(`Successfully left ${clubName}.`)
-      fetchClubs()
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to leave club.')
-    }
+}
+
+const leaveClub = async (clubName) => {
+  try {
+    await clubStore.leaveClub(clubName)
+    toast.success(`Successfully left ${clubName}.`)
+  } catch (error) {
+    console.error(error)
+    toast.error('Failed to leave club.')
   }
-  
-  const resetCreateModal = () => {
-    showCreate.value = false
-    newClubName.value = ''
-    newClubDescription.value = ''
-  }
-  
-  const goToClub = (clubName) => {
+}
+
+const resetCreateModal = () => {
+  showCreate.value = false
+  newClubName.value = ''
+  newClubDescription.value = ''
+}
+
+const goToClub = (clubName) => {
   if (!clubName) {
     toast.error('Invalid club name!')
     return
   }
   router.push(`/clubs/${encodeURIComponent(clubName)}`)
 }
-  
-  onMounted(fetchClubs)
-  </script>
+
+onMounted(() => {
+  clubStore.fetchClubs() // only refetch if needed
+})
+</script>
   
   <style scoped>
   .input {

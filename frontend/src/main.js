@@ -3,11 +3,13 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 const app = createApp(App)
+const pinia = createPinia()
 app.use(Toast, {
     timeout: 2000, 
     closeOnClick: true,
@@ -22,6 +24,8 @@ app.use(Toast, {
     rtl: false,
     position: 'bottom-right',
 })
+pinia.use(piniaPluginPersistedstate)
+app.use(pinia)
 
 app.use(router)
 
