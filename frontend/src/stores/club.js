@@ -6,6 +6,7 @@ export const useClubStore = defineStore('club', {
     clubs: [],
     myClubs: [],
     lastFetched: null,
+    myClubsFetched: false, // ✅ NEW FLAG
     currentClub: null,
     clubMembers: [],
     loadingClub: false,
@@ -59,23 +60,28 @@ export const useClubStore = defineStore('club', {
       await this.fetchClubs(true)
     },
 
-    async fetchMyClubs() {
+    async fetchMyClubs(force = false) {
+      if (this.myClubsFetched && !force) return
       try {
         const res = await authAxios.get('/clubs/my/')
         this.myClubs = res.data
+        this.myClubsFetched = true // ✅ set the flag
       } catch (error) {
         console.error('Failed to fetch my clubs:', error)
         this.myClubs = []
+        this.myClubsFetched = false
       }
     },
 
     reset() {
-        this.clubs = []
-        this.lastFetched = null
-        this.currentClub = null
-        this.clubMembers = []
-        this.loadingClub = false
-      }
+      this.clubs = []
+      this.myClubs = []
+      this.myClubsFetched = false
+      this.lastFetched = null
+      this.currentClub = null
+      this.clubMembers = []
+      this.loadingClub = false
+    }
   },
   persist: {
     paths: ['clubs'],
