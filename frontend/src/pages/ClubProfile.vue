@@ -190,15 +190,19 @@ const createEvent = async () => {
   const formData = new FormData()
   formData.append('title', eventTitle.value)
   formData.append('description', eventDescription.value)
-  formData.append('date', eventDate.value)
+
+  const localDate = new Date(eventDate.value)
+  formData.append('date', localDate.toISOString()) // ✅ UTC-safe
+
   formData.append('club_name', club.value.name)
+
   if (eventImage.value) {
     formData.append('image', eventImage.value)
   }
 
   try {
     await authAxios.post('/events/create/', formData)
-    await eventStore.fetchEvents()
+    await eventStore.fetchEvents(true) // force refresh
     toast.success('Event created!')
     showCreateModal.value = false
     eventTitle.value = ''

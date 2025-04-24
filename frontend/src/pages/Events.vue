@@ -14,7 +14,6 @@
             <option value="date">Sort by Date</option>
             <option value="title">Sort by Title</option>
           </select>
-          <button class="btn" @click="showCreate = true">+ Create Event</button>
         </div>
       </div>
 
@@ -137,7 +136,6 @@ const eventStore = useEventStore()
 const clubStore = useClubStore()
 const toast = useToast()
 
-const showCreate = ref(false)
 const eventType = ref('school')
 const clubName = ref('')
 const newTitle = ref('')
@@ -151,42 +149,6 @@ const sortOrder = ref('date')
 
 const showDeleteConfirm = ref(false)
 const eventToDelete = ref(null)
-
-
-const createEvent = async () => {
-  if (!newTitle.value || !newDate.value) {
-    toast.error('Title and date are required.')
-    return
-  }
-
-  const formData = new FormData()
-  formData.append('title', newTitle.value)
-  formData.append('description', newDescription.value)
-  formData.append('date', newDate.value)
-  if (newImage.value) formData.append('image', newImage.value)
-  if (eventType.value === 'club' && clubName.value) {
-    formData.append('club_name', clubName.value)
-  }
-
-  try {
-    await eventStore.createEvent(formData)
-    toast.success('Event created!')
-    resetCreateForm()
-  } catch (error) {
-    console.error(error)
-    toast.error('Failed to create event.')
-  }
-}
-
-const resetCreateForm = () => {
-  showCreate.value = false
-  eventType.value = 'school'
-  clubName.value = ''
-  newTitle.value = ''
-  newDescription.value = ''
-  newDate.value = ''
-  newImage.value = null
-}
 
 const handleFileChange = (e) => {
   newImage.value = e.target.files[0]
@@ -252,18 +214,6 @@ const isClubStaff = (clubName) => {
   return myClub && ['admin', 'moderator'].includes(myClub.role)
 }
 
-const deleteEvent = async (eventId) => {
-  if (!confirm("Are you sure you want to delete this event?")) return
-
-  try {
-    await eventStore.deleteEvent(eventId)
-    toast.success("Event deleted.")
-    await eventStore.fetchEvents()
-  } catch (err) {
-    console.error(err)
-    toast.error("Failed to delete event.")
-  }
-}
 
 const requestDeleteEvent = (eventId) => {
   eventToDelete.value = eventId
