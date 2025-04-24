@@ -66,7 +66,16 @@ class AcceptFriendRequestAPIView(generics.GenericAPIView):
         if action == "accept":
             friend_request.status = 'accepted'
             friend_request.save()
+
+            # ✅ Create a notification for the sender
+            Notification.objects.create(
+                user=from_user,
+                type='message',
+                message=f"{request.user.username} accepted your friend request."
+            )
+
             return Response({'message': 'Friend request accepted.'})
+
         elif action == "reject":
             friend_request.status = 'rejected'
             friend_request.save()
