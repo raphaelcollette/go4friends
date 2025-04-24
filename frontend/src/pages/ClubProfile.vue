@@ -37,6 +37,14 @@
           <!-- Admin Only -->
           <button v-if="isAdmin" class="btn bg-red-600 hover:bg-red-700 w-full" @click="showDeleteModal = true">🗑 Delete Club</button>
         </div>
+
+        <button
+          v-if="club?.is_private && isStaff"
+          class="btn bg-blue-600 hover:bg-blue-700 w-full"
+          @click="showInviteModal = true"
+        >
+          ✉️ Invite User
+        </button>
       </div>
 
       <!-- Club Not Found -->
@@ -106,6 +114,17 @@
         </div>
       </div>
     </div>
+    <!-- Invite User Modal -->
+    <div v-if="showInviteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">
+        <h2 class="text-xl font-bold text-gray-800 text-center">Invite User to Club</h2>
+        <input v-model="inviteUsername" class="input w-full" placeholder="Enter username to invite" />
+        <div class="flex justify-end space-x-2">
+          <button class="btn bg-gray-400 hover:bg-gray-500" @click="showInviteModal = false">Cancel</button>
+          <button class="btn bg-blue-600 hover:bg-blue-700" @click="sendInvite">Send Invite</button>
+        </div>
+      </div>
+    </div>
 
 
     <!-- Confirm Delete Modal -->
@@ -148,6 +167,8 @@ const eventDescription = ref('')
 const eventDate = ref('')
 const eventImage = ref(null)
 const roleChanges = ref({})
+const showInviteModal = ref(false)
+const inviteUsername = ref('')
 
 const clubName = decodeURIComponent(route.params.clubName)
 
@@ -251,6 +272,25 @@ const updateRole = async (username) => {
     await clubStore.fetchClubProfile(clubName)
   } catch {
     toast.error('Failed to update role.')
+  }
+}
+
+const sendInvite = async () => {
+  if (!inviteUsername.value.trim()) {
+    toast.error('Please enter a username to invite.')
+    return
+  }
+
+  try {
+    await authAxios.post(`/clubs/${encodeURIComponent(club.value.name)}/invite/`, {
+      username: inviteUsername.value.trim(),
+    })
+    toast.success('Invite sent!')
+    showInviteModal.value = false
+    inviteUsername.value = ''
+  } catch (err) {
+    console.error(err)
+    toast.error(err.response?.data?.error || 'Failed to send invite.')
   }
 }
 

@@ -10,6 +10,7 @@ class Club(models.Model):
     members = models.ManyToManyField(User, through='ClubMembership', related_name='clubs')
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
+    is_private = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -31,3 +32,16 @@ class ClubMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.club.name}"
+
+class ClubInvite(models.Model):
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invites')
+    invitee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='club_invites')
+    created_at = models.DateTimeField(auto_now_add=True)
+    accepted = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('club', 'invitee')  # Prevent duplicate invites
+
+    def __str__(self):
+        return f"{self.invitee.username} invited to {self.club.name} by {self.invited_by.username}"

@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from .models import Club, ClubMembership
-from .serializers import ClubSerializer, ClubMembershipSerializer
+from .models import Club, ClubMembership, ClubInvite
+from .serializers import ClubSerializer, ClubMembershipSerializer, ClubCreateSerializer, ClubInviteSerializer
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 class ClubCreateAPIView(generics.GenericAPIView):
-    serializer_class = ClubSerializer
+    serializer_class = ClubCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -23,6 +23,7 @@ class ClubCreateAPIView(generics.GenericAPIView):
             ClubMembership.objects.create(user=request.user, club=club, role='admin')
             return Response(ClubSerializer(club, context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ClubListAPIView(generics.ListAPIView):
     serializer_class = ClubSerializer
@@ -43,6 +44,7 @@ class ClubListAPIView(generics.ListAPIView):
         # Pass the request to the serializer so it can check is_member
         return {'request': self.request}
 
+
 class ClubJoinAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -52,12 +54,23 @@ class ClubJoinAPIView(generics.GenericAPIView):
         except Club.DoesNotExist:
             return Response({'error': 'Club not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        membership, created = ClubMembership.objects.get_or_create(user=request.user, club=club)
-
-        if not created:
+        # Check if already a member
+        if ClubMembership.objects.filter(user=request.user, club=club).exists():
             return Response({'message': 'Already a member.'}, status=status.HTTP_200_OK)
 
+        # 🔐 Private club? Check if the user has a valid invite
+        if club.is_private:
+            invite_exists = ClubInvite.objects.filter(club=club, invitee=request.user, accepted=True).exists()
+            if not invite_exists:
+                return Response(
+                    {'error': 'This club is private and requires an accepted invite to join.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # Create membership
+        ClubMembership.objects.create(user=request.user, club=club, role='member')
         return Response({'message': f'Joined {club.name} successfully!'}, status=status.HTTP_201_CREATED)
+
 
 class ClubLeaveAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -71,6 +84,10 @@ class ClubLeaveAPIView(generics.GenericAPIView):
         try:
             membership = ClubMembership.objects.get(user=request.user, club=club)
             membership.delete()
+
+            # ✅ Clean up any invite (so user can be invited again later)
+            ClubInvite.objects.filter(club=club, invitee=request.user).delete()
+
             return Response({'message': f'Left {club.name} successfully.'}, status=status.HTTP_200_OK)
         except ClubMembership.DoesNotExist:
             return Response({'error': 'You are not a member of this club.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -220,3 +237,62 @@ def my_clubs(request):
         for m in memberships
     ]
     return Response(data)
+
+class InviteUserToClubAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, club_name):
+        club = get_object_or_404(Club, name=club_name)
+        invitee_username = request.data.get('username')
+
+        # Check permission
+        membership = ClubMembership.objects.filter(user=request.user, club=club).first()
+        if not membership or membership.role not in ['admin', 'moderator']:
+            return Response({'error': 'Not authorized to invite users.'}, status=403)
+
+        try:
+            invitee = User.objects.get(username=invitee_username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=404)
+
+        if ClubMembership.objects.filter(user=invitee, club=club).exists():
+            return Response({'error': 'User is already a member.'}, status=400)
+
+        invite, created = ClubInvite.objects.get_or_create(club=club, invitee=invitee, defaults={'invited_by': request.user})
+
+        if not created:
+            return Response({'message': 'User already invited.'})
+
+        
+
+        return Response({'message': 'Invite sent successfully.'}, status=201)
+
+class AcceptInviteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, invite_id):
+        invite = get_object_or_404(ClubInvite, id=invite_id, invitee=request.user)
+
+        if invite.accepted:
+            return Response({'message': 'Invite already accepted.'}, status=400)
+
+        ClubMembership.objects.create(user=request.user, club=invite.club, role='member')
+        invite.accepted = True
+        invite.save()
+
+        return Response({'message': 'You have joined the club!'}, status=200)
+
+class ListClubInvitesAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ClubInviteSerializer
+
+    def get_queryset(self):
+        return ClubInvite.objects.filter(invitee=self.request.user, accepted=False)
+
+class RejectInviteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, invite_id):
+        invite = get_object_or_404(ClubInvite, id=invite_id, invitee=request.user, accepted=False)
+        invite.delete()
+        return Response({'message': 'Invite rejected.'}, status=200)

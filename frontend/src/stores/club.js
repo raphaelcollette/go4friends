@@ -20,8 +20,8 @@ export const useClubStore = defineStore('club', {
       this.lastFetched = Date.now()
     },
 
-    async createClub({ name, description }) {
-      await authAxios.post('/clubs/create/', { name, description })
+    async createClub({ name, description, is_private = false }) {
+      await authAxios.post('/clubs/create/', { name, description, is_private })
       await this.fetchClubs(true)
     },
 
