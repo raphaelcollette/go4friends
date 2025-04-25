@@ -8,10 +8,14 @@ class ClubSerializer(serializers.ModelSerializer):
     members = serializers.SerializerMethodField()
     is_private = serializers.BooleanField()
     only_member_is_me = serializers.SerializerMethodField()
+    thread_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
-        fields = ['id', 'name', 'description', 'created_at', 'is_member', 'members', 'is_private', 'only_member_is_me']
+        fields = [
+            'id', 'name', 'description', 'created_at', 'is_member',
+            'members', 'is_private', 'only_member_is_me', 'thread_id'
+        ]
 
     def get_is_member(self, obj):
         request = self.context.get('request')
@@ -34,6 +38,9 @@ class ClubSerializer(serializers.ModelSerializer):
             members = obj.clubmembership_set.all()
             return members.count() == 1 and members.first().user == request.user
         return False
+
+    def get_thread_id(self, obj):
+        return obj.thread.id if obj.thread else None
 
 class ClubMembershipSerializer(serializers.ModelSerializer):
     user = UserPublicSerializer(read_only=True)

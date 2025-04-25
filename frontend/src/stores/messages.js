@@ -45,15 +45,15 @@ export const useMessageStore = defineStore('messages', {
         }
       },
 
-    async sendMessage(threadId, message) {
-      try {
-        await authAxios.post(`/messages/threads/${threadId}/send/`, { message })
-        await this.fetchMessages(threadId)
-      } catch (error) {
-        console.error('Failed to send message:', error)
-        throw error
-      }
-    },
+      async sendMessage(threadId, message) {
+        try {
+          await authAxios.post(`/messages/threads/${threadId}/send/`, { message })
+          await this.fetchMessages(threadId, true) // ✅ force reload
+        } catch (error) {
+          console.error('Failed to send message:', error)
+          throw error
+        }
+      },
 
     async startGroupThread(usernames) {
       const res = await authAxios.post('/messages/threads/start-private/', { usernames })

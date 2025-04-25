@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from direct_messages.models import Thread
 
 User = get_user_model()
 
@@ -11,6 +12,7 @@ class Club(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
+    thread = models.OneToOneField(Thread, null=True, blank=True, on_delete=models.SET_NULL, related_name="club")
 
     def __str__(self):
         return self.name

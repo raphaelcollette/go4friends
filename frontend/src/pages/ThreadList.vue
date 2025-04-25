@@ -11,9 +11,10 @@
             @click="goToThread(thread.id)"
             class="p-4 rounded-xl bg-white/60 backdrop-blur hover:bg-white/80 cursor-pointer shadow transition"
           >
-            <div class="font-semibold text-lg text-gray-800">
-              {{ getOtherUsernames(thread.participants) }}
-            </div>
+          <div class="font-semibold text-lg text-gray-800">
+            <span v-if="thread.club_name">{{ thread.club_name }} (Club Chat)</span>
+            <span v-else>{{ getOtherUsernames(thread.participants) }}</span>
+          </div>
             <div class="text-sm text-gray-600 mt-1">
               {{ thread.last_message?.message || 'No messages yet' }}
             </div>

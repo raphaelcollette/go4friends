@@ -30,11 +30,12 @@ class ThreadParticipantSerializer(serializers.ModelSerializer):
 class ThreadSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
+    club_name = serializers.SerializerMethodField()  # 👈 NEW
     is_group = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Thread
-        fields = ['id', 'name', 'is_group', 'participants', 'last_message', 'created_at']
+        fields = ['id', 'name', 'is_group', 'participants', 'last_message', 'created_at', 'club_name']
 
     def get_participants(self, obj):
         participants = ThreadParticipant.objects.filter(thread=obj).select_related('user')
@@ -44,4 +45,9 @@ class ThreadSerializer(serializers.ModelSerializer):
         last_msg = obj.messages.order_by('-timestamp').first()
         if last_msg:
             return MessageSerializer(last_msg).data
+        return None
+
+    def get_club_name(self, obj):
+        if hasattr(obj, 'club') and obj.club:
+            return obj.club.name
         return None

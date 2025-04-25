@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import get_user_model
+from direct_messages.models import Thread, ThreadParticipant
+from .utils import add_user_to_club_chat
 
 User = get_user_model()
 
@@ -19,9 +21,19 @@ class ClubCreateAPIView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            club = serializer.save(owner=request.user)
+            # 1. Create chat thread
+            thread = Thread.objects.create(is_group=True)
+
+            # 2. Save club and link thread
+            club = serializer.save(owner=request.user, thread=thread)
+
+            # 3. Add creator to club and chat
             ClubMembership.objects.create(user=request.user, club=club, role='admin')
+            ThreadParticipant.objects.create(thread=thread, user=request.user)
+
+            # 4. Return serialized data
             return Response(ClubSerializer(club, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -49,16 +61,9 @@ class ClubJoinAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, club_name, *args, **kwargs):
-        try:
-            club = Club.objects.get(name=club_name)
-        except Club.DoesNotExist:
-            return Response({'error': 'Club not found.'}, status=status.HTTP_404_NOT_FOUND)
+        club = get_object_or_404(Club, name=club_name)
 
-        # Check if already a member
-        if ClubMembership.objects.filter(user=request.user, club=club).exists():
-            return Response({'message': 'Already a member.'}, status=status.HTTP_200_OK)
-
-        # 🔐 Private club? Check if the user has a valid invite
+        # 🔐 Private club? Require accepted invite
         if club.is_private:
             invite_exists = ClubInvite.objects.filter(club=club, invitee=request.user, accepted=True).exists()
             if not invite_exists:
@@ -67,9 +72,20 @@ class ClubJoinAPIView(generics.GenericAPIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-        # Create membership
-        ClubMembership.objects.create(user=request.user, club=club, role='member')
-        return Response({'message': f'Joined {club.name} successfully!'}, status=status.HTTP_201_CREATED)
+        # ✅ Safe creation — no IntegrityError even if already joined
+        membership, created = ClubMembership.objects.get_or_create(
+            user=request.user,
+            club=club,
+            defaults={'role': 'member'}
+        )
+
+        # ✅ Add to chat if new or if not already added
+        add_user_to_club_chat(club, request.user)
+
+        return Response(
+            {'message': f'Joined {club.name} successfully!' if created else 'Already a member.'},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
 
 
 class ClubLeaveAPIView(generics.GenericAPIView):
@@ -85,12 +101,17 @@ class ClubLeaveAPIView(generics.GenericAPIView):
             membership = ClubMembership.objects.get(user=request.user, club=club)
             membership.delete()
 
+            # ✅ Remove from club chat if thread exists
+            if club.thread:
+                ThreadParticipant.objects.filter(thread=club.thread, user=request.user).delete()
+
             # ✅ Clean up any invite (so user can be invited again later)
             ClubInvite.objects.filter(club=club, invitee=request.user).delete()
 
             return Response({'message': f'Left {club.name} successfully.'}, status=status.HTTP_200_OK)
         except ClubMembership.DoesNotExist:
             return Response({'error': 'You are not a member of this club.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ClubDetailAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -137,6 +158,10 @@ class ClubDeleteAPIView(APIView):
 
         if membership.role != 'admin':
             return Response({'error': 'Only club admins can delete the club.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # ✅ Delete the linked chat thread if it exists
+        if club.thread:
+            club.thread.delete()
 
         club.delete()
         return Response({'message': 'Club deleted successfully.'}, status=status.HTTP_200_OK)
@@ -276,9 +301,16 @@ class AcceptInviteAPIView(APIView):
         if invite.accepted:
             return Response({'message': 'Invite already accepted.'}, status=400)
 
-        ClubMembership.objects.create(user=request.user, club=invite.club, role='member')
+        # ✅ Check before creating membership
+        if not ClubMembership.objects.filter(user=request.user, club=invite.club).exists():
+            ClubMembership.objects.create(user=request.user, club=invite.club, role='member')
+
         invite.accepted = True
         invite.save()
+
+        # ✅ Also safe to call (won't duplicate due to get_or_create inside)
+        from .utils import add_user_to_club_chat
+        add_user_to_club_chat(invite.club, request.user)
 
         return Response({'message': 'You have joined the club!'}, status=200)
 

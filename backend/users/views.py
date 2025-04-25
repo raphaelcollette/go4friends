@@ -12,6 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import UserPublicSerializer
 from friends.models import FriendRequest
 from django.db.models import Q
+import json
 
 User = get_user_model()
 

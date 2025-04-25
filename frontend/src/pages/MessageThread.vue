@@ -88,7 +88,7 @@ const formatTime = (timestamp) => {
 
 onMounted(async () => {
   await userStore.fetchCurrentUser()
-  await messageStore.fetchMessages(threadId)
+  await messageStore.fetchMessages(threadId, true)
   scrollToBottom()
 })
 </script>
