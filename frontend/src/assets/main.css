@@ -55,11 +55,11 @@ a,
 
 /* Default primary button (dynamic color) */
 .btn {
-  background-color: var(--btn-primary, #6366f1); /* fallback color if variable missing */
+  background-color: var(--btn-primary, #7A0019); /* fallback color if variable missing */
 }
 
 .btn:hover {
-  background-color: var(--btn-primary-hover, #4f46e5);
+  background-color: var(--btn-primary-hover, #600015);
 }
 
 /* Fixed color buttons */

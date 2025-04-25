@@ -12,7 +12,7 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted } from 'vue'
 
 const updateColor = () => {
-  const color = localStorage.getItem('userColor') || '#6366f1'
+  const color = localStorage.getItem('userColor') || '#7A0019'
   document.documentElement.style.setProperty('--btn-primary', color)
 
   const hoverColor = darkenColor(color, 10)

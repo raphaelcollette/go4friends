@@ -127,7 +127,11 @@ const userStore = useUserStore()
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
-const userColor = ref(localStorage.getItem('userColor') || '#6366f1')
+const userColor = ref(
+  localStorage.getItem('userColor') ||
+  getComputedStyle(document.documentElement).getPropertyValue('--btn-primary').trim() ||
+  '#7A0019'
+)
 const userSecondaryColor = ref(localStorage.getItem('userSecondaryColor') || '#FFCC33') // UMN Gold fallback
 
 const isPrivate = ref(false)
