@@ -85,7 +85,7 @@
             class="flex flex-col items-center p-6 bg-white/20 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline relative group cursor-pointer"
           >
             <div v-if="user.profile_picture">
-              <img :src="user.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4 border-purple-300" />
+              <img :src="user.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4" :style="{ borderColor: 'var(--btn-primary, #7C0A02)' }" />
             </div>
             <div
               v-else
@@ -94,13 +94,19 @@
             >
               {{ user?.username?.charAt(0)?.toUpperCase() }}
             </div>
+
             <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.full_name || user.username }}</p>
             <p class="text-sm text-gray-600">@{{ user.username }}</p>
+
             <div class="flex flex-wrap justify-center gap-2 mt-2">
               <span
                 v-for="(reason, idx) in user.match_reasons"
                 :key="idx"
-                class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full"
+                class="text-xs font-semibold px-3 py-1 rounded-full transition-all duration-300 transform hover:scale-105"
+                :style="`
+                  background-color: var(--btn-secondary, #facc15);
+                  color: var(--btn-primary, #7C0A02);
+                `"
               >
                 {{ reason }}
               </span>
@@ -108,6 +114,7 @@
           </RouterLink>
         </div>
       </div>
+
 
       <!-- Friends -->
       <div v-if="friendStore.friends.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
