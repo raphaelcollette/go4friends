@@ -58,7 +58,7 @@
               <button
                 v-else-if="club.is_member && club.only_member_is_me"
                 class="btn bg-red-600 hover:bg-red-700"
-                @click.stop="deleteClub(club.name)"
+                @click.stop="requestDeleteClub(club.name)"
               >
                 Delete
               </button>
@@ -106,6 +106,17 @@
             </div>
           </div>
         </div>
+        <!-- Delete Club Confirmation Modal -->
+        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
+            <h2 class="text-xl font-bold text-red-600">Delete Club</h2>
+            <p class="text-gray-600">Are you sure you want to permanently delete <strong>{{ clubToDelete }}</strong>?</p>
+            <div class="flex justify-center space-x-4">
+              <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
+              <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteClub">Delete</button>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   </template>
@@ -128,6 +139,8 @@ const showCreate = ref(false)
 const newClubName = ref('')
 const newClubDescription = ref('')
 const newClubPrivate = ref(false)
+const showDeleteConfirm = ref(false)
+const clubToDelete = ref(null)
 
 // Use Pinia state
 const clubs = computed(() => clubStore.clubs)
@@ -223,14 +236,22 @@ const canDeleteInsteadOfLeave = (club) => {
   return isStaff && members.length === 1 && members[0].user.username === currentUser.username
 }
 
-const deleteClub = async (clubName) => {
+const requestDeleteClub = (clubName) => {
+  clubToDelete.value = clubName
+  showDeleteConfirm.value = true
+}
+
+const confirmDeleteClub = async () => {
   try {
-    await authAxios.delete(`/clubs/${encodeURIComponent(clubName)}/delete/`)
+    await authAxios.delete(`/clubs/${encodeURIComponent(clubToDelete.value)}/delete/`)
     toast.success('Club deleted.')
     await clubStore.fetchClubs(true)
   } catch (error) {
     console.error(error)
     toast.error('Failed to delete club.')
+  } finally {
+    showDeleteConfirm.value = false
+    clubToDelete.value = null
   }
 }
 

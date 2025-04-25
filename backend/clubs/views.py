@@ -142,6 +142,11 @@ class IsClubAdmin(permissions.BasePermission):
         except ClubMembership.DoesNotExist:
             return False
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import permissions, status
+from clubs.models import Club, ClubMembership
+
 class ClubDeleteAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -156,10 +161,14 @@ class ClubDeleteAPIView(APIView):
         except ClubMembership.DoesNotExist:
             return Response({'error': 'You are not a member of this club.'}, status=status.HTTP_403_FORBIDDEN)
 
-        if membership.role != 'admin':
-            return Response({'error': 'Only club admins can delete the club.'}, status=status.HTTP_403_FORBIDDEN)
+        # Count total members
+        total_members = ClubMembership.objects.filter(club=club).count()
 
-        # ✅ Delete the linked chat thread if it exists
+        # ✅ Allow delete if admin OR the only member
+        if membership.role != 'admin' and total_members > 1:
+            return Response({'error': 'Only club admins can delete the club unless you are the only member.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # ✅ Delete linked chat thread if exists
         if club.thread:
             club.thread.delete()
 
