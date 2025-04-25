@@ -6,8 +6,8 @@
         <h2 class="text-xl font-bold text-gray-800">Remove Friend?</h2>
         <p class="text-gray-600">Are you sure you want to remove <span class="font-semibold">@{{ removingUser }}</span> from your friends?</p>
         <div class="flex justify-center space-x-4">
-          <button class="btn bg-gray-300 hover:bg-gray-400 text-gray-800" @click="removingUser = null">Cancel</button>
-          <button class="btn bg-red-500 hover:bg-red-600" @click="confirmRemoveFriend">Remove</button>
+          <button class="btn" @click="removingUser = null">Cancel</button>
+          <button class="redbtn" @click="confirmRemoveFriend">Remove</button>
         </div>
       </div>
     </div>
@@ -59,8 +59,8 @@
             </div>
             <p class="mt-4 text-lg font-semibold text-gray-800">{{ request.from_username }}</p>
             <div class="flex space-x-4 mt-4">
-              <button class="btn bg-green-500 hover:bg-green-600" @click="friendStore.acceptRequest(request.from_username)">Accept</button>
-              <button class="btn bg-red-500 hover:bg-red-600" @click="friendStore.rejectRequest(request.from_username)">Reject</button>
+              <button class="greenbtn" @click="friendStore.acceptRequest(request.from_username)">Accept</button>
+              <button class="redbtn" @click="friendStore.rejectRequest(request.from_username)">Reject</button>
             </div>
           </div>
         </div>
@@ -167,12 +167,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.input {
-  @apply bg-white border border-gray-300 rounded-xl p-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400 w-48;
-}
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 text-base;
-}
-</style>
 

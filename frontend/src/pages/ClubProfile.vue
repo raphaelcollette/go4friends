@@ -31,16 +31,16 @@
 
         <!-- Admin + Moderator Controls -->
         <div v-if="isStaff" class="mt-8 space-y-4">
-          <button class="btn bg-green-600 hover:bg-green-700 w-full" @click="showCreateModal = true">📅 Create Event</button>
-          <button class="btn bg-yellow-500 hover:bg-yellow-600 w-full" @click="showManageModal = true">👥 Manage Members</button>
+          <button class="btn w-full" @click="showCreateModal = true">📅 Create Event</button>
+          <button class="btn w-full" @click="showManageModal = true">👥 Manage Members</button>
 
           <!-- Admin Only -->
-          <button v-if="isAdmin" class="btn bg-red-600 hover:bg-red-700 w-full" @click="showDeleteModal = true">🗑 Delete Club</button>
+          <button v-if="isAdmin" class="redbtn w-full" @click="showDeleteModal = true">🗑 Delete Club</button>
         </div>
 
         <button
           v-if="club?.is_private && isStaff"
-          class="btn bg-blue-600 hover:bg-blue-700 w-full"
+          class="btn w-full"
           @click="showInviteModal = true"
         >
           ✉️ Invite User
@@ -67,8 +67,8 @@
         <input type="file" @change="handleImageUpload" class="input w-full" />
 
         <div class="flex justify-end space-x-2">
-          <button class="btn bg-gray-400 hover:bg-gray-500" @click="showCreateModal = false">Cancel</button>
-          <button class="btn bg-green-600 hover:bg-green-700" @click="createEvent">Create</button>
+          <button class="btn" @click="showCreateModal = false">Cancel</button>
+          <button class="btn" @click="createEvent">Create</button>
         </div>
       </div>
     </div>
@@ -117,7 +117,7 @@
         <div v-else class="text-center text-sm text-gray-500">No members to manage.</div>
 
         <div class="flex justify-end">
-          <button class="btn bg-gray-400 hover:bg-gray-500" @click="showManageModal = false">Close</button>
+          <button class="btn" @click="showManageModal = false">Close</button>
         </div>
       </div>
     </div>
@@ -127,8 +127,8 @@
         <h2 class="text-xl font-bold text-gray-800 text-center">Invite User to Club</h2>
         <input v-model="inviteUsername" class="input w-full" placeholder="Enter username to invite" />
         <div class="flex justify-end space-x-2">
-          <button class="btn bg-gray-400 hover:bg-gray-500" @click="showInviteModal = false">Cancel</button>
-          <button class="btn bg-blue-600 hover:bg-blue-700" @click="sendInvite">Send Invite</button>
+          <button class="btn" @click="showInviteModal = false">Cancel</button>
+          <button class="btn" @click="sendInvite">Send Invite</button>
         </div>
       </div>
     </div>
@@ -140,8 +140,8 @@
         <h2 class="text-xl font-bold text-red-600">Delete Club</h2>
         <p class="text-gray-600">Are you sure you want to permanently delete this club?</p>
         <div class="flex justify-center space-x-4">
-          <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteModal = false">Cancel</button>
-          <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteClub">Delete</button>
+          <button class="btn" @click="showDeleteModal = false">Cancel</button>
+          <button class="redbtn" @click="confirmDeleteClub">Delete</button>
         </div>
       </div>
     </div>
@@ -314,12 +314,7 @@ onMounted(async () => {
 </script>
   
 <style scoped>
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
-}
-.input {
-  @apply w-full bg-white border border-gray-300 rounded-xl p-3 text-base focus:outline-none focus:ring-2 focus:ring-purple-400;
-}
+
 </style>
   
   

@@ -19,8 +19,12 @@
               {{ msg.sender.full_name || msg.sender.username }}
             </div>
 
-            <div class="inline-block px-4 py-2 rounded-xl text-white"
-              :class="msg.sender.username === currentUser.username ? 'bg-purple-600' : 'bg-gray-500'">
+            <div
+              class="inline-block px-4 py-2 rounded-xl text-white"
+              :style="msg.sender.username === currentUser.username
+                ? `background-color: var(--btn-primary, #6366f1);`
+                : 'background-color: #6b7280;'"
+            >
               {{ msg.message }}
             </div>
             <div class="text-xs text-gray-600 mt-1">
@@ -97,12 +101,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.input {
-  @apply p-3 rounded-xl bg-white/60 backdrop-blur-sm placeholder-gray-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400;
-}
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300;
-}
+
 </style>
 
 

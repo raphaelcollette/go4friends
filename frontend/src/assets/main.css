@@ -9,6 +9,12 @@
   font-weight: normal;
 }
 
+
+:root {
+  --btn-primary: #6366f1; /* Default primary color (indigo-500) 6366f1 */
+  --btn-primary-hover: #4f46e5; /* Default hover color (indigo-600) */
+}
+
 a,
 .green {
   text-decoration: none;
@@ -37,9 +43,68 @@ a,
 }
 
 .input {
-  @apply w-full p-2 border rounded mb-2;
+  @apply w-full p-3 rounded-2xl text-base leading-6 font-normal transition-all duration-300 text-gray-800 bg-white/70 border border-gray-300 placeholder-gray-500;
 }
 
+/* Shared base styles */
+/* Shared base button styles */
+.btn, .redbtn, .greenbtn {
+  @apply py-2 px-4 text-base leading-6 rounded-xl font-semibold transition-all duration-300 text-white;
+}
+
+/* Default primary button (dynamic color) */
 .btn {
-  @apply bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700;
+  background-color: var(--btn-primary, #6366f1); /* fallback color if variable missing */
+}
+
+.btn:hover {
+  background-color: var(--btn-primary-hover, #4f46e5);
+}
+
+/* Fixed color buttons */
+.redbtn {
+  @apply bg-red-500 hover:bg-red-600;
+}
+
+.greenbtn {
+  @apply bg-green-500 hover:bg-green-600;
+}
+
+.text-primary {
+  color: var(--btn-primary, #6366f1); /* fallback to indigo-500 if missing */
+}
+
+.text-primary:hover {
+  filter: brightness(90%);
+}
+
+.input-primary:focus {
+  --tw-ring-color: var(--btn-primary, #6366f1);
+}
+
+.bg-primary {
+  background-color: var(--btn-primary, #6366f1);
+}
+
+.bg-primary:hover {
+  filter: brightness(90%);
+}
+
+/* Dynamic focus color for inputs */
+
+.checkbox {
+  @apply h-4 w-4 text-primary border-gray-300 rounded;
+}
+
+a, .router-link-active, .router-link-exact-active {
+  outline: none !important;
+  box-shadow: none !important;
+  text-decoration: none;
+  @apply focus:outline-none focus:ring-0 focus:border-none;
+}
+
+a:hover {
+  background-color: rgba(99, 102, 241, 0.05); /* subtle hover effect */
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
 }

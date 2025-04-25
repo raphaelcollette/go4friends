@@ -39,6 +39,24 @@
           
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Preferences</h2>
+            <div class="mt-6">
+              <h2 class="text-lg font-semibold text-gray-700">Theme Color</h2>
+              <div class="flex items-center space-x-4 mt-2">
+                <div class="relative w-12 h-12">
+                  <input
+                    type="color"
+                    v-model="userColor"
+                    @input="updateColor"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div
+                    class="w-full h-full rounded-full border-2 border-gray-300"
+                    :style="{ backgroundColor: userColor }"
+                  ></div>
+                </div>
+                <span class="text-gray-600 text-sm">Choose your button color</span>
+              </div>
+            </div>
             <button @click="toggleDarkMode" class="btn w-full mt-2">Toggle Dark Mode</button>
           </div>
 
@@ -91,6 +109,7 @@ const userStore = useUserStore()
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
+const userColor = ref(localStorage.getItem('userColor') || '#6366f1')
 
 const isPrivate = ref(false)
 
@@ -176,6 +195,32 @@ const updatePrivacy = async () => {
   }
 }
 
+const updateColor = () => {
+  document.documentElement.style.setProperty('--btn-primary', userColor.value)
+
+  // Automatically create a slightly darker color for hover
+  const hoverColor = darkenColor(userColor.value, 10)
+  document.documentElement.style.setProperty('--btn-primary-hover', hoverColor)
+
+  localStorage.setItem('userColor', userColor.value)
+}
+
+function darkenColor(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16)
+  const amt = Math.round(2.55 * percent)
+  const R = (num >> 16) - amt
+  const G = (num >> 8 & 0x00FF) - amt
+  const B = (num & 0x0000FF) - amt
+  return `#${(
+    0x1000000 +
+    (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+    (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+    (B < 255 ? (B < 1 ? 0 : B) : 255)
+  )
+    .toString(16)
+    .slice(1)}`
+}
+
 // Sync privacy checkbox with store
 watch(
   () => userStore.currentUser,
@@ -187,15 +232,11 @@ watch(
 
 onMounted(() => {
   userStore.fetchCurrentUser()
+  updateColor()
 })
 </script>
 
 <style scoped>
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
-}
-.input {
-  @apply p-2 rounded-lg bg-white/50 backdrop-blur-sm placeholder-gray-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400;
-}
+
 </style>
 

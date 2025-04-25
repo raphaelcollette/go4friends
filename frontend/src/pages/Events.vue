@@ -26,7 +26,7 @@
           class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
         >
           <div class="absolute top-2 left-2">
-            <span v-if="event.club" class="bg-purple-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
+            <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
               {{ typeof event.club === 'object' ? event.club.name : event.club }}
             </span>
             <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
@@ -72,14 +72,14 @@
             <button
               v-if="event.is_going"
               @click.stop="cancelRsvp(event.id)"
-              class="btn bg-red-500 hover:bg-red-600"
+              class="redbtn"
             >
               Cancel RSVP
             </button>
             <button
               v-else
               @click.stop="rsvp(event.id)"
-              class="btn bg-green-500 hover:bg-green-600"
+              class="btn"
             >
               RSVP
             </button>
@@ -96,8 +96,8 @@
           <h2 class="text-xl font-bold text-red-600">Delete Event</h2>
           <p class="text-gray-600">Are you sure you want to permanently delete this event?</p>
           <div class="flex justify-center space-x-4">
-            <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
-            <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteEvent">Delete</button>
+            <button class="btn" @click="showDeleteConfirm = false">Cancel</button>
+            <button class="redbtn" @click="confirmDeleteEvent">Delete</button>
           </div>
         </div>
       </div>
@@ -223,13 +223,7 @@ onMounted(async () => {
 
 
 <style scoped>
-.input {
-  @apply p-3 rounded-xl bg-white/50 backdrop-blur-sm placeholder-gray-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400;
-}
 
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300;
-}
 </style>
 
   

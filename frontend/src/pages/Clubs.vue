@@ -20,8 +20,8 @@
             </label>
   
             <div class="flex justify-end space-x-4 mt-4">
-              <button class="btn bg-gray-400 hover:bg-gray-500" @click="resetCreateModal">Cancel</button>
-              <button class="btn bg-green-500 hover:bg-green-600" @click="createClub">Create</button>
+              <button class="btn" @click="resetCreateModal">Cancel</button>
+              <button class="greenbtn" @click="createClub">Create</button>
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@
               <!-- Show Join only if public and user is NOT a member -->
               <button
                 v-if="!club.is_private && !club.is_member"
-                class="btn bg-green-500 hover:bg-green-600"
+                class="greenbtn"
                 @click.stop="joinClub(club.name)"
               >
                 Join
@@ -57,7 +57,7 @@
               <!-- Show Delete if the user is staff and the only member -->
               <button
                 v-else-if="club.is_member && club.only_member_is_me"
-                class="btn bg-red-600 hover:bg-red-700"
+                class="redbtn"
                 @click.stop="requestDeleteClub(club.name)"
               >
                 Delete
@@ -66,7 +66,7 @@
               <!-- Otherwise, show Leave -->
               <button
                 v-else-if="club.is_member"
-                class="btn bg-red-500 hover:bg-red-600"
+                class="redbtn"
                 @click.stop="leaveClub(club.name)"
               >
                 Leave
@@ -100,8 +100,8 @@
               <h3 class="text-2xl font-bold text-gray-800">{{ invite.club }}</h3>
               <p class="text-sm text-gray-600 mt-1">Invited by: <span class="font-semibold text-purple-700">{{ invite.invited_by }}</span></p>
               <div class="flex gap-2 mt-6">
-                <button class="btn bg-green-500 hover:bg-green-600" @click="acceptInvite(invite.id)">Accept</button>
-                <button class="btn bg-red-500 hover:bg-red-600" @click="rejectInvite(invite.id)">Reject</button>
+                <button class="greenbtn" @click="acceptInvite(invite.id)">Accept</button>
+                <button class="redbtn" @click="rejectInvite(invite.id)">Reject</button>
               </div>
             </div>
           </div>
@@ -112,8 +112,8 @@
             <h2 class="text-xl font-bold text-red-600">Delete Club</h2>
             <p class="text-gray-600">Are you sure you want to permanently delete <strong>{{ clubToDelete }}</strong>?</p>
             <div class="flex justify-center space-x-4">
-              <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
-              <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteClub">Delete</button>
+              <button class="btn" @click="showDeleteConfirm = false">Cancel</button>
+              <button class="redbtn" @click="confirmDeleteClub">Delete</button>
             </div>
           </div>
         </div>
@@ -263,12 +263,6 @@ onMounted(() => {
 </script>
   
   <style scoped>
-  .input {
-    @apply p-3 rounded-xl bg-white/50 backdrop-blur-sm placeholder-gray-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400;
-  }
-  
-  .btn {
-    @apply bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300;
-  }
+
   </style>
   

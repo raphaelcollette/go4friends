@@ -15,17 +15,17 @@
           <form @submit.prevent="login" class="space-y-6">
             <div class="space-y-2">
               <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-              <input id="username" type="text" v-model="username" class="input" placeholder="Enter your username" />
+              <input id="username" type="text" v-model="username" class="login-input" placeholder="Enter your username" />
             </div>
 
             <div class="space-y-2">
               <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-              <input id="password" type="password" v-model="password" class="input" placeholder="Enter your password" />
+              <input id="password" type="password" v-model="password" class="login-input" placeholder="Enter your password" />
             </div>
 
             <div class="flex items-center justify-between">
               <div class="flex items-center">
-                <input id="remember-me" type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded" />
+                <input id="remember-me" type="checkbox" class="checkbox" />
                 <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
               </div>
               <a href="#" class="text-sm font-medium text-purple-600 hover:text-purple-500">Forgot password?</a>
@@ -115,13 +115,36 @@ html, body, #app {
   opacity: 1;
 }
 
-/* Buttons */
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl text-lg transition-all duration-300;
+/* Inputs */
+.login-input {
+  @apply w-full bg-white/90 border border-gray-300 placeholder-gray-500 text-gray-800 px-6 py-4 text-base leading-7 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:border-indigo-500;
+  min-height: 3.25rem;
+  font-size: 1rem;
+  line-height: 1.75rem;
 }
 
-/* Inputs */
-.input {
-  @apply w-full bg-white border border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-400;
+.login-input:focus {
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25); /* subtle indigo glow */
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Checkbox */
+.checkbox {
+  @apply h-5 w-5 text-indigo-500 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500;
+}
+
+.checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  border-color: #6366f1; /* indigo-500 */
+}
+
+/* Button (override just in case not using global .btn) */
+.btn {
+  @apply w-full py-3 rounded-2xl font-semibold text-white bg-indigo-500 transition-all duration-300;
+}
+
+.btn:hover {
+  filter: brightness(90%);
 }
 </style>

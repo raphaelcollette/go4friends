@@ -1,6 +1,6 @@
 <template>
   <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
-    <RouterLink to="/main" class="text-2xl font-bold text-purple-700">
+    <RouterLink to="/main" class="text-2xl font-bold text-primary">
       placeholder
     </RouterLink>
 
@@ -12,11 +12,11 @@
       @input="handleSearch"
       type="text"
       placeholder="Search users, clubs, events..."
-      class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
+      class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none input-primary"
     />
     <button
       type="submit"
-      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-600 hover:text-purple-800"
+      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary"
     >
       🔍
     </button>
@@ -293,9 +293,3 @@ const currentUser = computed(() => userStore.currentUser)
 const notifications = computed(() => userStore.notifications)
 const unreadCount = computed(() => userStore.unreadCount)
 </script>
-
-<style scoped>
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl text-base transition-all duration-300;
-}
-</style>

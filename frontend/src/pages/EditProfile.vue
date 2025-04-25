@@ -183,13 +183,3 @@ const cancel = () => {
   router.push('/settings')
 }
 </script>
-
-<style scoped>
-.input {
-  @apply w-full bg-white border border-gray-300 rounded-xl p-4 text-lg focus:outline-none focus:ring-2 focus:ring-purple-400;
-}
-
-.btn {
-  @apply bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
-}
-</style>

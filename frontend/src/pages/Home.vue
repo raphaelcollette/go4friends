@@ -54,7 +54,4 @@
     overflow: hidden;
   }
   
-  .btn {
-    @apply bg-purple-600 text-white py-3 px-8 rounded-lg text-lg hover:bg-purple-700 transition-all duration-300;
-  }
   </style>

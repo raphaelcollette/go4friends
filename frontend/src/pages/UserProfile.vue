@@ -39,13 +39,13 @@
             <button
               v-if="user.is_friend"
               @click="removeFriend"
-              class="btn bg-red-500 hover:bg-red-600"
+              class="redbtn"
             >
               Unfriend
             </button>
             <button
               v-else-if="user.friend_request_sent"
-              class="btn bg-yellow-500 hover:bg-yellow-600 cursor-default"
+              class="btn"
               disabled
             >
               Request Sent
@@ -53,7 +53,7 @@
             <button
               v-else
               @click="sendFriendRequest"
-              class="btn bg-purple-600 hover:bg-purple-700"
+              class="btn"
             >
               + Add Friend
             </button>
@@ -64,7 +64,7 @@
         <div class="mt-4" v-if="user.username !== userStore.currentUser?.username">
           <button
             @click="startOrNavigateToThread"
-            class="btn bg-blue-500 hover:bg-blue-600"
+            class="btn"
           >
             💬 Message
           </button>
@@ -189,9 +189,7 @@ watch(() => route.params.username, fetchUser)
 </script>
 
 <style scoped>
-.btn {
-  @apply text-white font-semibold py-2 px-6 rounded-xl transition-all duration-300;
-}
+
 </style>
 
 
