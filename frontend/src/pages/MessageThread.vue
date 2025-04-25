@@ -77,6 +77,9 @@ const sendMessage = async () => {
     await messageStore.sendMessage(threadId, newMessage.value.trim())
     newMessage.value = ''
     scrollToBottom()
+
+    // ✅ Refetch threads so the parent view shows the latest message
+    await messageStore.fetchThreads(true)
   } catch {
     toast.error('Failed to send message.')
   }
