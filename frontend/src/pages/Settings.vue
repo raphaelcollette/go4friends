@@ -57,6 +57,24 @@
                 <span class="text-gray-600 text-sm">Choose your button color</span>
               </div>
             </div>
+            <div class="mt-6">
+            <h2 class="text-lg font-semibold text-gray-700">Secondary Color</h2>
+            <div class="flex items-center space-x-4 mt-2">
+              <div class="relative w-12 h-12">
+                <input
+                  type="color"
+                  v-model="userSecondaryColor"
+                  @input="updateSecondaryColor"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div
+                  class="w-full h-full rounded-full border-2 border-gray-300"
+                  :style="{ backgroundColor: userSecondaryColor }"
+                ></div>
+              </div>
+              <span class="text-gray-600 text-sm">Choose your secondary color</span>
+            </div>
+          </div>
             <button @click="toggleDarkMode" class="btn w-full mt-2">Toggle Dark Mode</button>
           </div>
 
@@ -110,6 +128,7 @@ const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
 const userColor = ref(localStorage.getItem('userColor') || '#6366f1')
+const userSecondaryColor = ref(localStorage.getItem('userSecondaryColor') || '#FFCC33') // UMN Gold fallback
 
 const isPrivate = ref(false)
 
@@ -221,6 +240,10 @@ function darkenColor(hex, percent) {
     .slice(1)}`
 }
 
+const updateSecondaryColor = () => {
+  document.documentElement.style.setProperty('--btn-secondary', userSecondaryColor.value)
+  localStorage.setItem('userSecondaryColor', userSecondaryColor.value)
+}
 // Sync privacy checkbox with store
 watch(
   () => userStore.currentUser,
@@ -233,6 +256,7 @@ watch(
 onMounted(() => {
   userStore.fetchCurrentUser()
   updateColor()
+  updateSecondaryColor()
 })
 </script>
 

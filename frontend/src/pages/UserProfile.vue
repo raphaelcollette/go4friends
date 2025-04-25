@@ -21,10 +21,15 @@
             v-if="user.profile_picture"
             :src="user.profile_picture"
             alt="Profile Picture"
-            class="w-28 h-28 rounded-full object-cover border-4 border-purple-300"
+            class="w-28 h-28 rounded-full object-cover border-4"
+            :style="`border-color: var(--btn-primary, #6366f1);`"
           />
-          <div v-else class="w-28 h-28 rounded-full bg-purple-200 flex items-center justify-center text-4xl text-white">
-            {{ user.username.charAt(0).toUpperCase() }}
+          <div
+            v-else
+            class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
+            :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+          >
+            {{ user?.username?.charAt(0)?.toUpperCase() }}
           </div>
         </div>
 
@@ -92,7 +97,11 @@
             <span
               v-for="(interest, idx) in user.interests"
               :key="idx"
-              class="bg-green-100 text-green-700 text-sm font-semibold px-3 py-1 rounded-full"
+              class="text-sm font-semibold px-3 py-1 rounded-full transition-all duration-300 transform hover:scale-105"
+              :style="`
+                background-color: var(--btn-secondary, #a5b4fc);
+                color: var(--btn-primary, #6366f1);
+              `"
             >
               {{ interest }}
             </span>

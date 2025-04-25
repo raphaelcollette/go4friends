@@ -34,8 +34,12 @@
           <div v-if="user.profile_picture">
             <img :src="user.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4 border-purple-300" />
           </div>
-          <div v-else class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
-            {{ user.username.charAt(0).toUpperCase() }}
+          <div
+            v-else
+            class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
+            :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+          >
+            {{ user?.username?.charAt(0)?.toUpperCase() }}
           </div>
           <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.full_name || user.username }}</p>
           <p class="text-sm text-gray-600">@{{ user.username }}</p>
@@ -54,8 +58,12 @@
             <div v-if="request.from_profile_picture">
               <img :src="request.from_profile_picture" alt="Profile Picture" class="w-20 h-20 rounded-full object-cover border-4 border-purple-300" />
             </div>
-            <div v-else class="w-20 h-20 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
-              {{ request.from_username.charAt(0).toUpperCase() }}
+            <div
+              v-else
+              class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
+              :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+            >
+            {{ request?.from_username?.charAt(0)?.toUpperCase() }}
             </div>
             <p class="mt-4 text-lg font-semibold text-gray-800">{{ request.from_username }}</p>
             <div class="flex space-x-4 mt-4">
@@ -79,8 +87,12 @@
             <div v-if="user.profile_picture">
               <img :src="user.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4 border-purple-300" />
             </div>
-            <div v-else class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
-              {{ user.username.charAt(0).toUpperCase() }}
+            <div
+              v-else
+              class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
+              :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+            >
+              {{ user?.username?.charAt(0)?.toUpperCase() }}
             </div>
             <p class="mt-4 text-lg font-semibold text-gray-800">{{ user.full_name || user.username }}</p>
             <p class="text-sm text-gray-600">@{{ user.username }}</p>
@@ -108,8 +120,12 @@
           <div v-if="friend.profile_picture">
             <img :src="friend.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4 border-purple-300" />
           </div>
-          <div v-else class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-3xl text-white">
-            {{ friend.username.charAt(0).toUpperCase() }}
+          <div
+            v-else
+            class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
+            :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+          >
+          {{ friend?.username?.charAt(0)?.toUpperCase() }}
           </div>
           <p class="mt-4 text-lg font-semibold text-gray-800">{{ friend.full_name || friend.username }}</p>
           <p class="text-sm text-gray-600">@{{ friend.username }}</p>

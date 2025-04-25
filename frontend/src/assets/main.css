@@ -11,8 +11,9 @@
 
 
 :root {
-  --btn-primary: #6366f1; /* Default primary color (indigo-500) 6366f1 */
-  --btn-primary-hover: #4f46e5; /* Default hover color (indigo-600) */
+  --btn-primary: #7A0019; /* UMN Maroon */
+  --btn-primary-hover: #600015; /* Slightly darker maroon for hover */
+  --btn-secondary: #FFCC33; /* UMN Gold */
 }
 
 a,
