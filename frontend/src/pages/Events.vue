@@ -86,6 +86,9 @@
           />
 
           <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
+          <p class="text-sm text-indigo-600 font-medium mt-1">
+            📍 {{ event.location || 'No location specified' }}
+          </p>
           <p class="text-sm text-gray-500 mt-2">{{ formatDate(event.date) }}</p>
 
           <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">{{ event.description }}</p>

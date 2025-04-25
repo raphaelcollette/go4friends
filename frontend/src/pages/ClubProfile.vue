@@ -51,14 +51,21 @@
       <div v-else class="text-center text-lg text-gray-500 mt-10">❌ Club not found.</div>
     </main>
 
-    <!-- Create Event Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">
         <h2 class="text-xl font-bold text-gray-800 text-center">Create Club Event</h2>
+        
         <input v-model="eventTitle" class="input w-full" placeholder="Event Title" />
+        
         <textarea v-model="eventDescription" class="input w-full" placeholder="Event Description"></textarea>
+        
+        <!-- ✅ New Location Field -->
+        <input v-model="eventLocation" class="input w-full" placeholder="Event Location" />
+        
         <input v-model="eventDate" type="datetime-local" class="input w-full" />
+        
         <input type="file" @change="handleImageUpload" class="input w-full" />
+
         <div class="flex justify-end space-x-2">
           <button class="btn bg-gray-400 hover:bg-gray-500" @click="showCreateModal = false">Cancel</button>
           <button class="btn bg-green-600 hover:bg-green-700" @click="createEvent">Create</button>
@@ -169,6 +176,7 @@ const eventImage = ref(null)
 const roleChanges = ref({})
 const showInviteModal = ref(false)
 const inviteUsername = ref('')
+const eventLocation = ref('')
 
 const clubName = decodeURIComponent(route.params.clubName)
 
@@ -211,9 +219,9 @@ const createEvent = async () => {
   const formData = new FormData()
   formData.append('title', eventTitle.value)
   formData.append('description', eventDescription.value)
-
+  formData.append('location', eventLocation.value) // ✅ correct here
   const localDate = new Date(eventDate.value)
-  formData.append('date', localDate.toISOString()) // ✅ UTC-safe
+  formData.append('date', localDate.toISOString())
 
   formData.append('club_name', club.value.name)
 
@@ -223,12 +231,13 @@ const createEvent = async () => {
 
   try {
     await authAxios.post('/events/create/', formData)
-    await eventStore.fetchEvents(true) // force refresh
+    await eventStore.fetchEvents(true)
     toast.success('Event created!')
     showCreateModal.value = false
     eventTitle.value = ''
     eventDescription.value = ''
     eventDate.value = ''
+    eventLocation.value = '' // ✅ clear after submit
     eventImage.value = null
   } catch (err) {
     console.error('Create event error:', err.response?.data || err.message || err)
