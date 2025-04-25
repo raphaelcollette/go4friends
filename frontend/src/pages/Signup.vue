@@ -36,7 +36,9 @@
           <div class="pt-8">
             <p class="text-center text-gray-600 text-sm">
               Already have an account?
-              <RouterLink to="/login" class="text-purple-600 font-medium hover:text-purple-500">Log in</RouterLink>
+              <RouterLink to="/login" class="text-[color:var(--btn-primary)] font-medium hover:text-[color:var(--btn-primary-hover)]">
+                Log in
+              </RouterLink>
             </p>
           </div>
         </div>
@@ -47,7 +49,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { base } from '@/utils/axios' 
+import { base } from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 
@@ -114,35 +116,28 @@ html, body, #app {
 
 /* Inputs */
 .login-input {
-  @apply w-full bg-white/90 border border-gray-300 placeholder-gray-500 text-gray-800 px-6 py-4 text-base leading-7 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:border-indigo-500;
+  @apply w-full bg-white/90 border border-gray-300 placeholder-gray-500 text-gray-800 px-6 py-4 text-base leading-7 rounded-2xl transition-all duration-300 focus:outline-none;
   min-height: 3.25rem;
   font-size: 1rem;
   line-height: 1.75rem;
 }
-
 .login-input:focus {
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25); /* subtle indigo glow */
   background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 4px var(--btn-primary);
+  border-color: var(--btn-primary);
 }
 
-/* Checkbox */
-.checkbox {
-  @apply h-5 w-5 text-indigo-500 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500;
-}
-
-.checkbox:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
-  border-color: #6366f1; /* indigo-500 */
-}
-
-/* Button (override just in case not using global .btn) */
+/* Button */
 .btn {
-  @apply w-full py-3 rounded-2xl font-semibold text-white bg-indigo-500 transition-all duration-300;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  color: white;
+  background-color: var(--btn-primary);
+  transition: all 0.3s ease;
 }
-
 .btn:hover {
-  filter: brightness(90%);
+  background-color: var(--btn-primary-hover);
 }
-
 </style>
