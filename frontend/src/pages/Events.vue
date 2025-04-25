@@ -17,40 +17,8 @@
         </div>
       </div>
 
-      <!-- Create Event Modal -->
-      <div v-if="showCreate" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-8 w-full max-w-md space-y-4">
-          <h2 class="text-2xl font-bold text-center">Create Event</h2>
-
-          <select v-model="eventType" class="input w-full">
-            <option value="school">School-wide Event</option>
-            <option value="club">Club Event</option>
-          </select>
-
-          <div v-if="eventType === 'club'">
-            <select v-model="clubName" class="input w-full">
-              <option disabled value="">Select Club</option>
-              <option v-for="club in clubStore.clubs" :key="club.id" :value="club.name">
-                {{ club.name }}
-              </option>
-
-            </select>
-          </div>
-
-          <input v-model="newTitle" type="text" placeholder="Event Title" class="input w-full" />
-          <textarea v-model="newDescription" placeholder="Event Description" class="input w-full"></textarea>
-          <input v-model="newDate" type="datetime-local" class="input w-full" />
-          <input type="file" @change="handleFileChange" class="input w-full" />
-
-          <div class="flex justify-end space-x-4 mt-4">
-            <button class="btn bg-gray-400 hover:bg-gray-500" @click="showCreate = false">Cancel</button>
-            <button class="btn bg-green-500 hover:bg-green-600" @click="createEvent">Create</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Events List -->
-      <div v-if="filteredEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
+      <!-- Events Section: Only show one of these -->
+      <div v-if="sortedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
         <div
           v-for="event in sortedEvents"
           :key="event.id"
@@ -59,7 +27,7 @@
         >
           <div class="absolute top-2 left-2">
             <span v-if="event.club" class="bg-purple-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
-              {{ event.club }}
+              {{ typeof event.club === 'object' ? event.club.name : event.club }}
             </span>
             <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
               School Event
@@ -68,7 +36,7 @@
 
           <!-- Delete Button (top right) -->
           <button
-            v-if="event.club && isClubStaff(event.club)"
+            v-if="isClubStaff(event.club)"
             @click.stop="requestDeleteEvent(event.id)"
             class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-sm font-bold"
             title="Delete Event"
@@ -86,12 +54,19 @@
           />
 
           <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
+
+          <!-- ✅ Location -->
           <p class="text-sm text-indigo-600 font-medium mt-1">
             📍 {{ event.location || 'No location specified' }}
           </p>
-          <p class="text-sm text-gray-500 mt-2">{{ formatDate(event.date) }}</p>
 
-          <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">{{ event.description }}</p>
+          <!-- Date -->
+          <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
+
+          <!-- Description (only if expanded) -->
+          <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">
+            {{ event.description }}
+          </p>
 
           <div class="mt-4">
             <button
@@ -112,22 +87,24 @@
         </div>
       </div>
 
+      <!-- No Events Message -->
+      <div v-else class="text-gray-500 text-lg mt-10">No events yet. Be the first to create one!</div>
+
       <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
-            <h2 class="text-xl font-bold text-red-600">Delete Event</h2>
-            <p class="text-gray-600">Are you sure you want to permanently delete this event?</p>
-            <div class="flex justify-center space-x-4">
-              <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
-              <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteEvent">Delete</button>
-            </div>
+      <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
+          <h2 class="text-xl font-bold text-red-600">Delete Event</h2>
+          <p class="text-gray-600">Are you sure you want to permanently delete this event?</p>
+          <div class="flex justify-center space-x-4">
+            <button class="btn bg-gray-400 hover:bg-gray-500" @click="showDeleteConfirm = false">Cancel</button>
+            <button class="btn bg-red-600 hover:bg-red-700" @click="confirmDeleteEvent">Delete</button>
           </div>
         </div>
-
-      <div v-else class="text-gray-500 text-lg mt-10">No events yet. Be the first to create one!</div>
+      </div>
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
@@ -217,7 +194,6 @@ const isClubStaff = (clubName) => {
   return myClub && ['admin', 'moderator'].includes(myClub.role)
 }
 
-
 const requestDeleteEvent = (eventId) => {
   eventToDelete.value = eventId
   showDeleteConfirm.value = true
@@ -238,10 +214,10 @@ const confirmDeleteEvent = async () => {
   }
 }
 
-onMounted(() => {
-  eventStore.fetchEvents()
-  clubStore.fetchClubs()
-  clubStore.fetchMyClubs() // assuming you have this action to get memberships
+onMounted(async () => {
+  await clubStore.fetchClubs()
+  await clubStore.fetchMyClubs()
+  await eventStore.fetchEvents()
 })
 </script>
 
