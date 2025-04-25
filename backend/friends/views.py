@@ -146,20 +146,24 @@ class RemoveFriendAPIView(generics.GenericAPIView):
         return Response({'message': 'Friend removed successfully.'}, status=status.HTTP_200_OK)
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def friend_suggestions(request):
     me = request.user
 
     friends = me.friends.all()
-    sent = FriendRequest.objects.filter(from_user=me).values_list('to_user', flat=True)
-    received = FriendRequest.objects.filter(to_user=me).values_list('from_user', flat=True)
-    excluded_ids = set(friends.values_list('id', flat=True)) | set(sent) | set(received) | {me.id}
+
+    # Only exclude users with PENDING friend requests
+    pending_sent = FriendRequest.objects.filter(from_user=me, status='pending').values_list('to_user', flat=True)
+    pending_received = FriendRequest.objects.filter(to_user=me, status='pending').values_list('from_user', flat=True)
+
+    excluded_ids = set(friends.values_list('id', flat=True)) | set(pending_sent) | set(pending_received) | {me.id}
 
     my_club_ids = list(me.clubs.values_list('id', flat=True))
     my_grad_year = me.graduation_year
     my_major = me.major.strip().lower() if me.major else None
-    my_interests = set(map(str.lower, me.interests or []))  # ensure lowercase for matching
+    my_interests = set(map(str.lower, me.interests or []))
 
     candidates = User.objects.exclude(id__in=excluded_ids).prefetch_related('clubs')
 
@@ -167,22 +171,18 @@ def friend_suggestions(request):
     for user in candidates:
         reasons = []
 
-        # Graduation year match
         if my_grad_year and user.graduation_year == my_grad_year:
             reasons.append("Same graduation year")
 
-        # Shared club(s)
         user_club_ids = {club.id for club in user.clubs.all()}
         if user_club_ids & set(my_club_ids):
             reasons.append("Same club")
 
-        # Shared major (loose string match)
         if my_major and user.major:
             user_major = user.major.strip().lower()
             if my_major in user_major or user_major in my_major:
                 reasons.append("Similar major")
 
-        # Shared interests
         user_interests = set(map(str.lower, user.interests or []))
         shared_interests = my_interests & user_interests
         if shared_interests:
