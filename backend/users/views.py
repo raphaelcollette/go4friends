@@ -8,11 +8,12 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .serializers import UserPublicSerializer
 from friends.models import FriendRequest
 from django.db.models import Q
 import json
+from rest_framework.decorators import parser_classes
 
 User = get_user_model()
 
@@ -24,6 +25,7 @@ def me(request):
 
 
 @api_view(['POST'])
+@ratelimit(key='ip', rate='5/m', block=True)
 def signup(request):
     username = request.data.get('username')
     email = request.data.get('email')
@@ -56,10 +58,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def update_me(request):
     user = request.user
-
-    parser_classes = [MultiPartParser, FormParser]
 
     full_name = request.data.get('full_name')
     bio = request.data.get('bio')
