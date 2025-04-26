@@ -6,8 +6,7 @@ User = get_user_model()
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('friend_request', 'Friend Request'),
-        ('event_invite', 'Event Invite'),
-        ('club_announcement', 'Club Announcement'),
+        ('club_invite', 'Club Invite'),
         ('message', 'Message'),
     ]
 
