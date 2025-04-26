@@ -1,35 +1,35 @@
 <template>
   <nav class="w-full p-4 flex justify-between items-center shadow-md fixed top-0 z-50"
-  style="background-color: var(--navbar-bg); backdrop-filter: var(--navbar-blur);">
+    style="background-color: var(--navbar-bg); backdrop-filter: var(--navbar-blur);">
+    
     <RouterLink to="/main" class="text-2xl font-bold text-primary">
       placeholder
     </RouterLink>
 
     <!-- Global Search Bar -->
-<div class="flex-1 mx-8 relative">
-  <form @submit.prevent class="relative w-full max-w-md mx-auto">
-    <input
-      v-model="searchQuery"
-      @input="handleSearch"
-      type="text"
-      placeholder="Search users, clubs, events..."
-      class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none input-primary"
-    />
-    <button
-      type="submit"
-      class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary"
-    >
-      🔍
-    </button>
-  </form>
+    <div class="flex-1 mx-8 relative">
+      <form @submit.prevent class="relative w-full max-w-md mx-auto">
+        <input
+          v-model="searchQuery"
+          @input="handleSearch"
+          type="text"
+          placeholder="Search users, clubs, events..."
+          class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none input-primary"
+        />
+        <button
+          type="submit"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary"
+        >
+          🔍
+        </button>
+      </form>
 
-  <!-- Search Dropdown -->
-  <div
-    v-if="showDropdown"
-    class="absolute mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
+      <!-- Search Dropdown -->
+      <div
+        v-if="showDropdown"
+        class="absolute mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
       >
         <div v-if="loading" class="p-4 text-center text-gray-500">Searching...</div>
-
         <template v-else>
           <div v-if="hasResults">
             <!-- Users -->
@@ -71,35 +71,22 @@
               </div>
             </div>
           </div>
-
           <div v-else class="p-4 text-sm text-gray-500 text-center">No results found.</div>
         </template>
       </div>
     </div>
 
-
+    <!-- Right Side Buttons -->
     <div class="flex space-x-4 items-center relative">
-      <RouterLink
-        to="/messages"
-        class="btn"
-      >
-        💬 Messages
-      </RouterLink>
+      <RouterLink to="/messages" class="btn">💬 Messages</RouterLink>
       <RouterLink to="/clubs" class="btn">Clubs</RouterLink>
       <RouterLink to="/events" class="btn">Events</RouterLink>
       <RouterLink to="/friends" class="btn">Friends</RouterLink>
+      <RouterLink v-if="currentUser || fallbackUsername" :to="`/profile/${(currentUser?.username || fallbackUsername)}`" class="btn">Profile</RouterLink>
 
-      <!-- Profile & Settings -->
-      <RouterLink
-        v-if="currentUser || fallbackUsername"
-        :to="`/profile/${(currentUser?.username || fallbackUsername)}`"
-        class="btn"
-      >
-        Profile
-      </RouterLink>
-      <!-- Notification Dropdown -->
-      <div class="relative">
-        <button @click="toggleDropdown" class="btn relative">
+      <!-- Notifications -->
+      <div class="relative" ref="notiButton">
+        <button @click.stop="toggleDropdown" class="btn relative">
           🔔
           <span
             v-if="unreadCount > 0"
@@ -111,56 +98,47 @@
 
         <div
           v-if="showNotifs"
-          class="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded-xl p-4 z-50 space-y-2 max-h-96 overflow-y-auto"
+          class="absolute right-0 mt-2 w-80 bg-white rounded-xl p-4 z-50 space-y-2 max-h-96 overflow-y-auto shadow-2xl"
         >
-          <!-- Control Buttons -->
-          <div class="flex justify-between items-center mb-2">
-            <button
-              @click="markAllRead"
-              class="text-xs text-purple-700 font-semibold hover:underline"
-            >
-              Mark all as read
-            </button>
-            <button
-              @click="clearNotifications"
-              class="text-xs text-red-500 font-semibold hover:underline"
-            >
-              Clear all
-            </button>
+          <!-- Top Controls -->
+          <div class="flex justify-between items-center mb-3">
+            <button @click.stop="markAllRead" class="text-xs text-purple-700 font-semibold hover:underline">Mark all read</button>
+            <button @click.stop="clearNotifications" class="text-xs text-red-500 font-semibold hover:underline">Clear all</button>
           </div>
 
-          <!-- Notification List -->
-          <div v-if="notifications.length === 0" class="text-sm text-gray-500">No notifications</div>
-          <div
-            v-for="notif in notifications"
-            :key="notif.id"
-            class="text-sm text-gray-800 bg-purple-50 px-3 py-2 rounded hover:bg-purple-100 transition"
-          >
-            <div class="flex justify-between items-center">
-              <span>{{ notif.message }}</span>
+          <!-- Notifications -->
+          <div v-if="notifications.length === 0" class="text-sm text-gray-500 text-center">No notifications yet</div>
+          <div v-else class="space-y-3">
+            <div
+              v-for="notif in notifications"
+              :key="notif.id"
+              class="flex flex-col bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition"
+            >
+              <div class="flex justify-between items-start">
+                <div class="text-gray-800 text-sm">{{ notif.message }}</div>
+                <button
+                  v-if="!notif.is_read"
+                  @click.stop="markOneRead(notif.id)"
+                  class="text-xs text-blue-600 hover:text-blue-800 font-semibold ml-2"
+                >
+                  ✓
+                </button>
+              </div>
 
-              <button
-                v-if="!notif.is_read"
-                @click="markOneRead(notif.id)"
-                class="text-xs text-blue-600 hover:text-blue-800 font-semibold ml-4"
-              >
-                Mark Read
-              </button>
-            </div>
-
-            <!-- Optional: friend request logic -->
-            <div v-if="notif.type === 'friend_request'" class="mt-2 flex justify-end">
-              <button
-                class="text-xs font-semibold text-green-600 hover:text-green-800"
-                @click="acceptFriendFromNotif(notif)"
-              >
-                Accept Friend
-              </button>
+              <div v-if="notif.type === 'friend_request'" class="flex justify-end gap-2 mt-2">
+                <button @click.stop="acceptFriendFromNotif(notif)" class="greenbtn text-xs">Accept</button>
+                <button
+                  class="redbtn text-xs font-semibold"
+                  @click="rejectFriendFromNotif(notif)"
+                >
+                  Reject
+                </button>
+              </div>
+              
             </div>
           </div>
         </div>
-    </div>
-
+      </div>
 
       <RouterLink to="/settings" class="btn">Settings</RouterLink>
     </div>
@@ -168,24 +146,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useRouter } from 'vue-router'
 import { authAxios } from '@/utils/axios'
-import { useUserStore } from '@/stores/user' // 
+import { useUserStore } from '@/stores/user'
 
 const toast = useToast()
 const router = useRouter()
-const userStore = useUserStore() // 
+const userStore = useUserStore()
+
 const fallbackUsername = localStorage.getItem('currentUsername')
 
-//  Search functionality
 const searchQuery = ref('')
 const showDropdown = ref(false)
 const loading = ref(false)
 const results = ref({ users: [], clubs: [], events: [] })
+const showNotifs = ref(false)
+const notiButton = ref(null)
 let searchTimeout = null
 
+// Search handlers
 const handleSearch = () => {
   if (searchTimeout) clearTimeout(searchTimeout)
 
@@ -225,16 +206,20 @@ const goToClub = (clubName) => {
 
 const goToEvent = (id) => {
   showDropdown.value = false
-  router.push(`/events`) // change to `/events/${id}` if using detail view
+  router.push(`/events`) // (or `/events/${id}` if you add event detail pages)
 }
 
-// Notifications
-const showNotifs = ref(false)
-
+// Notifications handlers
 const toggleDropdown = async () => {
   showNotifs.value = !showNotifs.value
   if (showNotifs.value) {
     await userStore.fetchNotifications()
+  }
+}
+
+const handleClickOutside = (event) => {
+  if (notiButton.value && !notiButton.value.contains(event.target)) {
+    showNotifs.value = false
   }
 }
 
@@ -256,22 +241,6 @@ const clearNotifications = async () => {
   }
 }
 
-const acceptFriendFromNotif = async (notif) => {
-  try {
-    await authAxios.post('/friends/accept/', {
-      from_username: extractUsernameFromMessage(notif.message),
-    })
-    toast.success('Friend request accepted!')
-    await userStore.fetchNotifications()
-  } catch (error) {
-    toast.error('Error accepting friend request.')
-  }
-}
-
-const extractUsernameFromMessage = (message) => {
-  return message.split(' ')[0]
-}
-
 const markOneRead = async (id) => {
   try {
     await authAxios.post(`/notifications/${id}/mark-read/`)
@@ -284,14 +253,56 @@ const markOneRead = async (id) => {
   }
 }
 
-//  Initial fetch on mount only once
-onMounted(() => {
-  userStore.fetchCurrentUser()
-  userStore.fetchNotifications()
-})
+const acceptFriendFromNotif = async (notif) => {
+  try {
+    await authAxios.post('/friends/accept/', {
+      from_username: extractUsernameFromMessage(notif.message),
+    })
+    toast.success('Friend request accepted!')
 
-//  Expose from store
+    // 🛠 Remove the notification locally
+    userStore.notifications = userStore.notifications.filter(n => n.id !== notif.id)
+    userStore.unreadCount = userStore.notifications.filter(n => !n.is_read).length
+
+  } catch (error) {
+    toast.error('Error accepting friend request')
+  }
+}
+
+
+const rejectFriendFromNotif = async (notif) => {
+  try {
+    await authAxios.post('/friends/reject/', {
+      from_username: extractUsernameFromMessage(notif.message),
+    })
+    toast.success('Friend request rejected!')
+
+    // 🛠 Remove the notification locally
+    userStore.notifications = userStore.notifications.filter(n => n.id !== notif.id)
+    userStore.unreadCount = userStore.notifications.filter(n => !n.is_read).length
+
+  } catch (error) {
+    toast.error('Error rejecting friend request')
+  }
+}
+
+const extractUsernameFromMessage = (message) => {
+  return message.split(' ')[0]
+}
+
+// Computed values
 const currentUser = computed(() => userStore.currentUser)
 const notifications = computed(() => userStore.notifications)
 const unreadCount = computed(() => userStore.unreadCount)
+
+// Mount and cleanup
+onMounted(() => {
+  userStore.fetchCurrentUser()
+  userStore.fetchNotifications()
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
