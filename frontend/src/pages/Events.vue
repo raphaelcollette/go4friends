@@ -1,112 +1,110 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
-    <main class="flex-1 flex flex-col items-center pt-24 px-6">
-      <!-- Header -->
-      <div class="w-full max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between mb-10 space-y-4 sm:space-y-0">
-        <h1 class="text-4xl font-extrabold text-gray-800">Upcoming Events</h1>
-        <div class="flex space-x-4">
-          <select v-model="filterType" class="input">
-            <option value="">All</option>
-            <option value="club">Club Events</option>
-            <option value="school">School Events</option>
-            <option value="myClubs">My Club Events</option>
-          </select>
-          <select v-model="sortOrder" class="input">
-            <option value="date">Sort by Date</option>
-            <option value="title">Sort by Title</option>
-          </select>
-        </div>
-      </div>
+    <main class="flex-1 flex flex-col items-center pt-24 px-6 relative">
 
-      <!-- Events Grid -->
-      <div v-if="sortedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
-        <div
-          v-for="event in sortedEvents"
-          :key="event.id"
-          @click="toggleExpand(event.id)"
-          class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
-        >
-          <!-- Club or School Tag -->
-          <div class="absolute top-2 left-2">
-            <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
-              {{ typeof event.club === 'object' ? event.club.name : event.club }}
-            </span>
-            <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
-              School Event
-            </span>
+      <!-- Main Layout -->
+      <div class="flex w-full max-w-7xl space-x-6">
+        
+        <!-- Main Content (Events) -->
+        <div class="flex-1">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-10 space-y-4 sm:space-y-0">
+            <h1 class="text-4xl font-extrabold text-gray-800">Upcoming Events</h1>
+            <div class="flex space-x-4">
+              <select v-model="filterType" class="input">
+                <option value="">All</option>
+                <option value="club">Club Events</option>
+                <option value="school">School Events</option>
+                <option value="myClubs">My Club Events</option>
+              </select>
+              <select v-model="sortOrder" class="input">
+                <option value="date">Sort by Date</option>
+                <option value="title">Sort by Title</option>
+              </select>
+            </div>
           </div>
 
-          <!-- Delete and Edit Buttons -->
-          <button
-            v-if="isClubStaff(event.club)"
-            @click.stop="requestDeleteEvent(event.id)"
-            class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-sm font-bold"
-            title="Delete Event"
-          >
-            ✕
-          </button>
-          <button
-            v-if="isClubStaff(event.club)"
-            @click.stop="openEditModal(event)"
-            class="absolute top-2 right-8 text-blue-600 hover:text-blue-800 text-sm font-bold"
-            title="Edit Event"
-          >
-            ✏️
-          </button>
-
-          <!-- Attendee Count -->
-          <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
-
-          <!-- Event Image -->
-          <img
-            v-if="event.image"
-            :src="event.image"
-            alt="Event Image"
-            class="w-full h-40 object-cover rounded-xl mb-4"
-          />
-
-          <!-- Event Title -->
-          <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
-
-          <!-- Location -->
-          <p class="text-sm text-indigo-600 font-medium mt-1">
-            📍 {{ event.location || 'No location specified' }}
-          </p>
-
-          <!-- Date -->
-          <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
-
-          <!-- Expanded Description -->
-          <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">
-            {{ event.description }}
-          </p>
-
-          <!-- RSVP Buttons -->
-          <div class="mt-4">
-            <button
-              v-if="event.is_going"
-              @click.stop="cancelRsvp(event.id)"
-              class="redbtn"
+          <!-- Events Grid -->
+          <div v-if="sortedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-8">
+            <div
+              v-for="event in sortedEvents"
+              :key="event.id"
+              @click="toggleExpand(event.id)"
+              class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
             >
-              Cancel RSVP
-            </button>
-            <button
-              v-else
-              @click.stop="rsvp(event.id)"
-              class="btn"
-            >
-              RSVP
-            </button>
+              <!-- Club or School Tag -->
+              <div class="absolute top-2 left-2">
+                <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
+                  {{ typeof event.club === 'object' ? event.club.name : event.club }}
+                </span>
+                <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
+                  School Event
+                </span>
+              </div>
+
+              <!-- Edit/Delete Buttons -->
+              <button v-if="isClubStaff(event.club)" @click.stop="requestDeleteEvent(event.id)" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-sm font-bold">✕</button>
+              <button v-if="isClubStaff(event.club)" @click.stop="openEditModal(event)" class="absolute top-2 right-8 text-blue-600 hover:text-blue-800 text-sm font-bold">✏️</button>
+
+              <!-- Attendee Count -->
+              <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
+
+              <!-- Event Image -->
+              <img v-if="event.image" :src="event.image" alt="Event Image" class="w-full h-40 object-cover rounded-xl mb-4" />
+
+              <!-- Event Title -->
+              <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
+
+              <!-- Location -->
+              <p class="text-sm text-indigo-600 font-medium mt-1">
+                📍 {{ event.location || 'No location specified' }}
+              </p>
+
+              <!-- Date -->
+              <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
+
+              <!-- Expanded Description -->
+              <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">{{ event.description }}</p>
+
+              <!-- RSVP Buttons -->
+              <div class="mt-4">
+                <button v-if="event.is_going" @click.stop="cancelRsvp(event.id)" class="redbtn">Cancel RSVP</button>
+                <button v-else @click.stop="rsvp(event.id)" class="btn">RSVP</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Events Message -->
+          <div v-else class="text-gray-500 text-lg mt-10">
+            No events yet. Be the first to create one!
           </div>
         </div>
+
+        <!-- Right Sidebar (Suggested Events) -->
+        <div class="w-72 hidden lg:block">
+          <div class="glossy-bg p-6 rounded-2xl shadow-md space-y-4 sticky top-32">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">🔥 Suggested Events</h2>
+
+            <div class="space-y-3">
+              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
+                <p class="font-semibold text-gray-700">Hackathon 2025</p>
+                <p class="text-xs text-gray-500">Compete & build projects!</p>
+              </div>
+              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
+                <p class="font-semibold text-gray-700">Spring Fest</p>
+                <p class="text-xs text-gray-500">Campus music & food festival 🎶</p>
+              </div>
+              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
+                <p class="font-semibold text-gray-700">Photography Walk</p>
+                <p class="text-xs text-gray-500">Capture the city with friends 📷</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- No Events Message -->
-      <div v-else class="text-gray-500 text-lg mt-10">
-        No events yet. Be the first to create one!
-      </div>
-
-      <!-- Delete Confirmation Modal -->
+      <!-- Delete Event Modal -->
       <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
           <h2 class="text-xl font-bold text-red-600">Delete Event</h2>
@@ -127,7 +125,6 @@
           <input v-model="editForm.date" type="datetime-local" class="input w-full" />
           <input v-model="editForm.location" class="input w-full" placeholder="Location" />
           <textarea v-model="editForm.description" class="input w-full" placeholder="Description" rows="4" />
-
           <input type="file" @change="e => editForm.image = e.target.files[0]" class="input w-full" />
 
           <div class="flex justify-end space-x-4">
@@ -136,9 +133,11 @@
           </div>
         </div>
       </div>
+
     </main>
   </div>
 </template>
+
 
 
 
