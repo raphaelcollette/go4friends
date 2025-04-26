@@ -27,7 +27,7 @@
           <div
             v-else
             class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
-            :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+            :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
           >
             {{ user?.username?.charAt(0)?.toUpperCase() }}
           </div>

@@ -37,7 +37,7 @@
           <div
             v-else
             class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
-            :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+            :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
           >
             {{ user?.username?.charAt(0)?.toUpperCase() }}
           </div>
@@ -61,7 +61,7 @@
             <div
               v-else
               class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
-              :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+              :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
             >
             {{ request?.from_username?.charAt(0)?.toUpperCase() }}
             </div>
@@ -90,7 +90,7 @@
             <div
               v-else
               class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white"
-              :style="{ backgroundColor: 'var(--btn-secondary, #facc15)' }"
+              :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
             >
               {{ user?.username?.charAt(0)?.toUpperCase() }}
             </div>
