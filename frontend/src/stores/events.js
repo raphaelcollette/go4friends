@@ -25,18 +25,28 @@ export const useEventStore = defineStore('event', {
 
   actions: {
     async fetchEvents(force = false) {
-      const cacheTime = 30 * 1000
-      if (!force && this.lastFetched && Date.now() - this.lastFetched < cacheTime) return
-      this.loading = true
+      const cacheTime = 30 * 1000; // 30 seconds
+      const now = Date.now();
+    
+      if (!force && this.lastFetched && (now - this.lastFetched < cacheTime)) {
+        return; // ✅ Use cache if recent and not forcing
+      }
+    
+      this.loading = true;
       try {
-        const res = await authAxios.get('/events/', { params: { upcoming: true } })
-        this.events = res.data
-        this.lastFetched = Date.now()
+        const res = await authAxios.get('/events/', { params: { upcoming: true } });
+        if (Array.isArray(res.data)) {
+          this.events = res.data; // ✅ Always update events array
+        } else {
+          console.error('Unexpected events response format:', res.data);
+          this.events = [];
+        }
+        this.lastFetched = now;
       } catch (error) {
-        console.error('Failed to fetch events:', error)
-        throw error
+        console.error('Failed to fetch events:', error);
+        throw error;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
@@ -60,6 +70,10 @@ export const useEventStore = defineStore('event', {
     async deleteEvent(id) {
       await authAxios.delete(`/events/${id}/delete/`)
       this.events = this.events.filter(event => event.id !== id)
+    },
+
+    async updateEvent(eventId, formData) {
+      await authAxios.put(`/events/${eventId}/update/`, formData)
     },
 
     reset() {

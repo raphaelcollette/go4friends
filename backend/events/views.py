@@ -139,3 +139,25 @@ def delete_event(request, event_id):
 
     except Event.DoesNotExist:
         return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_event(request, event_id):
+    try:
+        event = Event.objects.get(id=event_id)
+
+        # Only allow update if user is admin/mod of the club
+        if event.club:
+            membership = event.club.clubmembership_set.filter(user=request.user).first()
+            if not membership or membership.role not in ['admin', 'moderator']:
+                return Response({"error": "You don't have permission to edit this event."},
+                                status=status.HTTP_403_FORBIDDEN)
+
+        serializer = EventSerializer(event, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Event.DoesNotExist:
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)

@@ -44,6 +44,16 @@
             ✕
           </button>
 
+          <!-- Edit Button (top right, next to delete) -->
+          <button
+            v-if="isClubStaff(event.club)"
+            @click.stop="openEditModal(event)"
+            class="absolute top-2 right-8 text-blue-600 hover:text-blue-800 text-sm font-bold"
+            title="Edit Event"
+          >
+            ✏️
+          </button>
+
           <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
 
           <img
@@ -101,6 +111,24 @@
           </div>
         </div>
       </div>
+      <!-- Edit Event Modal -->
+      <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg space-y-4">
+          <h2 class="text-xl font-bold text-blue-600">Edit Event</h2>
+
+          <input v-model="editForm.title" class="input w-full" placeholder="Title" />
+          <input v-model="editForm.date" type="datetime-local" class="input w-full" />
+          <input v-model="editForm.location" class="input w-full" placeholder="Location" />
+          <textarea v-model="editForm.description" class="input w-full" placeholder="Description" rows="4" />
+
+          <input type="file" @change="e => editForm.image = e.target.files[0]" class="input w-full" />
+
+          <div class="flex justify-end space-x-4">
+            <button class="btn" @click="showEditModal = false">Cancel</button>
+            <button class="btn" @click="submitEditEvent">Save Changes</button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -123,6 +151,8 @@ const newDescription = ref('')
 const newDate = ref('')
 const newImage = ref(null)
 const expandedEventId = ref(null)
+const showEditModal = ref(false)
+const eventToEdit = ref(null)
 
 const filterType = ref('')
 const sortOrder = ref('date')
@@ -133,6 +163,52 @@ const eventToDelete = ref(null)
 const handleFileChange = (e) => {
   newImage.value = e.target.files[0]
 }
+
+const submitEditEvent = async () => {
+  if (!eventToEdit.value) return
+
+  try {
+    const formData = new FormData()
+    formData.append('title', editForm.value.title)
+    formData.append('description', editForm.value.description)
+    formData.append('date', editForm.value.date)
+    formData.append('location', editForm.value.location)
+
+    if (editForm.value.image) {
+      formData.append('image', editForm.value.image)
+    }
+
+    await eventStore.updateEvent(eventToEdit.value.id, formData)
+    toast.success("Event updated!")
+    await eventStore.fetchEvents()
+    showEditModal.value = false
+    eventToEdit.value = null
+  } catch (err) {
+    console.error(err)
+    toast.error("Failed to update event")
+  }
+}
+
+const editForm = ref({
+  title: '',
+  description: '',
+  date: '',
+  location: '',
+  image: null
+})
+
+const openEditModal = (event) => {
+  eventToEdit.value = event
+  showEditModal.value = true
+  editForm.value = {
+    title: event.title,
+    description: event.description,
+    date: event.date,
+    location: event.location || '',
+    image: null // must upload again if changing
+  }
+}
+
 
 const toggleExpand = (eventId) => {
   expandedEventId.value = expandedEventId.value === eventId ? null : eventId
@@ -189,9 +265,9 @@ const cancelRsvp = async (eventId) => {
   }
 }
 
-const isClubStaff = (clubName) => {
-  const myClub = clubStore.myClubs.find(c => c.name === clubName)
-  return myClub && ['admin', 'moderator'].includes(myClub.role)
+const isClubStaff = (club) => {
+  const clubName = typeof club === 'object' ? club.name : club
+  return clubStore.myClubs.some(c => c.name === clubName && ['admin', 'moderator'].includes(c.role))
 }
 
 const requestDeleteEvent = (eventId) => {
