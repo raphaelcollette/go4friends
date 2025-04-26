@@ -168,6 +168,7 @@ const createClub = async () => {
     })
     toast.success('Club created successfully!')
     resetCreateModal()
+    await messageStore.fetchThreads(true)
   } catch (error) {
     console.error('Create club error:', error)
     toast.error('Failed to create club.')

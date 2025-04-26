@@ -128,9 +128,13 @@ const messageContainer = ref(null)
 const currentUser = computed(() => userStore.currentUser)
 const sortedThreads = computed(() => {
   return [...messageStore.threads].sort((a, b) => {
-    const t1 = new Date(a.last_message?.timestamp || 0).getTime()
-    const t2 = new Date(b.last_message?.timestamp || 0).getTime()
-    return t2 - t1
+    const timeA = a.last_message
+      ? new Date(a.last_message.timestamp).getTime()
+      : new Date(a.created).getTime()
+    const timeB = b.last_message
+      ? new Date(b.last_message.timestamp).getTime()
+      : new Date(b.created).getTime()
+    return timeB - timeA // newest first
   })
 })
 const friends = computed(() => friendStore.friends)
