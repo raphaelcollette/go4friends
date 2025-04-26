@@ -14,6 +14,15 @@
   --btn-primary: #7A0019; /* UMN Maroon */
   --btn-primary-hover: #600015; /* Slightly darker maroon for hover */
   --btn-secondary: #FFCC33; /* UMN Gold */
+
+  --navbar-bg: rgba(255, 255, 255, 0.3);
+  --navbar-blur: blur(10px);
+  --page-background: linear-gradient(to bottom right, #dbeafe, #ede9fe, #fce7f3);
+}
+
+.glossy-bg {
+  background-color: var(--navbar-bg, rgba(255, 255, 255, 0.3));
+  backdrop-filter: var(--navbar-blur, blur(10px));
 }
 
 a,

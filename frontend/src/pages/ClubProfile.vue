@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <!-- Loading -->
       <div v-if="loading" class="text-gray-600 text-lg">Loading club...</div>
 
       <!-- Club Found -->
-      <div v-else-if="club && club.name" class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 w-full max-w-4xl text-center">
+      <div v-else-if="club && club.name" class="glossy-bg rounded-2xl shadow-lg p-8 w-full max-w-4xl text-center">
         <h1 class="text-4xl font-bold text-gray-800 mb-6">{{ club.name }}</h1>
         <p class="text-gray-600 italic mb-10">{{ club.description || 'No description available.' }}</p>
 
@@ -15,7 +15,7 @@
             v-for="member in members"
             :key="member.id"
             @click="goToProfile(member.user.username)"
-            class="flex flex-col items-center bg-white/30 backdrop-blur-md p-4 rounded-xl hover:bg-white/50 transition-all cursor-pointer"
+            class="flex flex-col items-center glossy-bg p-4 rounded-xl hover:brightness-105 transition-all cursor-pointer"
           >
             <div class="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-purple-200">
               <img v-if="member.user.profile_picture" :src="member.user.profile_picture" alt="Profile" class="w-full h-full object-cover" />
@@ -40,7 +40,7 @@
 
         <button
           v-if="club?.is_private && isStaff"
-          class="btn w-full"
+          class="btn w-full mt-4"
           @click="showInviteModal = true"
         >
           ✉️ Invite User
@@ -51,21 +51,15 @@
       <div v-else class="text-center text-lg text-gray-500 mt-10">❌ Club not found.</div>
     </main>
 
+    <!-- Create Event Modal -->
     <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">
         <h2 class="text-xl font-bold text-gray-800 text-center">Create Club Event</h2>
-        
         <input v-model="eventTitle" class="input w-full" placeholder="Event Title" />
-        
         <textarea v-model="eventDescription" class="input w-full" placeholder="Event Description"></textarea>
-        
-        <!-- ✅ New Location Field -->
         <input v-model="eventLocation" class="input w-full" placeholder="Event Location" />
-        
         <input v-model="eventDate" type="datetime-local" class="input w-full" />
-        
         <input type="file" @change="handleImageUpload" class="input w-full" />
-
         <div class="flex justify-end space-x-2">
           <button class="btn" @click="showCreateModal = false">Cancel</button>
           <button class="btn" @click="createEvent">Create</button>
@@ -90,7 +84,6 @@
             </div>
 
             <div class="flex gap-2 items-center">
-              <!-- Role Dropdown -->
               <select
                 v-model="roleChanges[member.user.username]"
                 @change="updateRole(member.user.username)"
@@ -102,7 +95,6 @@
                 <option value="admin">admin</option>
               </select>
 
-              <!-- Remove Button -->
               <button
                 class="text-xs text-red-600 hover:underline"
                 @click="removeMember(member.user.username)"
@@ -121,6 +113,7 @@
         </div>
       </div>
     </div>
+
     <!-- Invite User Modal -->
     <div v-if="showInviteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md space-y-4">
@@ -132,7 +125,6 @@
         </div>
       </div>
     </div>
-
 
     <!-- Confirm Delete Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -147,6 +139,8 @@
     </div>
   </div>
 </template>
+
+
 
   
 <script setup>

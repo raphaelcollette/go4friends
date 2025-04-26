@@ -1,34 +1,28 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
-      <div class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
+      <div class="glossy-bg rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Settings</h1>
 
         <div class="space-y-8 text-left">
-          <!-- Account Settings -->
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Account</h2>
             <button @click="editProfile" class="btn w-full mt-2">Edit Profile</button>
             <button @click="toggleChangePassword" class="btn w-full mt-2">Change Password</button>
           </div>
 
-          <!-- Show change password form if toggled -->
           <div v-if="showChangePassword" class="space-y-4 mt-4">
             <input v-model="oldPassword" type="password" placeholder="Current Password" class="input w-full" />
             <input v-model="newPassword" type="password" placeholder="New Password (min 8 chars)" class="input w-full" />
             <button @click="submitChangePassword" class="btn w-full mt-2">Submit Password Change</button>
           </div>
 
-          <!-- Security -->
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Security</h2>
             <button @click="logout" class="btn w-full mt-2">Logout</button>
             <button @click="openDeleteModal" class="btn w-full mt-2 bg-red-600 hover:bg-red-700">Delete Account</button>
           </div>
 
-          <!-- Preferences -->
-          
-          <!-- Privacy Settings -->
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Privacy</h2>
             <div class="flex items-center justify-between mt-2">
@@ -36,55 +30,35 @@
               <input type="checkbox" v-model="isPrivate" @change="updatePrivacy" class="form-checkbox h-5 w-5 text-purple-600">
             </div>
           </div>
-          
+
           <div>
             <h2 class="text-lg font-semibold text-gray-700">Preferences</h2>
             <div class="mt-6">
               <h2 class="text-lg font-semibold text-gray-700">Theme Color</h2>
               <div class="flex items-center space-x-4 mt-2">
                 <div class="relative w-12 h-12">
-                  <input
-                    type="color"
-                    v-model="userColor"
-                    @input="updateColor"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                  <div
-                    class="w-full h-full rounded-full border-2 border-gray-300"
-                    :style="{ backgroundColor: userColor }"
-                  ></div>
+                  <input type="color" v-model="userColor" @input="updateColor" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div class="w-full h-full rounded-full border-2 border-gray-300" :style="{ backgroundColor: userColor }"></div>
                 </div>
                 <span class="text-gray-600 text-sm">Choose your button color</span>
               </div>
             </div>
+
             <div class="mt-6">
-            <h2 class="text-lg font-semibold text-gray-700">Secondary Color</h2>
-            <div class="flex items-center space-x-4 mt-2">
-              <div class="relative w-12 h-12">
-                <input
-                  type="color"
-                  v-model="userSecondaryColor"
-                  @input="updateSecondaryColor"
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <div
-                  class="w-full h-full rounded-full border-2 border-gray-300"
-                  :style="{ backgroundColor: userSecondaryColor }"
-                ></div>
+              <h2 class="text-lg font-semibold text-gray-700">Secondary Color</h2>
+              <div class="flex items-center space-x-4 mt-2">
+                <div class="relative w-12 h-12">
+                  <input type="color" v-model="userSecondaryColor" @input="updateSecondaryColor" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  <div class="w-full h-full rounded-full border-2 border-gray-300" :style="{ backgroundColor: userSecondaryColor }"></div>
+                </div>
+                <span class="text-gray-600 text-sm">Choose your secondary color</span>
               </div>
-              <span class="text-gray-600 text-sm">Choose your secondary color</span>
             </div>
-          </div>
-            <button @click="toggleDarkMode" class="btn w-full mt-2">Toggle Dark Mode</button>
+
+            <button @click="toggleDarkMode" class="btn w-full mt-4">Toggle Dark Mode</button>
+            <button @click="resetTheme" class="btn w-full mt-2">Reset to Default</button>
           </div>
 
-          <!-- Notifications (coming soon) -->
-          <div>
-            <h2 class="text-lg font-semibold text-gray-700">Notifications</h2>
-            <p class="text-gray-500 text-sm mt-1">Manage notification settings (coming soon)</p>
-          </div>
-
-          <!-- About -->
           <div class="pt-6 border-t border-white/30">
             <p class="text-xs text-gray-500 mt-4 text-center">
               go4friends app v1.0 — Built with ❤️ by You
@@ -94,7 +68,6 @@
       </div>
     </main>
 
-    <!-- Delete Account Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div class="bg-white rounded-2xl shadow-lg p-6 w-80 text-center">
         <h2 class="text-xl font-bold text-red-600 mb-4">Delete Account</h2>
@@ -105,16 +78,15 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
-import { ref, watch, onMounted } from 'vue'
 import { authAxios } from '@/utils/axios'
-import { useUserStore } from '@/stores/user' // ✅ Import the Pinia store
+import { useUserStore } from '@/stores/user'
 import { useFriendStore } from '@/stores/friend'
 import { useMessageStore } from '@/stores/messages'
 import { useClubStore } from '@/stores/club'
@@ -127,14 +99,22 @@ const userStore = useUserStore()
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
-const userColor = ref(
-  localStorage.getItem('userColor') ||
-  getComputedStyle(document.documentElement).getPropertyValue('--btn-primary').trim() ||
-  '#7A0019'
-)
-const userSecondaryColor = ref(localStorage.getItem('userSecondaryColor') || '#FFCC33') // UMN Gold fallback
-
+const userColor = ref(localStorage.getItem('userColor') || '#7A0019')
+const userSecondaryColor = ref(localStorage.getItem('userSecondaryColor') || '#FFCC33')
+const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
 const isPrivate = ref(false)
+
+const applyTheme = () => {
+  document.documentElement.style.setProperty('--btn-primary', userColor.value)
+  document.documentElement.style.setProperty('--btn-primary-hover', darkenColor(userColor.value, 10))
+  document.documentElement.style.setProperty('--btn-secondary', userSecondaryColor.value)
+
+  if (isDarkMode.value) {
+    document.documentElement.style.setProperty('--page-background', 'linear-gradient(to bottom right, #1f2937, #4b5563, #6b7280)')
+  } else {
+    document.documentElement.style.setProperty('--page-background', 'linear-gradient(to bottom right, #dbeafe, #ede9fe, #fce7f3)')
+  }
+}
 
 const toggleChangePassword = () => {
   showChangePassword.value = !showChangePassword.value
@@ -142,129 +122,96 @@ const toggleChangePassword = () => {
 
 const submitChangePassword = async () => {
   if (newPassword.value.length < 8) {
-    toast.error('New password must be at least 8 characters long.')
+    toast.error('New password must be at least 8 characters.')
     return
   }
-
   try {
-    await authAxios.patch('/users/change-password/', {
-      old_password: oldPassword.value,
-      new_password: newPassword.value
-    })
-    
-    toast.success('Password changed successfully! Please log in again.')
-    showChangePassword.value = false
-    oldPassword.value = ''
-    newPassword.value = ''
-    localStorage.removeItem('access_token')
+    await authAxios.patch('/users/change-password/', { old_password: oldPassword.value, new_password: newPassword.value })
+    toast.success('Password changed!')
     router.push('/login')
-  } catch (error) {
-    toast.error(error.response?.data?.error || 'Failed to change password.')
+  } catch (e) {
+    toast.error('Failed to change password.')
   }
 }
 
-const editProfile = () => {
-  router.push('/profile/edit')
-}
+const editProfile = () => router.push('/profile/edit')
 
 const logout = () => {
   localStorage.removeItem('access_token')
-
-  // Reset all user-related stores
   useUserStore().reset()
   useFriendStore().reset()
   useMessageStore().reset()
   useClubStore().reset()
   useEventStore().reset()
-
-  toast.success('Logged out successfully!')
   router.push('/login')
 }
 
 const showDeleteModal = ref(false)
-
-const openDeleteModal = () => {
-  showDeleteModal.value = true
-}
-
-const cancelDelete = () => {
-  showDeleteModal.value = false
-}
+const openDeleteModal = () => showDeleteModal.value = true
+const cancelDelete = () => showDeleteModal.value = false
 
 const confirmDeleteAccount = async () => {
   try {
     await authAxios.delete('/users/delete-account/')
-    toast.success('Account deleted successfully.')
-    localStorage.removeItem('access_token')
     router.push('/signup')
-  } catch (error) {
-    toast.error('Failed to delete account. Please try again.')
-  } finally {
-    showDeleteModal.value = false
+  } catch {
+    toast.error('Failed to delete account.')
   }
 }
 
 const toggleDarkMode = () => {
-  toast.info('Dark mode toggle coming soon!')
+  isDarkMode.value = !isDarkMode.value
+  localStorage.setItem('darkMode', isDarkMode.value)
+  applyTheme()
 }
 
-const updatePrivacy = async () => {
-  try {
-    await authAxios.patch('/users/me/update/', { is_private: isPrivate.value })
-    toast.success('Privacy setting updated.')
-    await userStore.fetchCurrentUser()
-  } catch (e) {
-    toast.error('Failed to update privacy.')
-  }
+const resetTheme = () => {
+  userColor.value = '#7A0019'
+  userSecondaryColor.value = '#FFCC33'
+  isDarkMode.value = false
+  localStorage.removeItem('darkMode')
+  localStorage.removeItem('userColor')
+  localStorage.removeItem('userSecondaryColor')
+  applyTheme()
 }
 
 const updateColor = () => {
-  document.documentElement.style.setProperty('--btn-primary', userColor.value)
-
-  // Automatically create a slightly darker color for hover
-  const hoverColor = darkenColor(userColor.value, 10)
-  document.documentElement.style.setProperty('--btn-primary-hover', hoverColor)
-
   localStorage.setItem('userColor', userColor.value)
+  applyTheme()
 }
 
-function darkenColor(hex, percent) {
+const updateSecondaryColor = () => {
+  localStorage.setItem('userSecondaryColor', userSecondaryColor.value)
+  applyTheme()
+}
+
+const darkenColor = (hex, percent) => {
   const num = parseInt(hex.replace("#", ""), 16)
   const amt = Math.round(2.55 * percent)
   const R = (num >> 16) - amt
   const G = (num >> 8 & 0x00FF) - amt
   const B = (num & 0x0000FF) - amt
-  return `#${(
-    0x1000000 +
-    (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-    (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-    (B < 255 ? (B < 1 ? 0 : B) : 255)
-  )
-    .toString(16)
-    .slice(1)}`
+  return `#${(0x1000000 + (R<255?(R<1?0:R):255)*0x10000 + (G<255?(G<1?0:G):255)*0x100 + (B<255?(B<1?0:B):255)).toString(16).slice(1)}`
 }
 
-const updateSecondaryColor = () => {
-  document.documentElement.style.setProperty('--btn-secondary', userSecondaryColor.value)
-  localStorage.setItem('userSecondaryColor', userSecondaryColor.value)
+const updatePrivacy = async () => {
+  try {
+    await authAxios.patch('/users/me/update/', { is_private: isPrivate.value })
+    toast.success('Privacy updated!')
+    userStore.fetchCurrentUser()
+  } catch {
+    toast.error('Failed to update privacy.')
+  }
 }
-// Sync privacy checkbox with store
-watch(
-  () => userStore.currentUser,
-  (user) => {
-    if (user) isPrivate.value = user.is_private
-  },
-  { immediate: true }
-)
+
+watch(() => userStore.currentUser, (user) => {
+  if (user) isPrivate.value = user.is_private
+}, { immediate: true })
 
 onMounted(() => {
-  userStore.fetchCurrentUser()
-  updateColor()
-  updateSecondaryColor()
+  applyTheme()
 })
 </script>
 
 <style scoped>
-
 </style>
-

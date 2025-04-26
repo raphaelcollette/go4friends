@@ -1,6 +1,6 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden pt-24 pb-12">
-    <div class="flex flex-1 w-full max-w-6xl mx-auto bg-white/20 backdrop-blur-md rounded-2xl shadow-md overflow-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden pt-24 pb-12" style="background-image: var(--page-background); background-size: cover; background-position: center;">
+    <div class="flex flex-1 w-full max-w-6xl mx-auto glossy-bg rounded-2xl shadow-md overflow-hidden">
 
       <!-- Left: Threads -->
       <div class="w-1/3 border-r p-4 overflow-y-auto">
@@ -51,9 +51,7 @@
                   v-for="(text, idx) in group.messages"
                   :key="idx"
                   class="px-4 py-2 rounded-xl text-white break-words max-w-xs w-fit"
-                  :class="[
-                    group.sender.username === currentUser.username ? 'self-end bg-primary' : 'self-start bg-gray-600'
-                  ]"
+                  :class="[ group.sender.username === currentUser.username ? 'self-end bg-primary' : 'self-start bg-gray-600' ]"
                 >
                   {{ text }}
                 </div>

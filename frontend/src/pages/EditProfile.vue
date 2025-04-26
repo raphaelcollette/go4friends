@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex items-center justify-center pt-24 px-4">
-      <div class="bg-white/20 backdrop-blur-md rounded-2xl p-8 w-full max-w-lg shadow-lg">
+      <div class="glossy-bg rounded-2xl p-8 w-full max-w-lg shadow-lg">
         <h1 class="text-3xl font-extrabold text-center text-gray-800 mb-8">Edit Profile</h1>
 
         <form @submit.prevent="updateProfile" class="space-y-6">
@@ -50,13 +50,14 @@
               @keydown.enter.prevent="addInterest"
             />
           </div>
+
           <!-- Major -->
           <div class="space-y-2">
             <label for="major" class="block text-sm font-medium text-gray-700">Major</label>
             <input id="major" type="text" v-model="major" class="input" placeholder="Enter your major" />
           </div>
 
-          <!--Grad Year-->
+          <!-- Graduation Year -->
           <div class="space-y-2">
             <label for="graduation_year" class="block text-sm font-medium text-gray-700">Graduation Year</label>
             <input id="graduation_year" type="number" v-model="graduationYear" class="input" placeholder="2025" />
@@ -72,6 +73,8 @@
     </main>
   </div>
 </template>
+
+
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'

@@ -1,21 +1,22 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
       <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
       <!-- Private Profile Message -->
-      <div v-else-if="user?.private" class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 max-w-md w-full text-center">
+      <div v-else-if="user?.private" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
         <h2 class="text-2xl font-bold text-gray-800">🔒 Private Profile</h2>
         <p class="text-gray-600 mt-2">This user's profile is private and only visible to friends.</p>
       </div>
 
       <!-- User Not Found Message -->
-      <div v-else-if="!user" class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 max-w-md w-full text-center">
+      <div v-else-if="!user" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
         <h2 class="text-2xl font-bold text-gray-800">❌ User Not Found</h2>
         <p class="text-gray-600 mt-2">We couldn't find anyone with that username.</p>
       </div>
 
-      <div v-else class="bg-white/20 backdrop-blur-md rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+      <!-- Profile Card -->
+      <div v-else class="glossy-bg rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
         <div class="flex justify-center">
           <img
             v-if="user.profile_picture"
@@ -65,7 +66,7 @@
           </template>
         </div>
 
-        <!-- Message button -->
+        <!-- Message Button -->
         <div class="mt-4" v-if="user.username !== userStore.currentUser?.username">
           <button
             @click="startOrNavigateToThread"
@@ -118,6 +119,7 @@
     </main>
   </div>
 </template>
+
 
 
 <script setup>

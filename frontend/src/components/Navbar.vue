@@ -1,5 +1,6 @@
 <template>
-  <nav class="w-full p-4 flex justify-between items-center bg-white/30 backdrop-blur-md shadow-md fixed top-0 z-50">
+  <nav class="w-full p-4 flex justify-between items-center shadow-md fixed top-0 z-50"
+  style="background-color: var(--navbar-bg); backdrop-filter: var(--navbar-blur);">
     <RouterLink to="/main" class="text-2xl font-bold text-primary">
       placeholder
     </RouterLink>

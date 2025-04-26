@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
+      <!-- Header -->
       <div class="w-full max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between mb-10 space-y-4 sm:space-y-0">
         <h1 class="text-4xl font-extrabold text-gray-800">Upcoming Events</h1>
         <div class="flex space-x-4">
@@ -17,14 +18,15 @@
         </div>
       </div>
 
-      <!-- Events Section: Only show one of these -->
+      <!-- Events Grid -->
       <div v-if="sortedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
         <div
           v-for="event in sortedEvents"
           :key="event.id"
           @click="toggleExpand(event.id)"
-          class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
+          class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
         >
+          <!-- Club or School Tag -->
           <div class="absolute top-2 left-2">
             <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
               {{ typeof event.club === 'object' ? event.club.name : event.club }}
@@ -34,7 +36,7 @@
             </span>
           </div>
 
-          <!-- Delete Button (top right) -->
+          <!-- Delete and Edit Buttons -->
           <button
             v-if="isClubStaff(event.club)"
             @click.stop="requestDeleteEvent(event.id)"
@@ -43,8 +45,6 @@
           >
             ✕
           </button>
-
-          <!-- Edit Button (top right, next to delete) -->
           <button
             v-if="isClubStaff(event.club)"
             @click.stop="openEditModal(event)"
@@ -54,8 +54,10 @@
             ✏️
           </button>
 
+          <!-- Attendee Count -->
           <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
 
+          <!-- Event Image -->
           <img
             v-if="event.image"
             :src="event.image"
@@ -63,9 +65,10 @@
             class="w-full h-40 object-cover rounded-xl mb-4"
           />
 
+          <!-- Event Title -->
           <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
 
-          <!-- ✅ Location -->
+          <!-- Location -->
           <p class="text-sm text-indigo-600 font-medium mt-1">
             📍 {{ event.location || 'No location specified' }}
           </p>
@@ -73,11 +76,12 @@
           <!-- Date -->
           <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
 
-          <!-- Description (only if expanded) -->
+          <!-- Expanded Description -->
           <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">
             {{ event.description }}
           </p>
 
+          <!-- RSVP Buttons -->
           <div class="mt-4">
             <button
               v-if="event.is_going"
@@ -98,7 +102,9 @@
       </div>
 
       <!-- No Events Message -->
-      <div v-else class="text-gray-500 text-lg mt-10">No events yet. Be the first to create one!</div>
+      <div v-else class="text-gray-500 text-lg mt-10">
+        No events yet. Be the first to create one!
+      </div>
 
       <!-- Delete Confirmation Modal -->
       <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -111,6 +117,7 @@
           </div>
         </div>
       </div>
+
       <!-- Edit Event Modal -->
       <div v-if="showEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg space-y-4">
@@ -132,6 +139,7 @@
     </main>
   </div>
 </template>
+
 
 
 <script setup>

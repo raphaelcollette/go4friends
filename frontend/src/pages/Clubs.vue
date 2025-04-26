@@ -1,126 +1,128 @@
 <template>
-    <div class="flex flex-col min-h-screen w-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-x-hidden">
-      <main class="flex-1 flex flex-col items-center pt-24 px-6">
-        <div class="w-full max-w-6xl flex justify-between items-center mb-10">
-          <h1 class="text-4xl font-extrabold text-gray-800">Clubs</h1>
-          <button class="btn" @click="showCreate = true">+ Create Club</button>
-        </div>
-  
-        <!-- Create Club Modal -->
-        <div v-if="showCreate" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div class="bg-white rounded-2xl p-8 w-full max-w-md space-y-6">
-            <h2 class="text-2xl font-bold text-center">Create a New Club</h2>
-  
-            <input v-model="newClubName" type="text" placeholder="Club Name" class="input w-full" />
-            <textarea v-model="newClubDescription" placeholder="Club Description" class="input w-full"></textarea>
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
+    <main class="flex-1 flex flex-col items-center pt-24 px-6">
+      <!-- Header -->
+      <div class="w-full max-w-6xl flex justify-between items-center mb-10">
+        <h1 class="text-4xl font-extrabold text-gray-800">Clubs</h1>
+        <button class="btn" @click="showCreate = true">+ Create Club</button>
+      </div>
 
-            <label class="flex items-center space-x-2 mt-2">
-              <input type="checkbox" v-model="newClubPrivate" class="form-checkbox h-5 w-5 text-purple-600" />
-              <span class="text-gray-700 font-medium">Private Club (invite-only)</span>
-            </label>
-  
-            <div class="flex justify-end space-x-4 mt-4">
-              <button class="btn" @click="resetCreateModal">Cancel</button>
-              <button class="greenbtn" @click="createClub">Create</button>
-            </div>
+      <!-- Create Club Modal -->
+      <div v-if="showCreate" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md space-y-6">
+          <h2 class="text-2xl font-bold text-center">Create a New Club</h2>
+
+          <input v-model="newClubName" type="text" placeholder="Club Name" class="input w-full" />
+          <textarea v-model="newClubDescription" placeholder="Club Description" class="input w-full"></textarea>
+
+          <label class="flex items-center space-x-2 mt-2">
+            <input type="checkbox" v-model="newClubPrivate" class="form-checkbox h-5 w-5 text-purple-600" />
+            <span class="text-gray-700 font-medium">Private Club (invite-only)</span>
+          </label>
+
+          <div class="flex justify-end space-x-4 mt-4">
+            <button class="btn" @click="resetCreateModal">Cancel</button>
+            <button class="greenbtn" @click="createClub">Create</button>
           </div>
         </div>
-  
-        <!-- Clubs List -->
-        <div v-if="clubs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
-          <div
-            v-for="club in clubs"
-            :key="club.id"
-            @click="club.name && goToClub(club.name)"
-            class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer"
-          >
+      </div>
 
+      <!-- Clubs List -->
+      <div v-if="clubs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full max-w-6xl">
+        <div
+          v-for="club in clubs"
+          :key="club.id"
+          @click="club.name && goToClub(club.name)"
+          class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer"
+        >
           <span
             v-if="club.is_private"
             class="mt-2 inline-block px-3 py-1 text-xs font-semibold text-white bg-red-500 rounded-full"
           >
             Private
           </span>
-            <h3 class="text-2xl font-bold text-gray-800">{{ club.name }}</h3>
-            <p class="text-gray-600 mt-2">{{ club.description || 'No description provided.' }}</p>
-  
-            <div class="mt-4">
-              <!-- Show Join only if public and user is NOT a member -->
-              <button
-                v-if="!club.is_private && !club.is_member"
-                class="greenbtn"
-                @click.stop="joinClub(club.name)"
-              >
-                Join
-              </button>
 
-              <!-- Show Delete if the user is staff and the only member -->
-              <button
-                v-else-if="club.is_member && club.only_member_is_me"
-                class="redbtn"
-                @click.stop="requestDeleteClub(club.name)"
-              >
-                Delete
-              </button>
+          <h3 class="text-2xl font-bold text-gray-800 mt-2">{{ club.name }}</h3>
+          <p class="text-gray-600 mt-2">{{ club.description || 'No description provided.' }}</p>
 
-              <!-- Otherwise, show Leave -->
-              <button
-                v-else-if="club.is_member"
-                class="redbtn"
-                @click.stop="leaveClub(club.name)"
-              >
-                Leave
-              </button>
-
-              <!-- Optionally: show disabled "Invite Only" badge -->
-              <span
-                v-else-if="club.is_private && !club.is_member"
-                class="inline-block px-3 py-1 text-xs font-semibold text-white bg-red-500 rounded-full"
-              >
-                Invite Only
-              </span>
-            </div>
-          </div>
-        </div>
-  
-        <!-- No Clubs Message -->
-        <div v-else class="text-gray-500 text-lg mt-10">
-          No clubs yet. Be the first to create one!
-        </div>
-
-        <!-- Pending Invites Section -->
-        <div v-if="invites.length > 0" class="w-full max-w-6xl mt-16">
-          <h2 class="text-3xl font-bold text-gray-800 mb-6">📨 Your Club Invites</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            <div
-              v-for="invite in invites"
-              :key="invite.id"
-              class="bg-white/20 backdrop-blur-md rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300"
+          <div class="mt-4">
+            <!-- Join Button -->
+            <button
+              v-if="!club.is_private && !club.is_member"
+              class="greenbtn"
+              @click.stop="joinClub(club.name)"
             >
-              <h3 class="text-2xl font-bold text-gray-800">{{ invite.club }}</h3>
-              <p class="text-sm text-gray-600 mt-1">Invited by: <span class="font-semibold text-purple-700">{{ invite.invited_by }}</span></p>
-              <div class="flex gap-2 mt-6">
-                <button class="greenbtn" @click="acceptInvite(invite.id)">Accept</button>
-                <button class="redbtn" @click="rejectInvite(invite.id)">Reject</button>
-              </div>
+              Join
+            </button>
+
+            <!-- Delete Button -->
+            <button
+              v-else-if="club.is_member && club.only_member_is_me"
+              class="redbtn"
+              @click.stop="requestDeleteClub(club.name)"
+            >
+              Delete
+            </button>
+
+            <!-- Leave Button -->
+            <button
+              v-else-if="club.is_member"
+              class="redbtn"
+              @click.stop="leaveClub(club.name)"
+            >
+              Leave
+            </button>
+
+            <!-- Invite Only Badge -->
+            <span
+              v-else-if="club.is_private && !club.is_member"
+              class="inline-block px-3 py-1 text-xs font-semibold text-white bg-red-500 rounded-full"
+            >
+              Invite Only
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Clubs Message -->
+      <div v-else class="text-gray-500 text-lg mt-10">
+        No clubs yet. Be the first to create one!
+      </div>
+
+      <!-- Pending Invites Section -->
+      <div v-if="invites.length > 0" class="w-full max-w-6xl mt-16">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">📨 Your Club Invites</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div
+            v-for="invite in invites"
+            :key="invite.id"
+            class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300"
+          >
+            <h3 class="text-2xl font-bold text-gray-800">{{ invite.club }}</h3>
+            <p class="text-sm text-gray-600 mt-1">Invited by: <span class="font-semibold text-purple-700">{{ invite.invited_by }}</span></p>
+            <div class="flex gap-2 mt-6">
+              <button class="greenbtn" @click="acceptInvite(invite.id)">Accept</button>
+              <button class="redbtn" @click="rejectInvite(invite.id)">Reject</button>
             </div>
           </div>
         </div>
-        <!-- Delete Club Confirmation Modal -->
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
-            <h2 class="text-xl font-bold text-red-600">Delete Club</h2>
-            <p class="text-gray-600">Are you sure you want to permanently delete <strong>{{ clubToDelete }}</strong>?</p>
-            <div class="flex justify-center space-x-4">
-              <button class="btn" @click="showDeleteConfirm = false">Cancel</button>
-              <button class="redbtn" @click="confirmDeleteClub">Delete</button>
-            </div>
+      </div>
+
+      <!-- Delete Club Confirmation Modal -->
+      <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md text-center space-y-4">
+          <h2 class="text-xl font-bold text-red-600">Delete Club</h2>
+          <p class="text-gray-600">Are you sure you want to permanently delete <strong>{{ clubToDelete }}</strong>?</p>
+          <div class="flex justify-center space-x-4">
+            <button class="btn" @click="showDeleteConfirm = false">Cancel</button>
+            <button class="redbtn" @click="confirmDeleteClub">Delete</button>
           </div>
         </div>
-      </main>
-    </div>
-  </template>
-  
+      </div>
+    </main>
+  </div>
+</template>
+
   <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
