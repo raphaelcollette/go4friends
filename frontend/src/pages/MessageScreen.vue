@@ -95,7 +95,7 @@
 
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useUserStore } from '@/stores/user'
 import { useFriendStore } from '@/stores/friend'
@@ -124,6 +124,13 @@ const friends = computed(() => friendStore.friends)
 
 const currentMessages = computed(() => {
   return messageStore.messagesByThread[activeThreadId.value] || []
+})
+
+watch(() => currentMessages.value.length, async () => {
+  await nextTick()
+  if (messageContainer.value) {
+    messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
 })
 
 const formatTime = (timestamp) => timestamp ? new Date(timestamp).toLocaleString() : ''
@@ -179,9 +186,22 @@ const createGroupChat = async () => {
   }
 }
 
+let pollingInterval = null
+
 onMounted(async () => {
   await userStore.fetchCurrentUser()
   await friendStore.fetchFriends()
   await messageStore.fetchThreads()
+
+  pollingInterval = setInterval(async () => {
+    await messageStore.fetchThreads(true) // force refresh threads every 15 seconds
+  }, 15000) // 15000ms = 15 seconds
+
+})
+
+onUnmounted(() => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval) // ✅ clean up
+  }
 })
 </script>

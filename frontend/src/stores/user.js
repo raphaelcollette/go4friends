@@ -3,15 +3,17 @@ import { authAxios } from '@/utils/axios'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    currentUser: null,
+    currentUser: JSON.parse(localStorage.getItem('currentUser')) || null, // ✅ load immediately
     notifications: [],
     unreadCount: 0,
+    lastFetched: null,
   }),
   actions: {
     async fetchCurrentUser() {
       if (!this.currentUser) {
         const res = await authAxios.get('/users/me/')
         this.currentUser = res.data
+        localStorage.setItem('currentUser', JSON.stringify(res.data)) // ✅ save it
       }
     },
     async fetchNotifications(force = false) {
