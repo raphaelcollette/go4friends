@@ -128,11 +128,13 @@ import { useToast } from 'vue-toastification'
 import { useClubStore } from '@/stores/club'
 import { useInviteStore } from '@/stores/invites'
 import { authAxios } from '@/utils/axios'
+import { useMessageStore } from '@/stores/messages'
 
 const toast = useToast()
 const router = useRouter()
 const clubStore = useClubStore()
 const inviteStore = useInviteStore()
+const messageStore = useMessageStore()
 const invites = computed(() => inviteStore.invites)
 
 const showCreate = ref(false)
@@ -227,15 +229,6 @@ const rejectInvite = async (inviteId) => {
   }
 }
 
-const canDeleteInsteadOfLeave = (club) => {
-  const currentUser = clubStore.currentUser || {}
-  const membership = club.club_membership || {} // make sure you expose this in your API if not already
-  const isStaff = ['admin', 'moderator'].includes(membership.role)
-  const members = club.club_members || [] // you’ll need to expose member count per club
-
-  return isStaff && members.length === 1 && members[0].user.username === currentUser.username
-}
-
 const requestDeleteClub = (clubName) => {
   clubToDelete.value = clubName
   showDeleteConfirm.value = true
@@ -246,6 +239,7 @@ const confirmDeleteClub = async () => {
     await authAxios.delete(`/clubs/${encodeURIComponent(clubToDelete.value)}/delete/`)
     toast.success('Club deleted.')
     await clubStore.fetchClubs(true)
+    await messageStore.fetchThreads(true)
   } catch (error) {
     console.error(error)
     toast.error('Failed to delete club.')
