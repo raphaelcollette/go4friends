@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FriendRequest, Notification
+from .models import FriendRequest
 
 class FriendRequestSerializer(serializers.ModelSerializer):
     from_username = serializers.ReadOnlyField(source='from_user.username')

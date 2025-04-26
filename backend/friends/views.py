@@ -31,11 +31,6 @@ class FriendRequestCreateAPIView(generics.GenericAPIView):
             return Response({'error': 'Friend request already sent or already friends.'}, status=status.HTTP_400_BAD_REQUEST)
 
         FriendRequest.objects.create(from_user=request.user, to_user=to_user)
-        Notification.objects.create(
-            user=to_user,
-            type='friend_request',
-            message=f"{request.user.username} sent you a friend request!"
-        )
 
         return Response({'message': 'Friend request sent.'}, status=status.HTTP_201_CREATED)
 
@@ -66,13 +61,6 @@ class AcceptFriendRequestAPIView(generics.GenericAPIView):
         if action == "accept":
             friend_request.status = 'accepted'
             friend_request.save()
-
-            # ✅ Create a notification for the sender
-            Notification.objects.create(
-                user=from_user,
-                type='message',
-                message=f"{request.user.username} accepted your friend request."
-            )
 
             return Response({'message': 'Friend request accepted.'})
 
