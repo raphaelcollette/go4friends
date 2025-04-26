@@ -53,6 +53,7 @@ import { ref, onMounted } from 'vue'
 import { base } from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { jwtDecode } from 'jwt-decode'
 
 const username = ref('')
 const password = ref('')
@@ -70,8 +71,15 @@ const login = async () => {
       username: username.value,
       password: password.value,
     })
+
+    // Save tokens
     localStorage.setItem('access_token', res.data.access)
     localStorage.setItem('refresh_token', res.data.refresh)
+
+    // ✅ Decode access token to extract username
+    const decoded = jwtDecode(res.data.access)
+    localStorage.setItem('currentUsername', decoded.username)
+
     toast.success('Successfully logged in!')
     router.push('/main')
   } catch (error) {

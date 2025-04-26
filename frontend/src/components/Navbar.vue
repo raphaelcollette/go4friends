@@ -90,8 +90,8 @@
 
       <!-- Profile & Settings -->
       <RouterLink
-        v-if="currentUser"
-        :to="`/profile/${currentUser.username}`"
+        v-if="currentUser || fallbackUsername"
+        :to="`/profile/${(currentUser?.username || fallbackUsername)}`"
         class="btn"
       >
         Profile
@@ -171,13 +171,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useRouter } from 'vue-router'
 import { authAxios } from '@/utils/axios'
-import { useUserStore } from '@/stores/user' // ✅ import Pinia store
+import { useUserStore } from '@/stores/user' // 
 
 const toast = useToast()
 const router = useRouter()
-const userStore = useUserStore() // ✅ store instance
+const userStore = useUserStore() // 
+const fallbackUsername = localStorage.getItem('currentUsername')
 
-// ✅ Search functionality
+//  Search functionality
 const searchQuery = ref('')
 const showDropdown = ref(false)
 const loading = ref(false)
@@ -226,7 +227,7 @@ const goToEvent = (id) => {
   router.push(`/events`) // change to `/events/${id}` if using detail view
 }
 
-// ✅ Notifications
+// Notifications
 const showNotifs = ref(false)
 
 const toggleDropdown = async () => {
@@ -282,13 +283,13 @@ const markOneRead = async (id) => {
   }
 }
 
-// ✅ Initial fetch on mount only once
+//  Initial fetch on mount only once
 onMounted(() => {
   userStore.fetchCurrentUser()
   userStore.fetchNotifications()
 })
 
-// ✅ Expose from store
+//  Expose from store
 const currentUser = computed(() => userStore.currentUser)
 const notifications = computed(() => userStore.notifications)
 const unreadCount = computed(() => userStore.unreadCount)
