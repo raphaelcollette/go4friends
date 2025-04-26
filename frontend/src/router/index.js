@@ -10,8 +10,7 @@ import Settings from '@/pages/Settings.vue'
 import Events from '@/pages/Events.vue'
 import Clubs from '@/pages/Clubs.vue'
 import ClubProfile from '@/pages/ClubProfile.vue'
-import MessageThread from '@/pages/MessageThread.vue'
-import ThreadList from '@/pages/ThreadList.vue' // <-- Add this import
+import MessageScreen from '@/pages/MessageScreen.vue'
 
 const routes = [
   {
@@ -79,14 +78,8 @@ const routes = [
   },
   {
     path: '/messages',
-    name: 'Messages',
-    component: ThreadList, // <-- Shows recent chats
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/messages/thread/:threadId',
-    name: 'MessageThread',
-    component: MessageThread,
+    name: 'MessageScreen',
+    component: MessageScreen,
     meta: { requiresAuth: true }
   },
 ]
