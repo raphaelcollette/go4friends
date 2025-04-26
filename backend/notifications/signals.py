@@ -4,6 +4,7 @@ from friends.models import FriendRequest
 from .models import Notification
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from clubs.models import ClubInvite
 
 @receiver(post_save, sender=FriendRequest)
 def friend_request_created(sender, instance, created, **kwargs):
@@ -21,4 +22,13 @@ def friend_request_created(sender, instance, created, **kwargs):
             user=instance.from_user,
             type='message',
             message=f"{instance.to_user.username} accepted your friend request!"
+        )
+
+@receiver(post_save, sender=ClubInvite)
+def create_club_invite_notification(sender, instance, created, **kwargs):
+    if created:
+        Notification.objects.create(
+            user=instance.invitee,
+            type='club_invite',
+            message=f"You've been invited to join {instance.club.name}!"
         )

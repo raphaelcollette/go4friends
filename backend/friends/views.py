@@ -6,7 +6,6 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import FriendRequest
 from .serializers import FriendRequestSerializer
 from users.serializers import UserPublicSerializer
-from notifications.models import Notification
 from rest_framework.permissions import IsAuthenticated
 from clubs.models import Club
 
