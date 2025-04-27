@@ -92,19 +92,22 @@
           <div class="glossy-bg p-6 rounded-2xl shadow-md space-y-4 sticky top-32">
             <h2 class="text-xl font-bold text-gray-800 mb-4">🔥 Suggested Clubs</h2>
 
-            <div class="space-y-3">
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Coding Club</p>
-                <p class="text-xs text-gray-500">Learn and hack together!</p>
+            <div v-if="suggestedClubs.length > 0" class="space-y-3">
+              <div
+                v-for="club in suggestedClubs"
+                :key="club.id"
+                class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition cursor-pointer"
+                @click="club.name && goToClub(club.name)"
+              >
+                <p class="font-semibold text-gray-700">{{ club.name }}</p>
+                <p class="text-xs text-gray-500">
+                  {{ club.match_reasons ? club.match_reasons.join(' | ') : 'Suggested for you' }}
+                </p>
               </div>
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Chess Society</p>
-                <p class="text-xs text-gray-500">Challenge and compete weekly.</p>
-              </div>
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Photography Club</p>
-                <p class="text-xs text-gray-500">Capture your best moments!</p>
-              </div>
+            </div>
+
+            <div v-else class="text-gray-500 text-sm">
+              No suggestions at the moment.
             </div>
           </div>
         </div>
@@ -150,6 +153,7 @@ const newClubDescription = ref('')
 const newClubPrivate = ref(false)
 const showDeleteConfirm = ref(false)
 const clubToDelete = ref(null)
+const suggestedClubs = computed(() => clubStore.suggestedClubs)
 
 // Use Pinia state
 const clubs = computed(() => clubStore.clubs)
@@ -261,6 +265,7 @@ const confirmDeleteClub = async () => {
 onMounted(() => {
   clubStore.fetchClubs() // only refetch if needed
   inviteStore.fetchInvites()
+  clubStore.fetchSuggestedClubs()
 })
 </script>
   

@@ -10,6 +10,7 @@ export const useClubStore = defineStore('club', {
     currentClub: null,
     clubMembers: [],
     loadingClub: false,
+    suggestedClubs: [],
   }),
   actions: {
     async fetchClubs(force = false) {
@@ -70,6 +71,14 @@ export const useClubStore = defineStore('club', {
         console.error('Failed to fetch my clubs:', error)
         this.myClubs = []
         this.myClubsFetched = false
+      }
+    },
+    async fetchSuggestedClubs() {
+      try {
+        const res = await authAxios.get('/clubs/suggested/')
+        this.suggestedClubs = res.data
+      } catch (error) {
+        console.error('Error fetching suggested clubs:', error)
       }
     },
 

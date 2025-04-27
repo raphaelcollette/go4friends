@@ -24,4 +24,6 @@ urlpatterns = [
     path('invites/', views.ListClubInvitesAPIView.as_view(), name='list-invites'),
     path('invites/<int:invite_id>/accept/', views.AcceptInviteAPIView.as_view(), name='accept-invite'),
     path('invites/<int:invite_id>/reject/', views.RejectInviteAPIView.as_view(), name='reject-invite'),
+
+    path('suggested/', views.SuggestedClubsAPIView.as_view(), name='suggested-clubs'),
 ]

@@ -337,3 +337,48 @@ class RejectInviteAPIView(APIView):
         invite = get_object_or_404(ClubInvite, id=invite_id, invitee=request.user, accepted=False)
         invite.delete()
         return Response({'message': 'Invite rejected.'}, status=200)
+
+class SuggestedClubsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        me = request.user
+
+        # Clubs the user already joined
+        joined_club_ids = set(me.clubs.values_list('id', flat=True))
+
+        # User's interests
+        my_interests = set(map(str.lower, me.interests or [])) if me.interests else set()
+
+        # User's friends
+        friends = me.friends.all()
+
+        # Get all clubs (except already joined ones)
+        clubs = Club.objects.exclude(id__in=joined_club_ids)
+
+        suggestions = []
+        for club in clubs:
+            reasons = []
+
+            # Check if any friends are members
+            friend_member_ids = ClubMembership.objects.filter(
+                club=club,
+                user__in=friends
+            ).values_list('user_id', flat=True)
+
+            if friend_member_ids.exists():
+                reasons.append(f"{len(friend_member_ids)} friend(s) are members")
+
+            # Check if club name matches any interests
+            club_name_lower = club.name.lower()
+            matching_interests = [interest for interest in my_interests if interest in club_name_lower]
+
+            if matching_interests:
+                reasons.append(f"Related to your interests: {', '.join(sorted(matching_interests))}")
+
+            if reasons:
+                data = ClubSerializer(club, context={'request': request}).data
+                data['match_reasons'] = reasons
+                suggestions.append(data)
+
+        return Response(suggestions)
