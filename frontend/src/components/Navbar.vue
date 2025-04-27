@@ -7,7 +7,7 @@
     </RouterLink>
 
     <!-- Global Search Bar -->
-    <div class="flex-1 mx-8 relative">
+    <div class="relative w-full max-w-md">
       <form @submit.prevent class="relative w-full max-w-md mx-auto">
         <input
           v-model="searchQuery"
@@ -27,7 +27,7 @@
       <!-- Search Dropdown -->
       <div
         v-if="showDropdown"
-        class="absolute mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
+        class="absolute left-0 mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
       >
         <div v-if="loading" class="p-4 text-center text-gray-500">Searching...</div>
         <template v-else>
