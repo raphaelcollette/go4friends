@@ -213,7 +213,7 @@ const createEvent = async () => {
   const formData = new FormData()
   formData.append('title', eventTitle.value)
   formData.append('description', eventDescription.value)
-  formData.append('location', eventLocation.value) // ✅ correct here
+  formData.append('location', eventLocation.value)
   const localDate = new Date(eventDate.value)
   formData.append('date', localDate.toISOString())
 
@@ -225,13 +225,14 @@ const createEvent = async () => {
 
   try {
     await authAxios.post('/events/create/', formData)
-    await eventStore.fetchEvents(true)
+    await eventStore.fetchEvents(true)        
+    await clubStore.fetchMyClubs(true)           
     toast.success('Event created!')
     showCreateModal.value = false
     eventTitle.value = ''
     eventDescription.value = ''
     eventDate.value = ''
-    eventLocation.value = '' // ✅ clear after submit
+    eventLocation.value = ''
     eventImage.value = null
   } catch (err) {
     console.error('Create event error:', err.response?.data || err.message || err)

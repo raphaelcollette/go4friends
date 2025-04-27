@@ -150,18 +150,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useEventStore } from '@/stores/events'
 import { useClubStore } from '@/stores/club'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const eventStore = useEventStore()
 const clubStore = useClubStore()
 const toast = useToast()
-const suggestedEvents = computed(() => eventStore.suggestedEvents)
 
-const eventType = ref('school')
-const clubName = ref('')
-const newTitle = ref('')
-const newDescription = ref('')
-const newDate = ref('')
-const newImage = ref(null)
+const suggestedEvents = computed(() => eventStore.suggestedEvents)
 const expandedEventId = ref(null)
 const showEditModal = ref(false)
 const eventToEdit = ref(null)
@@ -172,9 +168,13 @@ const sortOrder = ref('date')
 const showDeleteConfirm = ref(false)
 const eventToDelete = ref(null)
 
-const handleFileChange = (e) => {
-  newImage.value = e.target.files[0]
-}
+const editForm = ref({
+  title: '',
+  description: '',
+  date: '',
+  location: '',
+  image: null
+})
 
 const submitEditEvent = async () => {
   if (!eventToEdit.value) return
@@ -192,7 +192,8 @@ const submitEditEvent = async () => {
 
     await eventStore.updateEvent(eventToEdit.value.id, formData)
     toast.success("Event updated!")
-    await eventStore.fetchEvents()
+    await eventStore.fetchEvents(true)
+    await eventStore.fetchSuggestedEvents(true)
     showEditModal.value = false
     eventToEdit.value = null
   } catch (err) {
@@ -200,14 +201,6 @@ const submitEditEvent = async () => {
     toast.error("Failed to update event")
   }
 }
-
-const editForm = ref({
-  title: '',
-  description: '',
-  date: '',
-  location: '',
-  image: null
-})
 
 const openEditModal = (event) => {
   eventToEdit.value = event
@@ -217,10 +210,9 @@ const openEditModal = (event) => {
     description: event.description,
     date: event.date,
     location: event.location || '',
-    image: null // must upload again if changing
+    image: null
   }
 }
-
 
 const toggleExpand = (eventId) => {
   expandedEventId.value = expandedEventId.value === eventId ? null : eventId
@@ -263,6 +255,8 @@ const rsvp = async (eventId) => {
   try {
     await eventStore.rsvp(eventId)
     toast.success("You’re going!")
+    await eventStore.fetchEvents(true)
+    await eventStore.fetchSuggestedEvents(true)
   } catch {
     toast.error("Could not RSVP")
   }
@@ -272,6 +266,8 @@ const cancelRsvp = async (eventId) => {
   try {
     await eventStore.cancelRsvp(eventId)
     toast.success("RSVP cancelled.")
+    await eventStore.fetchEvents(true)
+    await eventStore.fetchSuggestedEvents(true)
   } catch {
     toast.error("Could not cancel RSVP")
   }
@@ -296,7 +292,8 @@ const confirmDeleteEvent = async () => {
   try {
     await eventStore.deleteEvent(eventToDelete.value)
     toast.success("Event deleted.")
-    await eventStore.fetchEvents()
+    await eventStore.fetchEvents(true)
+    await eventStore.fetchSuggestedEvents(true)
   } catch (err) {
     console.error(err)
     toast.error("Failed to delete event.")
@@ -313,6 +310,7 @@ onMounted(async () => {
   await eventStore.fetchSuggestedEvents()
 })
 </script>
+
 
 
 <style scoped>
