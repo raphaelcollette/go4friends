@@ -8,6 +8,8 @@ from clubs.models import Club
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from rest_framework.views import APIView
+from clubs.models import ClubMembership
 
 # --- Create Event ---
 class EventCreateAPIView(generics.GenericAPIView):
@@ -161,3 +163,48 @@ def update_event(request, event_id):
 
     except Event.DoesNotExist:
         return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+class SuggestedEventsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        me = request.user
+
+        my_club_ids = list(me.clubs.values_list('id', flat=True))
+        my_interests = set(map(str.lower, me.interests or [])) if me.interests else set()
+        my_friends = me.friends.all()
+
+        # Start with all upcoming events
+        events = Event.objects.filter(date__gte=timezone.now()).exclude(club__isnull=True) # assuming event has a 'date' and optional 'club'
+
+        suggestions = []
+        for event in events:
+            reasons = []
+
+            # If event is tied to a club I'm in
+            if event.club and event.club.id in my_club_ids:
+                reasons.append('Event hosted by your club')
+
+            # If event matches interests by event title/description
+            if my_interests:
+                combined_text = (event.title + ' ' + (event.description or '')).lower()
+                if any(interest in combined_text for interest in my_interests):
+                    reasons.append('Matches your interests')
+
+            # If my friends RSVP’d to the event (optional)
+            friend_ids = my_friends.values_list('id', flat=True)
+            friend_attendees = event.attendees.filter(id__in=friend_ids).count()
+            if friend_attendees > 0:
+                reasons.append(f'{friend_attendees} friend(s) attending')
+
+            if reasons:
+                event_data = {
+                    'id': event.id,
+                    'title': event.title,
+                    'date': event.date,
+                    'club': event.club.name if event.club else None,
+                    'match_reasons': reasons,
+                }
+                suggestions.append(event_data)
+
+        return Response(suggestions)

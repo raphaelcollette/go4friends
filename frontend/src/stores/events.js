@@ -6,6 +6,7 @@ export const useEventStore = defineStore('event', {
     events: [],
     lastFetched: null,
     loading: false,
+    suggestedEvents: [],
   }),
 
   getters: {
@@ -29,14 +30,14 @@ export const useEventStore = defineStore('event', {
       const now = Date.now();
     
       if (!force && this.lastFetched && (now - this.lastFetched < cacheTime)) {
-        return; // ✅ Use cache if recent and not forcing
+        return; // 
       }
     
       this.loading = true;
       try {
         const res = await authAxios.get('/events/', { params: { upcoming: true } });
         if (Array.isArray(res.data)) {
-          this.events = res.data; // ✅ Always update events array
+          this.events = res.data; // 
         } else {
           console.error('Unexpected events response format:', res.data);
           this.events = [];
@@ -47,6 +48,28 @@ export const useEventStore = defineStore('event', {
         throw error;
       } finally {
         this.loading = false;
+      }
+    },
+
+    async fetchSuggestedEvents(force = false) { // 🆕
+      const cacheTime = 60 * 1000; // 1 minute
+      const now = Date.now();
+
+      if (!force && this.suggestedLastFetched && (now - this.suggestedLastFetched < cacheTime)) {
+        return; // 
+      }
+
+      try {
+        const res = await authAxios.get('/events/suggested/');
+        if (Array.isArray(res.data)) {
+          this.suggestedEvents = res.data;
+        } else {
+          console.error('Unexpected suggested events format:', res.data);
+          this.suggestedEvents = [];
+        }
+        this.suggestedLastFetched = now;
+      } catch (error) {
+        console.error('Failed to fetch suggested events:', error);
       }
     },
 

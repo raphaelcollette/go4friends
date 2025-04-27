@@ -34,17 +34,13 @@
         <section class="w-full">
           <h3 class="text-3xl font-bold text-gray-800 mb-6">🎉 Discover Upcoming Events</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Open Mic Night</h4>
-              <p class="text-gray-600 text-sm">Show off your talents or cheer your friends on! 🎤</p>
-            </div>
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Soccer Tournament</h4>
-              <p class="text-gray-600 text-sm">Join a team or come support! ⚽</p>
-            </div>
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Midnight Breakfast</h4>
-              <p class="text-gray-600 text-sm">Late-night pancakes at the student union! 🍳</p>
+            <div 
+              v-for="event in displayedEvents" 
+              :key="event.id"
+              class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center"
+            >
+              <h4 class="text-xl font-bold text-gray-800 mb-2">{{ event.title }}</h4>
+              <p class="text-gray-600 text-sm">{{ event.location || 'No location specified' }}</p>
             </div>
           </div>
         </section>
@@ -53,18 +49,15 @@
         <section class="w-full">
           <h3 class="text-3xl font-bold text-gray-800 mb-6">🏛️ Join Clubs & Communities</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Chess Club</h4>
-              <p class="text-gray-600 text-sm">Sharpen your mind and meet new friends! ♟️</p>
-            </div>
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Environmental Action Group</h4>
-              <p class="text-gray-600 text-sm">Take action and protect the planet. 🌎</p>
-            </div>
-            <div class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center">
-              <h4 class="text-xl font-bold text-gray-800 mb-2">Film Society</h4>
-              <p class="text-gray-600 text-sm">Watch, discuss, and create amazing films! 🎬</p>
-            </div>
+            <RouterLink
+              v-for="club in displayedClubs"
+              :key="club.id"
+              :to="`/clubs/${encodeURIComponent(club.name)}`"
+              class="glossy-bg p-6 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col items-center text-center"
+            >
+              <h4 class="text-xl font-bold text-gray-800 mb-2">{{ club.name }}</h4>
+              <p class="text-gray-600 text-sm">{{ club.description || 'No description provided.' }}</p>
+            </RouterLink>
           </div>
         </section>
 
@@ -84,8 +77,14 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useEventStore } from '@/stores/events'
+import { useClubStore } from '@/stores/club'
+
+const eventStore = useEventStore()
+const clubStore = useClubStore()
 
 const activities = ref([
   { description: 'You joined the Chess Club.', time: '2 hours ago' },
@@ -93,5 +92,13 @@ const activities = ref([
   { description: 'You added "Photography" to your interests.', time: '2 days ago' },
   { description: 'You made 3 new friends!', time: 'Last week' },
 ])
+
+const displayedEvents = computed(() => eventStore.events.slice(0, 3))
+const displayedClubs = computed(() => clubStore.clubs.slice(0, 3))
+
+onMounted(async () => {
+  await eventStore.fetchEvents()
+  await clubStore.fetchClubs()
+})
 </script>
 

@@ -80,27 +80,31 @@
           </div>
         </div>
 
-        <!-- Right Sidebar (Suggested Events) -->
+        <!-- Suggested Events Sidebar -->
         <div class="w-72 hidden lg:block">
           <div class="glossy-bg p-6 rounded-2xl shadow-md space-y-4 sticky top-32">
             <h2 class="text-xl font-bold text-gray-800 mb-4">🔥 Suggested Events</h2>
 
-            <div class="space-y-3">
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Hackathon 2025</p>
-                <p class="text-xs text-gray-500">Compete & build projects!</p>
+            <div v-if="suggestedEvents.length > 0" class="space-y-3">
+              <div
+                v-for="event in suggestedEvents"
+                :key="event.id"
+                class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition cursor-pointer"
+                @click="goToEvent(event.id)"
+              >
+                <p class="font-semibold text-gray-700">{{ event.title }}</p>
+                <p class="text-xs text-gray-500">
+                  {{ event.match_reasons ? event.match_reasons.join(' | ') : 'Suggested for you' }}
+                </p>
               </div>
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Spring Fest</p>
-                <p class="text-xs text-gray-500">Campus music & food festival 🎶</p>
-              </div>
-              <div class="bg-white/30 backdrop-blur rounded-lg p-3 hover:brightness-110 transition">
-                <p class="font-semibold text-gray-700">Photography Walk</p>
-                <p class="text-xs text-gray-500">Capture the city with friends 📷</p>
-              </div>
+            </div>
+
+            <div v-else class="text-gray-500 text-sm">
+              No event suggestions at the moment.
             </div>
           </div>
         </div>
+
 
       </div>
 
@@ -150,6 +154,7 @@ import { useClubStore } from '@/stores/club'
 const eventStore = useEventStore()
 const clubStore = useClubStore()
 const toast = useToast()
+const suggestedEvents = computed(() => eventStore.suggestedEvents)
 
 const eventType = ref('school')
 const clubName = ref('')
@@ -277,6 +282,10 @@ const isClubStaff = (club) => {
   return clubStore.myClubs.some(c => c.name === clubName && ['admin', 'moderator'].includes(c.role))
 }
 
+const goToEvent = (eventId) => {
+  router.push(`/events/${eventId}`)
+}
+
 const requestDeleteEvent = (eventId) => {
   eventToDelete.value = eventId
   showDeleteConfirm.value = true
@@ -301,6 +310,7 @@ onMounted(async () => {
   await clubStore.fetchClubs()
   await clubStore.fetchMyClubs()
   await eventStore.fetchEvents()
+  await eventStore.fetchSuggestedEvents()
 })
 </script>
 
