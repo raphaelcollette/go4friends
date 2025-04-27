@@ -33,7 +33,8 @@
         <!-- Discover Events -->
         <section class="w-full">
           <h3 class="text-3xl font-bold text-gray-800 mb-6">🎉 Discover Upcoming Events</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          
+          <div v-if="displayedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             <div 
               v-for="event in displayedEvents" 
               :key="event.id"
@@ -43,12 +44,17 @@
               <p class="text-gray-600 text-sm">{{ event.location || 'No location specified' }}</p>
             </div>
           </div>
+
+          <div v-else class="text-gray-500 text-center text-lg mt-6">
+            No upcoming events found.
+          </div>
         </section>
 
         <!-- Join Clubs -->
         <section class="w-full">
           <h3 class="text-3xl font-bold text-gray-800 mb-6">🏛️ Join Clubs & Communities</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          
+          <div v-if="displayedClubs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             <RouterLink
               v-for="club in displayedClubs"
               :key="club.id"
@@ -58,6 +64,10 @@
               <h4 class="text-xl font-bold text-gray-800 mb-2">{{ club.name }}</h4>
               <p class="text-gray-600 text-sm">{{ club.description || 'No description provided.' }}</p>
             </RouterLink>
+          </div>
+
+          <div v-else class="text-gray-500 text-center text-lg mt-6">
+            No clubs found.
           </div>
         </section>
 
