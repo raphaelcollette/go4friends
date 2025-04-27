@@ -1,15 +1,17 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex flex-col items-center pt-24 px-6">
+      
+      <!-- Loading State -->
       <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
-      <!-- Private Profile Message -->
+      <!-- Private Profile -->
       <div v-else-if="user?.private" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
         <h2 class="text-2xl font-bold text-gray-800">🔒 Private Profile</h2>
         <p class="text-gray-600 mt-2">This user's profile is private and only visible to friends.</p>
       </div>
 
-      <!-- User Not Found Message -->
+      <!-- User Not Found -->
       <div v-else-if="!user" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
         <h2 class="text-2xl font-bold text-gray-800">❌ User Not Found</h2>
         <p class="text-gray-600 mt-2">We couldn't find anyone with that username.</p>
@@ -23,14 +25,11 @@
             :src="user.profile_picture"
             alt="Profile Picture"
             class="w-28 h-28 rounded-full object-cover border-4"
-            :style="`border-color: var(--btn-primary, #6366f1);`"
+            :style="{ borderColor: 'var(--btn-primary, #6366f1)' }"
           />
-          <div
-            v-else
-            class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
-            :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
-          >
-            {{ user?.username?.charAt(0)?.toUpperCase() }}
+          <div v-else class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
+            :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }">
+            {{ user.username.charAt(0).toUpperCase() }}
           </div>
         </div>
 
@@ -38,42 +37,17 @@
         <p class="text-gray-600 mt-2">@{{ user.username }}</p>
 
         <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
-        <p v-if="user.location" class="mt-2 text-gray-500 text-sm">📍 {{ user.location }}</p>
+        <p v-if="user.location" class="text-gray-500 text-sm mt-2">📍 {{ user.location }}</p>
 
-        <div class="mt-6">
-          <template v-if="user.username !== userStore.currentUser?.username">
-            <button
-              v-if="user.is_friend"
-              @click="removeFriend"
-              class="redbtn"
-            >
-              Unfriend
-            </button>
-            <button
-              v-else-if="user.friend_request_sent"
-              class="btn"
-              disabled
-            >
-              Request Sent
-            </button>
-            <button
-              v-else
-              @click="sendFriendRequest"
-              class="btn"
-            >
-              + Add Friend
-            </button>
-          </template>
-        </div>
+        <!-- Friend Actions -->
+        <div class="mt-6" v-if="!isCurrentUser">
+          <button v-if="user.is_friend" @click="removeFriend" class="redbtn">Unfriend</button>
+          <button v-else-if="user.friend_request_sent" class="btn" disabled>Request Sent</button>
+          <button v-else @click="sendFriendRequest" class="btn">+ Add Friend</button>
 
-        <!-- Message Button -->
-        <div class="mt-4" v-if="user.username !== userStore.currentUser?.username">
-          <button
-            @click="startOrNavigateToThread"
-            class="btn"
-          >
-            💬 Message
-          </button>
+          <div class="mt-4">
+            <button @click="startOrNavigateToThread" class="btn">💬 Message</button>
+          </div>
         </div>
 
         <!-- Clubs -->
@@ -84,7 +58,7 @@
               v-for="club in user.clubs"
               :key="club.id"
               :to="`/clubs/${encodeURIComponent(club.name)}`"
-              class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition-all"
+              class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition"
             >
               {{ club.name }}
             </RouterLink>
@@ -98,11 +72,11 @@
             <span
               v-for="(interest, idx) in user.interests"
               :key="idx"
-              class="text-sm font-semibold px-3 py-1 rounded-full transition-all duration-300 transform hover:scale-105"
-              :style="`
-                background-color: var(--btn-secondary, #a5b4fc);
-                color: var(--btn-primary, #6366f1);
-              `"
+              class="text-sm font-semibold px-3 py-1 rounded-full"
+              :style="{
+                backgroundColor: 'var(--btn-secondary, #a5b4fc)',
+                color: 'var(--btn-primary, #6366f1)',
+              }"
             >
               {{ interest }}
             </span>
@@ -116,14 +90,13 @@
           <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
         </div>
       </div>
+
     </main>
   </div>
 </template>
 
-
-
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authAxios } from '@/utils/axios'
 import { useToast } from 'vue-toastification'
@@ -131,26 +104,30 @@ import { useUserStore } from '@/stores/user'
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
+const userStore = useUserStore()
+
 const user = ref(null)
 const loading = ref(true)
-const toast = useToast()
-const currentUsername = ref('')
-const userStore = useUserStore()
+
+const isCurrentUser = computed(() => {
+  return userStore.currentUser && user.value && userStore.currentUser.username === user.value.username
+})
 
 const fetchUser = async () => {
   loading.value = true
   const username = route.params.username
 
   try {
-    // Always fetch current user once and store the username
-    await userStore.fetchCurrentUser()
-    const currentUsername = userStore.currentUser.username
-
-    const res = username === currentUsername
-      ? { data: userStore.currentUser } // no need to refetch
-      : await authAxios.get(`/users/profile/${username}/`)
-
+    // Always refetch profile fresh
+    const res = await authAxios.get(`/users/profile/${username}/`)
     user.value = res.data
+
+    // If viewing yourself, update currentUser too
+    if (userStore.currentUser && username === userStore.currentUser.username) {
+      userStore.currentUser = res.data
+      localStorage.setItem('currentUser', JSON.stringify(res.data))
+    }
   } catch (error) {
     if (error.response?.status === 403) {
       user.value = { private: true }
@@ -186,7 +163,7 @@ const removeFriend = async () => {
 const startOrNavigateToThread = async () => {
   try {
     const res = await authAxios.post('/messages/threads/start-private/', {
-      username: user.value.username
+      username: user.value.username,
     })
     const threadId = res.data.thread_id
     router.push(`/messages/thread/${threadId}`)
@@ -200,7 +177,6 @@ watch(() => route.params.username, fetchUser)
 </script>
 
 <style scoped>
-
 </style>
 
 

@@ -139,6 +139,7 @@ import { useClubStore } from '@/stores/club'
 import { useInviteStore } from '@/stores/invites'
 import { authAxios } from '@/utils/axios'
 import { useMessageStore } from '@/stores/messages'
+import { useUserStore } from '@/stores/user'
 
 const toast = useToast()
 const router = useRouter()
@@ -146,6 +147,7 @@ const clubStore = useClubStore()
 const inviteStore = useInviteStore()
 const messageStore = useMessageStore()
 const invites = computed(() => inviteStore.invites)
+const userStore = useUserStore()
 
 const showCreate = ref(false)
 const newClubName = ref('')
@@ -173,6 +175,8 @@ const createClub = async () => {
     toast.success('Club created successfully!')
     resetCreateModal()
     await messageStore.fetchThreads(true)
+    await userStore.fetchCurrentUser()
+    await clubStore.fetchClubs(true)
   } catch (error) {
     console.error('Create club error:', error)
     toast.error('Failed to create club.')
@@ -183,6 +187,7 @@ const joinClub = async (clubName) => {
   try {
     await clubStore.joinClub(clubName)
     toast.success(`Successfully joined ${clubName}!`)
+    await clubStore.fetchClubs(true)
   } catch (error) {
     console.error(error)
     toast.error('Failed to join club.')
@@ -199,6 +204,8 @@ const leaveClub = async (clubName) => {
     if (club) {
       club.is_member = false
     }
+    await clubStore.fetchClubs(true)
+
   } catch (error) {
     console.error(error)
     toast.error('Failed to leave club.')
@@ -252,6 +259,8 @@ const confirmDeleteClub = async () => {
     toast.success('Club deleted.')
     await clubStore.fetchClubs(true)
     await messageStore.fetchThreads(true)
+    await clubStore.fetchSuggestedClubs(true)
+    await userStore.fetchCurrentUser()
   } catch (error) {
     console.error(error)
     toast.error('Failed to delete club.')

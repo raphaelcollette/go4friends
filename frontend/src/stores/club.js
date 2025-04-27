@@ -6,11 +6,12 @@ export const useClubStore = defineStore('club', {
     clubs: [],
     myClubs: [],
     lastFetched: null,
-    myClubsFetched: false, // ✅ NEW FLAG
+    myClubsLastFetched: false,
     currentClub: null,
     clubMembers: [],
     loadingClub: false,
     suggestedClubs: [],
+    suggestedLastFetched: null,
   }),
   actions: {
     async fetchClubs(force = false) {
@@ -62,21 +63,37 @@ export const useClubStore = defineStore('club', {
     },
 
     async fetchMyClubs(force = false) {
-      if (this.myClubsFetched && !force) return
+      const now = Date.now()
+      const oneMinute = 60 * 1000
+    
+      if (!force && this.myClubsLastFetched && (now - this.myClubsLastFetched < oneMinute)) {
+        return // 
+      }
+    
       try {
         const res = await authAxios.get('/clubs/my/')
         this.myClubs = res.data
-        this.myClubsFetched = true // ✅ set the flag
+        this.myClubsLastFetched = now // 
       } catch (error) {
         console.error('Failed to fetch my clubs:', error)
         this.myClubs = []
-        this.myClubsFetched = false
+        this.myClubsLastFetched = null
       }
     },
-    async fetchSuggestedClubs() {
+
+
+    async fetchSuggestedClubs(force = false) {
+      const now = Date.now()
+      const oneMinute = 60 * 1000
+
+      if (!force && this.suggestedLastFetched && (now - this.suggestedLastFetched < oneMinute)) {
+        return 
+      }
+
       try {
         const res = await authAxios.get('/clubs/suggested/')
         this.suggestedClubs = res.data
+        this.suggestedLastFetched = now
       } catch (error) {
         console.error('Error fetching suggested clubs:', error)
       }
