@@ -11,6 +11,7 @@ import Events from '@/pages/Events.vue'
 import Clubs from '@/pages/Clubs.vue'
 import ClubProfile from '@/pages/ClubProfile.vue'
 import MessageScreen from '@/pages/MessageScreen.vue'
+import EventProfile from '@/pages/EventProfile.vue'
 
 const routes = [
   {
@@ -80,6 +81,12 @@ const routes = [
     path: '/messages',
     name: 'MessageScreen',
     component: MessageScreen,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/events/:eventId',
+    name: 'EventProfile',
+    component: EventProfile,
     meta: { requiresAuth: true }
   },
 ]

@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from rest_framework.views import APIView
 from clubs.models import ClubMembership
+from users.serializers import UserPublicSerializer
 
 # --- Create Event ---
 class EventCreateAPIView(generics.GenericAPIView):
@@ -208,3 +209,20 @@ class SuggestedEventsAPIView(APIView):
                 suggestions.append(event_data)
 
         return Response(suggestions)
+
+class EventDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, event_id):
+        try:
+            event = Event.objects.get(id=event_id)
+        except Event.DoesNotExist:
+            return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        attendees = event.attendees.all()
+        attendee_data = UserPublicSerializer(attendees, many=True, context={'request': request}).data
+        
+        return Response({
+            'event': EventSerializer(event, context={'request': request}).data,
+            'attendees': attendee_data
+        })

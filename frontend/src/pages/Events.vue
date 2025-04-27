@@ -29,44 +29,31 @@
             <div
               v-for="event in sortedEvents"
               :key="event.id"
-              @click="toggleExpand(event.id)"
-              class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 cursor-pointer relative"
+              class="glossy-bg rounded-2xl shadow-md p-6 flex flex-col items-center text-center hover:shadow-xl transition-all duration-300 relative"
             >
-              <!-- Club or School Tag -->
-              <div class="absolute top-2 left-2">
-                <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
-                  {{ typeof event.club === 'object' ? event.club.name : event.club }}
-                </span>
-                <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
-                  School Event
-                </span>
-              </div>
-
               <!-- Edit/Delete Buttons -->
               <button v-if="isClubStaff(event.club)" @click.stop="requestDeleteEvent(event.id)" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-sm font-bold">✕</button>
               <button v-if="isClubStaff(event.club)" @click.stop="openEditModal(event)" class="absolute top-2 right-8 text-blue-600 hover:text-blue-800 text-sm font-bold">✏️</button>
 
-              <!-- Attendee Count -->
-              <p class="text-sm text-gray-600 mt-1">👥 {{ event.attendee_count }} going</p>
+              <RouterLink :to="`/events/${event.id}`" class="flex flex-col items-center text-center w-full">
+                <div class="absolute top-2 left-2">
+                  <span v-if="event.club" class="bg-primary text-white text-xs font-bold py-1 px-2 rounded-lg">
+                    {{ typeof event.club === 'object' ? event.club.name : event.club }}
+                  </span>
+                  <span v-else class="bg-green-500 text-white text-xs font-bold py-1 px-2 rounded-lg">
+                    School Event
+                  </span>
+                </div>
 
-              <!-- Event Image -->
-              <img v-if="event.image" :src="event.image" alt="Event Image" class="w-full h-40 object-cover rounded-xl mb-4" />
+                <img v-if="event.image" :src="event.image" alt="Event Image" class="w-full h-40 object-cover rounded-xl mb-4" />
+                <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
+                <p class="text-sm text-indigo-600 font-medium mt-1">
+                  📍 {{ event.location || 'No location specified' }}
+                </p>
+                <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
+              </RouterLink>
 
-              <!-- Event Title -->
-              <h3 class="text-2xl font-bold text-gray-800">{{ event.title }}</h3>
-
-              <!-- Location -->
-              <p class="text-sm text-indigo-600 font-medium mt-1">
-                📍 {{ event.location || 'No location specified' }}
-              </p>
-
-              <!-- Date -->
-              <p class="text-sm text-gray-500 mt-1">{{ formatDate(event.date) }}</p>
-
-              <!-- Expanded Description -->
-              <p v-if="expandedEventId === event.id" class="text-gray-700 mt-4">{{ event.description }}</p>
-
-              <!-- RSVP Buttons -->
+              <!-- RSVP Buttons outside the RouterLink -->
               <div class="mt-4">
                 <button v-if="event.is_going" @click.stop="cancelRsvp(event.id)" class="redbtn">Cancel RSVP</button>
                 <button v-else @click.stop="rsvp(event.id)" class="btn">RSVP</button>
@@ -105,7 +92,6 @@
           </div>
         </div>
 
-
       </div>
 
       <!-- Delete Event Modal -->
@@ -141,6 +127,7 @@
     </main>
   </div>
 </template>
+
 
 
 

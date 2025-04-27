@@ -7,6 +7,7 @@ export const useEventStore = defineStore('event', {
     lastFetched: null,
     loading: false,
     suggestedEvents: [],
+    eventDetailCache: {},
   }),
 
   getters: {
@@ -99,6 +100,27 @@ export const useEventStore = defineStore('event', {
       await authAxios.put(`/events/${eventId}/update/`, formData)
     },
 
+    async fetchEventDetail(eventId, force = false) {
+      const now = Date.now();
+      const cacheDuration = 60 * 1000; // 1 minute
+      const cached = this.eventDetailCache[eventId];
+    
+      if (!force && cached && (now - cached.lastFetched) < cacheDuration) {
+        return cached.data; 
+      }
+    
+      try {
+        const res = await authAxios.get(`/events/${eventId}/`);
+        this.eventDetailCache[eventId] = {
+          data: res.data,
+          lastFetched: now
+        };
+        return res.data;
+      } catch (error) {
+        console.error('Failed to fetch event detail:', error);
+        throw error;
+      }
+    },
     reset() {
       this.events = []
       this.lastFetched = null
