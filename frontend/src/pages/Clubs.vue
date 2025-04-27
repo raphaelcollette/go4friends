@@ -177,6 +177,7 @@ const createClub = async () => {
     await messageStore.fetchThreads(true)
     await userStore.fetchCurrentUser()
     await clubStore.fetchClubs(true)
+    userStore.clearProfileCache(userStore.currentUser.username)
   } catch (error) {
     console.error('Create club error:', error)
     toast.error('Failed to create club.')
@@ -261,6 +262,7 @@ const confirmDeleteClub = async () => {
     await messageStore.fetchThreads(true)
     await clubStore.fetchSuggestedClubs(true)
     await userStore.fetchCurrentUser()
+    userStore.clearProfileCache(userStore.currentUser.username)
   } catch (error) {
     console.error(error)
     toast.error('Failed to delete club.')

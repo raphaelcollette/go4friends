@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', {
     notifications: [],
     unreadCount: 0,
     lastFetched: null,
+    profileCache: {},
   }),
   actions: {
     async fetchCurrentUser(force = false) {
@@ -42,6 +43,12 @@ export const useUserStore = defineStore('user', {
       await authAxios.post('/notifications/clear/')
       this.notifications = []
       this.unreadCount = 0
+    },
+
+    clearProfileCache(username) {
+      if (this.profileCache[username]) {
+        delete this.profileCache[username]
+      }
     },
     reset() {
       this.currentUser = null

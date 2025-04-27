@@ -117,16 +117,32 @@ const isCurrentUser = computed(() => {
 const fetchUser = async () => {
   loading.value = true
   const username = route.params.username
+  const now = Date.now()
+  const oneMinute = 60 * 1000
 
   try {
-    // Always refetch profile fresh
-    const res = await authAxios.get(`/users/profile/${username}/`)
-    user.value = res.data
+    // Check cache from userStore
+    const cached = userStore.profileCache[username]
 
-    // If viewing yourself, update currentUser too
-    if (userStore.currentUser && username === userStore.currentUser.username) {
-      userStore.currentUser = res.data
-      localStorage.setItem('currentUser', JSON.stringify(res.data))
+    if (cached && (now - cached.lastFetched) < oneMinute) {
+      // 
+      user.value = cached.data
+    } else {
+      // 
+      const res = await authAxios.get(`/users/profile/${username}/`)
+      user.value = res.data
+
+      // 
+      userStore.profileCache[username] = {
+        data: res.data,
+        lastFetched: now
+      }
+
+      // 
+      if (userStore.currentUser && username === userStore.currentUser.username) {
+        userStore.currentUser = res.data
+        localStorage.setItem('currentUser', JSON.stringify(res.data))
+      }
     }
   } catch (error) {
     if (error.response?.status === 403) {
@@ -139,7 +155,6 @@ const fetchUser = async () => {
     loading.value = false
   }
 }
-
 const sendFriendRequest = async () => {
   try {
     await authAxios.post('/friends/send/', { to_username: user.value.username })
