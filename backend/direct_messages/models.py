@@ -29,6 +29,7 @@ class Message(models.Model):
     message = EncryptedTextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    pinned = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['timestamp']

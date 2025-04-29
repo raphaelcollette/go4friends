@@ -33,6 +33,20 @@
       <div class="flex-1 flex flex-col p-6">
         <div ref="messageContainer" class="flex-1 flex flex-col space-y-4 overflow-y-auto">
 
+          <!-- Pinned messages -->
+          <div v-if="messageStore.pinnedMessages[activeThreadId]?.length" class="sticky top-0 z-10 bg-white backdrop-blur-md py-2 px-4 rounded-b-xl shadow-md">
+            <h3 class="text-sm font-bold text-gray-700 mb-2">📌 Pinned</h3>
+            <div class="space-y-2">
+              <div
+                v-for="pin in messageStore.pinnedMessages[activeThreadId]"
+                :key="pin.id"
+                class="bg-yellow-100 text-gray-800 px-4 py-2 rounded-xl w-fit max-w-xs"
+              >
+                {{ pin.message }}
+              </div>
+            </div>
+          </div>
+
           <div v-if="activeThreadId && groupedMessages.length > 0">
             <div
               v-for="(group, index) in groupedMessages"
@@ -48,12 +62,23 @@
               <!-- Messages in the group -->
               <div class="flex flex-col space-y-1">
                 <div
-                  v-for="(text, idx) in group.messages"
-                  :key="idx"
-                  class="px-4 py-2 rounded-xl text-white break-words max-w-xs w-fit"
-                  :class="[ group.sender.username === currentUser.username ? 'self-end bg-primary' : 'self-start bg-gray-600' ]"
+                  v-for="msg in group.messages"
+                  :key="msg.id"
+                  class="relative group"
                 >
-                  {{ text }}
+                  <div
+                    class="px-4 py-2 rounded-xl text-white break-words max-w-xs w-fit"
+                    :class="[ group.sender.username === currentUser.username ? 'ml-auto bg-primary' : 'mr-auto bg-gray-600' ]"
+                  >
+                    {{ msg.message }}
+                  </div>
+                  <button
+                    @click="togglePin(msg.id)"
+                    class="absolute top-0 right-0 text-xs text-yellow-300 hover:text-yellow-500 hidden group-hover:inline"
+                    title="Pin/Unpin"
+                  >
+                    📌
+                  </button>
                 </div>
               </div>
 
@@ -139,25 +164,26 @@ const groupedMessages = computed(() => {
   const groups = []
   let currentGroup = null
 
-  const FIVE_MINUTES = 5 * 60 * 1000 // ms
+  const FIVE_MINUTES = 5 * 60 * 1000
 
-  for (const msg of messageStore.messagesByThread[activeThreadId.value] || []) {
+  const messages = messageStore.messagesByThread[activeThreadId.value] || []
+
+  for (const msg of messages) {
+    const ts = new Date(msg.timestamp)
+
     if (
       !currentGroup ||
       currentGroup.sender.username !== msg.sender.username ||
-      new Date(msg.timestamp) - new Date(currentGroup.lastTimestamp) > FIVE_MINUTES
+      ts - new Date(currentGroup.lastTimestamp) > FIVE_MINUTES
     ) {
-      // Start a new group
       if (currentGroup) groups.push(currentGroup)
-
       currentGroup = {
         sender: msg.sender,
-        messages: [msg.message],
+        messages: [msg],  // now full message object
         lastTimestamp: msg.timestamp
       }
     } else {
-      // Add to current group
-      currentGroup.messages.push(msg.message)
+      currentGroup.messages.push(msg)
       currentGroup.lastTimestamp = msg.timestamp
     }
   }
@@ -181,6 +207,7 @@ const selectThread = async (id) => {
   if (!messageStore.messagesByThread[id]) {
     await messageStore.fetchMessages(id, true)
   }
+  await messageStore.fetchPinnedMessages(id) // ← add this
   await nextTick()
   if (messageContainer.value) {
     messageContainer.value.scrollTop = messageContainer.value.scrollHeight
@@ -199,6 +226,15 @@ const sendMessage = async () => {
     await messageStore.fetchThreads(true) // Refresh threads
   } catch {
     toast.error('Failed to send message')
+  }
+}
+
+async function togglePin(messageId) {
+  try {
+    await messageStore.togglePin(messageId, activeThreadId.value)
+    toast.success('Pin status updated')
+  } catch {
+    toast.error('Failed to update pin')
   }
 }
 
@@ -242,7 +278,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (pollingInterval) {
-    clearInterval(pollingInterval) // ✅ clean up
+    clearInterval(pollingInterval) //
   }
 })
 </script>

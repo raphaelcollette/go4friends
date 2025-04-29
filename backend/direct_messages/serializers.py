@@ -16,7 +16,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ['id', 'sender', 'message', 'timestamp', 'is_read']
+        fields = ['id', 'sender', 'message', 'timestamp', 'is_read', 'pinned']
 
 
 class ThreadParticipantSerializer(serializers.ModelSerializer):

@@ -8,6 +8,7 @@ from .serializers import MessageSerializer, ThreadSerializer
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 from django.db.models import Count
+from rest_framework.views import APIView
 
 User = get_user_model()
 
@@ -105,3 +106,12 @@ class StartPrivateThreadAPIView(generics.GenericAPIView):
             if user != request.user:
                 ThreadParticipant.objects.create(thread=thread, user=user)
         return Response({'thread_id': thread.id})
+
+class TogglePinMessageAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        message = get_object_or_404(Message, id=pk, thread__participants__user=request.user)
+        message.pinned = not message.pinned
+        message.save()
+        return Response({'status': 'pinned' if message.pinned else 'unpinned'}, status=status.HTTP_200_OK)

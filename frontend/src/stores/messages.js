@@ -7,6 +7,7 @@ export const useMessageStore = defineStore('messages', {
     lastFetched: null,
     messagesByThread: {},
     loadingByThread: {},
+    pinnedMessages: {},
   }),
 
   actions: {
@@ -60,6 +61,34 @@ export const useMessageStore = defineStore('messages', {
       await this.fetchThreads(true)
       return res.data
     },
+
+    async fetchPinnedMessages(threadId) {
+      try {
+        // Reuse full message list if already fetched
+        const all = this.messagesByThread[threadId]
+        if (all) {
+          this.pinnedMessages[threadId] = all.filter(msg => msg.pinned)
+        } else {
+          // Otherwise fetch and filter
+          const res = await authAxios.get(`/messages/threads/${threadId}/messages/`)
+          this.pinnedMessages[threadId] = res.data.filter(msg => msg.pinned)
+        }
+      } catch (error) {
+        console.error(`Failed to fetch pinned messages for thread ${threadId}:`, error)
+        this.pinnedMessages[threadId] = []
+      }
+    },
+
+    async togglePin(messageId, threadId) {
+      try {
+        await authAxios.post(`messages/messages/${messageId}/pin/`)
+        await this.fetchPinnedMessages(threadId)
+      } catch (error) {
+        console.error(`Failed to toggle pin for message ${messageId}:`, error)
+        throw error
+      }
+    },
+
 
     reset() {
       this.threads = []
