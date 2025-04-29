@@ -37,7 +37,6 @@
 
         <!-- Friends List -->
         <div v-if="friendStore.friends.length > 0" class="mb-16">
-          <h2 class="text-2xl font-bold text-gray-700 mb-6">Friends</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             <RouterLink
               v-for="friend in friendStore.friends"
