@@ -3,7 +3,7 @@
     style="background-color: var(--navbar-bg); backdrop-filter: var(--navbar-blur);">
     
     <RouterLink to="/main" class="text-2xl font-bold text-primary">
-      placeholder
+      go4friends
     </RouterLink>
 
     <!-- Global Search Bar -->
