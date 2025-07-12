@@ -17,8 +17,8 @@ PyJWT==2.9.0
 python-dotenv==1.1.0
 sqlparse==0.5.3
 boto3
-django-storages
-supabase-py
+django-storages==1.13.1
+supabase
 gunicorn
 whitenoise
 requests
