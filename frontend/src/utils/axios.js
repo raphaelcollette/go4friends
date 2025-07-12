@@ -3,12 +3,12 @@ import router from '@/router'
 
 // BASE axios = No Authorization header
 const base = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: import.meta.env.VITE_API_BASE_URL
 })
 
 // AUTH axios = Attach token + Handle token expiration
 const authAxios = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/',
+  baseURL: import.meta.env.VITE_API_BASE_URL
 })
 
 // Attach token before every request
