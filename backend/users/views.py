@@ -94,8 +94,7 @@ def update_me(request):
             # Overwrite if exists
             supabase.storage.from_('go4friendsimages').update(path, file_bytes)
 
-            public_url_response = supabase.storage.from_('go4friendsimages').get_public_url(path)
-            public_url = public_url_response.get('publicURL')
+            public_url = supabase.storage.from_('go4friendsimages').get_public_url(path)
 
             if not public_url:
                 return Response({"error": "Failed to get profile picture URL."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
