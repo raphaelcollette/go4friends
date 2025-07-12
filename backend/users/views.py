@@ -14,6 +14,7 @@ from friends.models import FriendRequest
 from django.db.models import Q
 import json
 from rest_framework.decorators import parser_classes
+from storage3.exceptions import StorageApiError
 
 User = get_user_model()
 
@@ -86,27 +87,31 @@ def update_me(request):
         user.location = location
 
     if profile_picture is not None:
-        # Upload file bytes to Supabase Storage
-        file_bytes = profile_picture.read()
-        path = f"profile_pics/{user.id}/{profile_picture.name}"
-        upload_response = supabase.storage.from_('go4friendsimages').upload(path, file_bytes)
-        if upload_response.get('error'):
-            return Response({"error": "Failed to upload profile picture."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            file_bytes = profile_picture.read()
+            path = f"profile_pics/{user.id}/{profile_picture.name}"
 
-        public_url_response = supabase.storage.from_('go4friendsimages').get_public_url(path)
-        public_url = public_url_response.get('publicURL')
-        if not public_url:
-            return Response({"error": "Failed to get profile picture URL."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Overwrite if exists
+            supabase.storage.from_('go4friendsimages').update(path, file_bytes)
 
-        user.profile_picture_url = public_url  
+            public_url_response = supabase.storage.from_('go4friendsimages').get_public_url(path)
+            public_url = public_url_response.get('publicURL')
+
+            if not public_url:
+                return Response({"error": "Failed to get profile picture URL."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            user.profile_picture_url = public_url
+
+        except StorageApiError as e:
+            return Response({"error": str(e)}, status=400)
 
     if major is not None:
         user.major = major
     if graduation_year is not None:
-        user.graduation_year = graduation_year    
+        user.graduation_year = graduation_year
 
     if is_private is not None:
-        user.is_private = is_private in [True, 'true', 'True', 1, '1']    
+        user.is_private = is_private in [True, 'true', 'True', 1, '1']
 
     if interests is not None:
         if isinstance(interests, list):
@@ -119,6 +124,7 @@ def update_me(request):
 
     user.save()
     return Response({"message": "Profile updated successfully!"})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
