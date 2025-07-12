@@ -56,6 +56,13 @@ class MyTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+from supabase import create_client
+import os
+
+supabase_url = os.getenv('SUPABASE_URL')
+supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+supabase = create_client(supabase_url, supabase_key)
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
@@ -77,8 +84,22 @@ def update_me(request):
         user.bio = bio
     if location is not None:
         user.location = location
+
     if profile_picture is not None:
-        user.profile_picture = profile_picture
+        # Upload file bytes to Supabase Storage
+        file_bytes = profile_picture.read()
+        path = f"profile_pics/{user.id}/{profile_picture.name}"
+        upload_response = supabase.storage.from_('go4friendsimages').upload(path, file_bytes)
+        if upload_response.get('error'):
+            return Response({"error": "Failed to upload profile picture."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        public_url_response = supabase.storage.from_('go4friendsimages').get_public_url(path)
+        public_url = public_url_response.get('publicURL')
+        if not public_url:
+            return Response({"error": "Failed to get profile picture URL."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        user.profile_picture_url = public_url  
+
     if major is not None:
         user.major = major
     if graduation_year is not None:
@@ -98,7 +119,6 @@ def update_me(request):
 
     user.save()
     return Response({"message": "Profile updated successfully!"})
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

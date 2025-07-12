@@ -50,6 +50,8 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
+        if obj.profile_picture_url:
+            return obj.profile_picture_url
         if obj.profile_picture and request:
             return request.build_absolute_uri(obj.profile_picture.url)
         return None
