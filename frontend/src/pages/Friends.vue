@@ -24,8 +24,8 @@
             :to="`/profile/${user.username}`"
             class="flex flex-col items-center p-6 glossy-bg rounded-2xl shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-300 no-underline relative group cursor-pointer"
           >
-            <div v-if="user.profile_picture">
-              <img :src="user.profile_picture" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4" :style="{ borderColor: 'var(--btn-primary, #7A0019)' }" />
+            <div v-if="user.profile_picture_url">
+              <img :src="user.profile_picture_url" alt="Profile Picture" class="w-24 h-24 rounded-full object-cover border-4" :style="{ borderColor: 'var(--btn-primary, #7A0019)' }" />
             </div>
             <div v-else class="w-24 h-24 rounded-full flex items-center justify-center text-3xl text-white" :style="{ backgroundColor: 'var(--btn-primary, #7A0019)' }">
               {{ user?.username?.charAt(0)?.toUpperCase() }}
@@ -78,8 +78,8 @@
               :to="`/profile/${user.username}`"
               class="flex items-center gap-3 glossy-bg p-3 rounded-xl hover:brightness-105 transition cursor-pointer"
             >
-              <div v-if="user.profile_picture">
-                <img :src="user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2" :style="{ borderColor: 'var(--btn-primary, #7A0019)' }" />
+              <div v-if="user.profile_picture_url">
+                <img :src="user.profile_picture_url" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2" :style="{ borderColor: 'var(--btn-primary, #7A0019)' }" />
               </div>
               <div v-else class="w-12 h-12 rounded-full flex items-center justify-center text-lg text-white" :style="{ backgroundColor: 'var(--btn-primary, #7A0019)' }">
                 {{ user?.username?.charAt(0)?.toUpperCase() }}

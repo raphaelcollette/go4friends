@@ -21,8 +21,8 @@
       <div v-else class="glossy-bg rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
         <div class="flex justify-center">
           <img
-            v-if="user.profile_picture"
-            :src="user.profile_picture"
+            v-if="user.profile_picture_url"
+            :src="user.profile_picture_url"
             alt="Profile Picture"
             class="w-28 h-28 rounded-full object-cover border-4"
             :style="{ borderColor: 'var(--btn-primary, #6366f1)' }"
