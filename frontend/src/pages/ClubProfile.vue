@@ -18,7 +18,7 @@
             class="flex flex-col items-center glossy-bg p-4 rounded-xl hover:brightness-105 transition-all cursor-pointer"
           >
             <div class="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-purple-200">
-              <img v-if="member.user.profile_picture_url" :src="member.user.profile_picture_url" alt="Profile" class="w-full h-full object-cover" />
+              <img v-if="member.user.profile_picture" :src="member.user.profile_picture" alt="Profile" class="w-full h-full object-cover" />
               <div v-else class="text-2xl text-white font-bold">{{ member.user.username?.charAt(0).toUpperCase() }}</div>
             </div>
             <p class="mt-3 font-semibold text-gray-800">
