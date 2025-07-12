@@ -54,8 +54,6 @@
                 <span class="text-gray-600 text-sm">Choose your secondary color</span>
               </div>
             </div>
-
-            <button @click="toggleDarkMode" class="btn w-full mt-4">Toggle Dark Mode</button>
             <button @click="resetTheme" class="btn w-full mt-2">Reset to Default</button>
           </div>
 
@@ -157,12 +155,6 @@ const confirmDeleteAccount = async () => {
   } catch {
     toast.error('Failed to delete account.')
   }
-}
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-  localStorage.setItem('darkMode', isDarkMode.value)
-  applyTheme()
 }
 
 const resetTheme = () => {
