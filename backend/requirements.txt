@@ -22,3 +22,4 @@ supabase
 gunicorn
 whitenoise
 requests
+dj-database-url
