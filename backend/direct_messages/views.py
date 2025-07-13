@@ -9,8 +9,16 @@ from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from rest_framework.views import APIView
+from friends.models import FriendRequest  # Import your FriendRequest model
 
 User = get_user_model()
+
+def are_friends(user1, user2):
+    """Helper function to check if two users are friends"""
+    return FriendRequest.objects.filter(
+        Q(from_user=user1, to_user=user2) | Q(from_user=user2, to_user=user1),
+        status='accepted'
+    ).exists()
 
 class ThreadListAPIView(generics.ListAPIView):
     serializer_class = ThreadSerializer
@@ -18,7 +26,6 @@ class ThreadListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return Thread.objects.filter(participants__user=self.request.user).select_related('club').distinct()
-
 
 
 class ThreadDetailAPIView(generics.RetrieveAPIView):
@@ -43,7 +50,6 @@ class MessageListAPIView(generics.ListAPIView):
         )
 
 
-
 class SendMessageAPIView(generics.CreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,6 +57,15 @@ class SendMessageAPIView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         thread_id = kwargs.get('thread_id')
         thread = get_object_or_404(Thread, id=thread_id, participants__user=request.user)
+        
+        # Check if user is friends with all other participants in the thread
+        other_participants = thread.participants.exclude(user=request.user)
+        for participant in other_participants:
+            if not are_friends(request.user, participant.user):
+                return Response({
+                    'error': f'You can only send messages to friends. You are not friends with {participant.user.username}.'
+                }, status=status.HTTP_403_FORBIDDEN)
+        
         message = request.data.get('message')
 
         if not message:
@@ -82,6 +97,13 @@ class StartPrivateThreadAPIView(generics.GenericAPIView):
         users = list(User.objects.filter(username__in=usernames).distinct())
         if len(users) != len(usernames):
             return Response({'error': 'One or more users not found.'}, status=404)
+
+        # CHECK FRIENDSHIP FOR ALL USERS
+        for user in users:
+            if not are_friends(request.user, user):
+                return Response({
+                    'error': f'You can only start conversations with friends. You are not friends with {user.username}.'
+                }, status=status.HTTP_403_FORBIDDEN)
 
         # Private 1-1 chat
         if len(users) == 1:
