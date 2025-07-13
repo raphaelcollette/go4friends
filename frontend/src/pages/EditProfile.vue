@@ -146,17 +146,7 @@ const updateProfile = async () => {
 
     const response = await authAxios.patch('/users/me/update/', payload, { headers })
     
-    userStore.currentUser = {
-      ...userStore.currentUser,
-      ...response.data, 
-      
-      full_name: response.data.full_name || full_name.value,
-      bio: response.data.bio || bio.value,
-      location: response.data.location || location.value,
-      interests: response.data.interests || interests.value,
-      major: response.data.major || major.value,
-      graduation_year: response.data.graduation_year || graduationYear.value || null,
-    }
+    userStore.updateCurrentUser(response.data)
 
     profile_picture.value = null
     const fileInput = document.querySelector('input[type="file"]')

@@ -1,4 +1,3 @@
-// stores/user.js
 import { defineStore } from 'pinia'
 import { authAxios } from '@/utils/axios'
 
@@ -12,7 +11,7 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     async fetchCurrentUser(force = false) {
-      if (this.currentUser && !force) return // Only refetch if forced
+      if (this.currentUser && !force) return 
       try {
         const res = await authAxios.get('/users/me/')
         this.currentUser = res.data
@@ -22,7 +21,6 @@ export const useUserStore = defineStore('user', {
       }
     },
     async refreshCurrentUser() {
-      // Always force refetch (for after club deletes, profile updates, etc.)
       await this.fetchCurrentUser(true)
     },
     async fetchNotifications(force = false) {
