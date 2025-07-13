@@ -13,6 +13,7 @@ from clubs.models import ClubMembership
 from users.serializers import UserPublicSerializer
 from supabase import create_client
 from storage3.exceptions import StorageApiError
+import os
 
 # --- Create Event ---
 supabase_url = os.getenv('SUPABASE_URL')
