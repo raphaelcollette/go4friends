@@ -144,18 +144,23 @@ const updateProfile = async () => {
       headers = { 'Content-Type': 'application/json' }
     }
 
-    await authAxios.patch('/users/me/update/', payload, { headers })
-
-    // ✅ Instantly update the store instead of refetching
+    const response = await authAxios.patch('/users/me/update/', payload, { headers })
+    
     userStore.currentUser = {
       ...userStore.currentUser,
-      full_name: full_name.value,
-      bio: bio.value,
-      location: location.value,
-      interests: interests.value,
-      major: major.value,
-      graduation_year: graduationYear.value || null,
+      ...response.data, 
+      
+      full_name: response.data.full_name || full_name.value,
+      bio: response.data.bio || bio.value,
+      location: response.data.location || location.value,
+      interests: response.data.interests || interests.value,
+      major: response.data.major || major.value,
+      graduation_year: response.data.graduation_year || graduationYear.value || null,
     }
+
+    profile_picture.value = null
+    const fileInput = document.querySelector('input[type="file"]')
+    if (fileInput) fileInput.value = ''
 
     toast.success('Profile updated successfully!')
     router.push(`/profile/${userStore.currentUser.username}`)
