@@ -23,6 +23,14 @@ export const useUserStore = defineStore('user', {
     async refreshCurrentUser() {
       await this.fetchCurrentUser(true)
     },
+    updateCurrentUser(userData) {
+      this.currentUser = { ...this.currentUser, ...userData }
+      localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
+      
+      if (this.currentUser?.username && this.profileCache[this.currentUser.username]) {
+        this.clearProfileCache(this.currentUser.username)
+      }
+    },
     async fetchNotifications(force = false) {
       const oneMinute = 60 * 1000
       if (!force && this.lastFetched && Date.now() - this.lastFetched < oneMinute) return
