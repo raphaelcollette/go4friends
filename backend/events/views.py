@@ -11,25 +11,29 @@ from django.db.models import Q
 from rest_framework.views import APIView
 from clubs.models import ClubMembership
 from users.serializers import UserPublicSerializer
+from supabase import create_client
+from supabase.storage import StorageApiError
 
 # --- Create Event ---
+supabase_url = os.getenv('SUPABASE_URL')
+supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+supabase = create_client(supabase_url, supabase_key)
+
 class EventCreateAPIView(generics.GenericAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # Needed for images
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, *args, **kwargs):
         club_name = request.data.get('club_name')
         club = None
 
-        # If this is a club event, fetch the club and check if the user is allowed
         if club_name:
             try:
                 club = Club.objects.get(name=club_name)
             except Club.DoesNotExist:
                 return Response({'error': 'Club not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-            # Check if the user is an admin or moderator in that club
             membership = club.clubmembership_set.filter(user=request.user).first()
             if not membership or membership.role not in ['admin', 'moderator']:
                 return Response({'error': 'Only admins or moderators can create events for this club.'},
@@ -37,8 +41,24 @@ class EventCreateAPIView(generics.GenericAPIView):
 
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save(club=club)
+            image_file = request.FILES.get('image')
+            image_url = None
+
+            if image_file:
+                try:
+                    file_bytes = image_file.read()
+                    path = f"event_images/{request.user.id}/{image_file.name}"
+                    supabase.storage.from_('go4friendsimages').update(path, file_bytes)
+                    image_url = supabase.storage.from_('go4friendsimages').get_public_url(path)
+                    if not image_url:
+                        return Response({'error': 'Failed to get event image URL.'},
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                except StorageApiError as e:
+                    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            event = serializer.save(club=club, image=image_url)
             return Response(EventSerializer(event, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # --- List All Events ---

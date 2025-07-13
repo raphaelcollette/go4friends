@@ -63,7 +63,7 @@ class ClubJoinAPIView(generics.GenericAPIView):
     def post(self, request, club_name, *args, **kwargs):
         club = get_object_or_404(Club, name=club_name)
 
-        # 🔐 Private club? Require accepted invite
+        # Private club? Require accepted invite
         if club.is_private:
             invite_exists = ClubInvite.objects.filter(club=club, invitee=request.user, accepted=True).exists()
             if not invite_exists:
@@ -72,14 +72,13 @@ class ClubJoinAPIView(generics.GenericAPIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-        # ✅ Safe creation — no IntegrityError even if already joined
+        # Safe creation — no IntegrityError even if already joined
         membership, created = ClubMembership.objects.get_or_create(
             user=request.user,
             club=club,
             defaults={'role': 'member'}
         )
 
-        # ✅ Add to chat if new or if not already added
         add_user_to_club_chat(club, request.user)
 
         return Response(
@@ -101,11 +100,11 @@ class ClubLeaveAPIView(generics.GenericAPIView):
             membership = ClubMembership.objects.get(user=request.user, club=club)
             membership.delete()
 
-            # ✅ Remove from club chat if thread exists
+            #  Remove from club chat if thread exists
             if club.thread:
                 ThreadParticipant.objects.filter(thread=club.thread, user=request.user).delete()
 
-            # ✅ Clean up any invite (so user can be invited again later)
+            #  Clean up any invite (so user can be invited again later)
             ClubInvite.objects.filter(club=club, invitee=request.user).delete()
 
             return Response({'message': f'Left {club.name} successfully.'}, status=status.HTTP_200_OK)
@@ -164,11 +163,11 @@ class ClubDeleteAPIView(APIView):
         # Count total members
         total_members = ClubMembership.objects.filter(club=club).count()
 
-        # ✅ Allow delete if admin OR the only member
+        #  Allow delete if admin OR the only member
         if membership.role != 'admin' and total_members > 1:
             return Response({'error': 'Only club admins can delete the club unless you are the only member.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # ✅ Delete linked chat thread if exists
+        # Delete linked chat thread if exists
         if club.thread:
             club.thread.delete()
 

@@ -12,7 +12,7 @@ class Event(models.Model):
     location = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(upload_to='event_images/', null=True, blank=True)
+    image = models.URLField(null=True, blank=True)
     attendees = models.ManyToManyField(User, related_name='attending_events', blank=True)
 
     def __str__(self):
