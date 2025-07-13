@@ -5,6 +5,7 @@ class EventSerializer(serializers.ModelSerializer):
     club = serializers.SerializerMethodField()
     is_going = serializers.SerializerMethodField()
     attendee_count = serializers.SerializerMethodField()
+    image = serializers.URLField(read_only=True)
 
     class Meta:
         model = Event
