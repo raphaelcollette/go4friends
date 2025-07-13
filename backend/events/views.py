@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from clubs.models import ClubMembership
 from users.serializers import UserPublicSerializer
 from supabase import create_client
-from supabase.storage import StorageApiError
+from storage3.exceptions import StorageApiError
 
 # --- Create Event ---
 supabase_url = os.getenv('SUPABASE_URL')
@@ -53,7 +53,7 @@ class EventCreateAPIView(generics.GenericAPIView):
                     if not image_url:
                         return Response({'error': 'Failed to get event image URL.'},
                                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                except StorageApiError as e:
+                except StorageAPIError as e:
                     return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
             event = serializer.save(club=club, image=image_url)
