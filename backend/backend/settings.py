@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'False'
-ALLOWED_HOSTS = ['35.239.115.54', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['go4friends-141192021287.northamerica-northeast2.run.app', 'localhost', '127.0.0.1']
 
 FIELD_ENCRYPTION_KEY = os.getenv('ENCRYPTED_MODEL_FIELDS_KEY')
 # Application definition
