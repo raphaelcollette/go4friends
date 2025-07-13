@@ -2,23 +2,26 @@
   <nav class="w-full p-4 flex justify-between items-center shadow-md fixed top-0 z-50"
     style="background-color: var(--navbar-bg); backdrop-filter: var(--navbar-blur);">
     
-    <RouterLink to="/main" class="text-2xl font-bold text-primary">
-      go4friends
-    </RouterLink>
+    <!-- Logo - Fixed width to prevent shifting -->
+    <div class="flex-shrink-0 w-32">
+      <RouterLink to="/main" class="text-2xl font-bold text-primary">
+        go4friends
+      </RouterLink>
+    </div>
 
-    <!-- Global Search Bar -->
-    <div class="relative w-full max-w-md">
-      <form @submit.prevent class="relative w-full max-w-md mx-auto">
+    <!-- Global Search Bar - Consistent sizing -->
+    <div class="relative flex-1 max-w-md mx-4">
+      <form @submit.prevent class="relative w-full">
         <input
           v-model="searchQuery"
           @input="handleSearch"
           type="text"
           placeholder="Search users, clubs, events..."
-          class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none input-primary"
+          class="w-full px-4 py-2 rounded-full bg-white/70 text-gray-800 placeholder-gray-500 focus:outline-none input-primary text-sm"
         />
         <button
           type="submit"
-          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary"
         >
           🔍
         </button>
@@ -27,7 +30,7 @@
       <!-- Search Dropdown -->
       <div
         v-if="showDropdown"
-        class="absolute left-0 mt-2 w-full max-w-md bg-white border border-gray-300 rounded-xl shadow-lg z-50"
+        class="absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-xl shadow-lg z-50"
       >
         <div v-if="loading" class="p-4 text-center text-gray-500">Searching...</div>
         <template v-else>
@@ -39,7 +42,7 @@
                 v-for="user in results.users"
                 :key="user.username"
                 @click="goToUser(user.username)"
-                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded text-sm"
               >
                 @{{ user.username }} <span v-if="user.full_name">– {{ user.full_name }}</span>
               </div>
@@ -52,7 +55,7 @@
                 v-for="club in results.clubs"
                 :key="club.id"
                 @click="goToClub(club.name)"
-                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded text-sm"
               >
                 {{ club.name }}
               </div>
@@ -65,7 +68,7 @@
                 v-for="event in results.events"
                 :key="event.id"
                 @click="goToEvent(event.id)"
-                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded text-sm"
               >
                 {{ event.title }}
               </div>
@@ -76,17 +79,17 @@
       </div>
     </div>
 
-    <!-- Right Side Buttons -->
-    <div class="flex space-x-4 items-center relative">
-      <RouterLink to="/messages" class="btn">💬 Messages</RouterLink>
-      <RouterLink to="/clubs" class="btn">Clubs</RouterLink>
-      <RouterLink to="/events" class="btn">Events</RouterLink>
-      <RouterLink to="/friends" class="btn">Friends</RouterLink>
-      <RouterLink v-if="currentUser || fallbackUsername" :to="`/profile/${(currentUser?.username || fallbackUsername)}`" class="btn">Profile</RouterLink>
+    <!-- Right Side Buttons - Consistent spacing and sizing -->
+    <div class="flex items-center space-x-3 flex-shrink-0">
+      <RouterLink to="/messages" class="btn whitespace-nowrap">💬 Messages</RouterLink>
+      <RouterLink to="/clubs" class="btn whitespace-nowrap">Clubs</RouterLink>
+      <RouterLink to="/events" class="btn whitespace-nowrap">Events</RouterLink>
+      <RouterLink to="/friends" class="btn whitespace-nowrap">Friends</RouterLink>
+      <RouterLink v-if="currentUser || fallbackUsername" :to="`/profile/${(currentUser?.username || fallbackUsername)}`" class="btn whitespace-nowrap">Profile</RouterLink>
 
       <!-- Notifications -->
       <div class="relative" ref="notiButton">
-        <button @click.stop="toggleDropdown" class="btn relative">
+        <button @click.stop="toggleDropdown" class="btn relative whitespace-nowrap">
           🔔
           <span
             v-if="unreadCount > 0"
@@ -140,7 +143,7 @@
         </div>
       </div>
 
-      <RouterLink to="/settings" class="btn">Settings</RouterLink>
+      <RouterLink to="/settings" class="btn whitespace-nowrap">Settings</RouterLink>
     </div>
   </nav>
 </template>
@@ -306,3 +309,42 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+/* Ensure consistent button sizing across screen sizes */
+.btn {
+  @apply px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200;
+  min-width: fit-content;
+}
+
+.greenbtn {
+  @apply bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition-colors;
+}
+
+.redbtn {
+  @apply bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors;
+}
+
+/* Prevent layout shifts on different screen sizes */
+nav {
+  min-height: 64px;
+}
+
+/* Ensure search dropdown doesn't cause layout issues */
+.relative {
+  position: relative;
+}
+
+/* Consistent spacing for all screen sizes */
+@media (min-width: 1024px) {
+  .btn {
+    @apply px-4 py-2;
+  }
+}
+
+@media (min-width: 1280px) {
+  nav {
+    @apply px-6;
+  }
+}
+</style>
