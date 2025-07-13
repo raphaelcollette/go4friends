@@ -9,7 +9,7 @@ from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from rest_framework.views import APIView
-from friends.models import FriendRequest  # Import your FriendRequest model
+from friends.models import FriendRequest 
 
 User = get_user_model()
 

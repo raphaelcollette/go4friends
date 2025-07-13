@@ -129,16 +129,15 @@
 
 
   
-
-
-
 <script setup>
 import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useUserStore } from '@/stores/user'
 import { useFriendStore } from '@/stores/friend'
 import { useMessageStore } from '@/stores/messages'
 
+const route = useRoute()
 const toast = useToast()
 const userStore = useUserStore()
 const friendStore = useFriendStore()
@@ -197,6 +196,16 @@ watch(() => groupedMessages.value.length, async () => {
   await nextTick()
   if (messageContainer.value) {
     messageContainer.value.scrollTop = messageContainer.value.scrollHeight
+  }
+})
+
+// Watch for route changes to handle thread selection from query params
+watch(() => route.query.thread, async (newThreadId) => {
+  if (newThreadId && messageStore.threads.length > 0) {
+    const threadId = parseInt(newThreadId)
+    if (messageStore.threads.some(t => t.id === threadId)) {
+      await selectThread(threadId)
+    }
   }
 })
 
@@ -263,6 +272,26 @@ const createGroupChat = async () => {
   }
 }
 
+// Helper function to handle thread auto-selection from query params
+const handleThreadAutoSelection = async () => {
+  const threadIdFromQuery = route.query.thread
+  if (threadIdFromQuery && messageStore.threads.length > 0) {
+    const threadId = parseInt(threadIdFromQuery)
+    const threadExists = messageStore.threads.some(t => t.id === threadId)
+    
+    if (threadExists) {
+      await selectThread(threadId)
+    } else {
+      // If thread doesn't exist, it might be a new thread that hasn't been fetched yet
+      // Refresh threads and try again
+      await messageStore.fetchThreads(true)
+      if (messageStore.threads.some(t => t.id === threadId)) {
+        await selectThread(threadId)
+      }
+    }
+  }
+}
+
 let pollingInterval = null
 
 onMounted(async () => {
@@ -270,15 +299,17 @@ onMounted(async () => {
   await friendStore.fetchFriends()
   await messageStore.fetchThreads()
 
+  // Handle thread auto-selection after threads are loaded
+  await handleThreadAutoSelection()
+
   pollingInterval = setInterval(async () => {
     await messageStore.fetchThreads(true) // force refresh threads every 15 seconds
   }, 15000) // 15000ms = 15 seconds
-
 })
 
 onUnmounted(() => {
   if (pollingInterval) {
-    clearInterval(pollingInterval) //
+    clearInterval(pollingInterval)
   }
 })
 </script>

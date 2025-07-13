@@ -181,7 +181,9 @@ const startOrNavigateToThread = async () => {
       username: user.value.username,
     })
     const threadId = res.data.thread_id
-    router.push(`/messages/thread/${threadId}`)
+    
+    // Navigate to messages with thread selection
+    router.push(`/messages?thread=${threadId}`)
   } catch (e) {
     toast.error('Could not start chat.')
   }
