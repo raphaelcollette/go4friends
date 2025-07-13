@@ -49,7 +49,7 @@ class EventCreateAPIView(generics.GenericAPIView):
                 try:
                     file_bytes = image_file.read()
                     path = f"event_images/{request.user.id}/{image_file.name}"
-                    supabase.storage.from_('go4friendsimages').update(path, file_bytes)
+                    supabase.storage.from_('go4friendsimages').upload(path, file_bytes)
                     image_url = supabase.storage.from_('go4friendsimages').get_public_url(path)
                     if not image_url:
                         return Response({'error': 'Failed to get event image URL.'},
