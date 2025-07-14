@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from .models import Post, Like, Repost
 from clubs.models import ClubMembership
 from django.contrib.auth import get_user_model
+from posts.serializers import PostSerializer
 
 User = get_user_model()
 
