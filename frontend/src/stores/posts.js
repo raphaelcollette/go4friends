@@ -41,6 +41,42 @@ export const usePostStore = defineStore('posts', {
       } catch (error) {
         console.error('Failed to delete post:', error)
       }
-    }
+    },
+
+    async likePost(postId) {
+      try {
+        await authAxios.post(`/posts/${postId}/like/`)
+        await this.fetchPosts()
+      } catch (error) {
+        console.error('Failed to like post:', error)
+      }
+    },
+
+    async unlikePost(postId) {
+      try {
+        await authAxios.post(`/posts/${postId}/unlike/`)
+        await this.fetchPosts()
+      } catch (error) {
+        console.error('Failed to unlike post:', error)
+      }
+    },
+
+    async repostPost(postId) {
+      try {
+        await authAxios.post(`/posts/${postId}/repost/`)
+        await this.fetchPosts()
+      } catch (error) {
+        console.error('Failed to repost post:', error)
+      }
+    },
+
+    async undoRepostPost(postId) {
+      try {
+        await authAxios.post(`/posts/${postId}/undo_repost/`)
+        await this.fetchPosts()
+      } catch (error) {
+        console.error('Failed to undo repost:', error)
+      }
+    },
   }
 })

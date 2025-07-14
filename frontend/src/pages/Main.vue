@@ -59,13 +59,40 @@
                       <span>💬</span>
                       <span class="text-sm">{{ post.commentCount }}</span>
                     </button>
-                    <button class="flex items-center space-x-2 hover:text-green-500 transition-colors">
+                    <!-- Like Button -->
+                    <button
+                      class="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                      @click="likePost(post.id)"
+                    >
+                      <span>❤️</span>
+                      <span class="text-sm">{{ post.likeCount }}</span>
+                    </button>
+
+                    <!-- Unlike Button -->
+                    <button
+                      class="flex items-center space-x-2 text-red-500 transition-colors"
+                      @click="unlikePost(post.id)"
+                    >
+                      <span>🗑️❤️</span>
+                      <span class="text-sm">Undo Like</span>
+                    </button>
+
+                    <!-- Repost Button -->
+                    <button
+                      class="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                      @click="repostPost(post.id)"
+                    >
                       <span>🔁</span>
                       <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
-                    <button class="flex items-center space-x-2 hover:text-red-500 transition-colors">
-                      <span>❤️</span>
-                      <span class="text-sm">{{ post.likeCount }}</span>
+
+                    <!-- Undo Repost Button -->
+                    <button
+                      class="flex items-center space-x-2 text-green-600 transition-colors"
+                      @click="undoRepostPost(post.id)"
+                    >
+                      <span>🗑️🔁</span>
+                      <span class="text-sm">Undo Repost</span>
                     </button>
                   </div>
                 </div>
@@ -205,6 +232,38 @@ const userInitials = computed(() => {
   const names = user.full_name?.split(' ') || []
   return names.slice(0, 2).map(n => n[0]?.toUpperCase()).join('') || user.username?.[0]?.toUpperCase() || 'U'
 })
+
+const likePost = async (postId) => {
+  try {
+    await postStore.likePost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const unlikePost = async (postId) => {
+  try {
+    await postStore.unlikePost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const repostPost = async (postId) => {
+  try {
+    await postStore.repostPost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const undoRepostPost = async (postId) => {
+  try {
+    await postStore.undoRepostPost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 onMounted(async () => {
   await eventStore.fetchEvents()
