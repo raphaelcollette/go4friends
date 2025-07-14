@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background);">
-    <main class="flex-1 flex pt-24 px-6 max-w-6xl mx-auto w-full">
+    <main class="flex-1 flex pt-24 px-6 max-w-7xl mx-auto w-full gap-8">
       
-      <!-- Main Content -->
-      <section class="flex-1 flex flex-col space-y-20">
+      <!-- Main Content - Posts Feed -->
+      <section class="flex-1 flex flex-col">
 
         <!-- Social Feed Section -->
         <section class="w-full">
-          <div class="text-center mb-12">
+          <div class="text-center mb-8">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">📱 Campus Feed</h2>
             <p class="text-gray-600 text-lg">Stay connected with what's happening around campus</p>
           </div>
@@ -152,50 +152,49 @@
               </div>
             </div>
 
-            <!-- Load More Button -->
-            <div class="text-center pt-6">
-              <button class="px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-                Load More Posts
-              </button>
-            </div>
-          </div>
         </section>
 
+      </section>
+
+      <!-- Sidebar - Events and Clubs -->
+      <aside class="w-80 flex-shrink-0 space-y-8">
+        
         <!-- Discover Events -->
         <section class="w-full">
-          <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">🎉 Discover Upcoming Events</h2>
-            <p class="text-gray-600 text-lg">Don't miss out on the hottest events happening around campus</p>
+          <div class="text-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">🎉 Upcoming Events</h3>
+            <p class="text-gray-600 text-sm">Don't miss out on campus events</p>
           </div>
           
-          <div v-if="displayedEvents.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div v-if="displayedEvents.length > 0" class="space-y-4">
             <div 
               v-for="event in displayedEvents" 
               :key="event.id"
-              class="glossy-bg p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col items-center text-center group transform hover:scale-105"
+              class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
             >
-              <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <span class="text-2xl">🎉</span>
+              <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm">🎉</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-gray-800 mb-1">{{ event.title }}</h4>
+                  <p class="text-gray-600 text-xs flex items-center">
+                    <span class="mr-1">📍</span>
+                    {{ event.location || 'No location specified' }}
+                  </p>
+                </div>
               </div>
-              <h4 class="text-xl font-bold text-gray-800 mb-3">{{ event.title }}</h4>
-              <p class="text-gray-600 text-sm flex items-center">
-                <span class="mr-2">📍</span>
-                {{ event.location || 'No location specified' }}
-              </p>
-              <button class="mt-4 px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium rounded-lg hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                View Details
-              </button>
             </div>
           </div>
 
-          <div v-else class="glossy-bg rounded-2xl shadow-lg p-12 text-center">
-            <div class="text-6xl mb-4">🎭</div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">No Events Yet</h3>
-            <p class="text-gray-600">Check back soon for exciting upcoming events!</p>
+          <div v-else class="glossy-bg rounded-xl shadow-lg p-6 text-center">
+            <div class="text-3xl mb-2">🎭</div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">No Events Yet</h4>
+            <p class="text-gray-600 text-sm">Check back soon!</p>
           </div>
 
-          <div class="text-center mt-12">
-            <RouterLink to="/events" class="inline-block px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+          <div class="text-center mt-4">
+            <RouterLink to="/events" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               View All Events
             </RouterLink>
           </div>
@@ -203,43 +202,44 @@
 
         <!-- Join Clubs -->
         <section class="w-full">
-          <div class="text-center mb-12">
-            <h2 class="text-4xl font-bold text-gray-800 mb-4">🏛️ Join Clubs & Communities</h2>
-            <p class="text-gray-600 text-lg">Connect with like-minded students and pursue your passions</p>
+          <div class="text-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">🏛️ Join Clubs</h3>
+            <p class="text-gray-600 text-sm">Connect with like-minded students</p>
           </div>
           
-          <div v-if="displayedClubs.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div v-if="displayedClubs.length > 0" class="space-y-4">
             <RouterLink
               v-for="club in displayedClubs"
               :key="club.id"
               :to="`/clubs/${encodeURIComponent(club.name)}`"
-              class="glossy-bg p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col items-center text-center group transform hover:scale-105"
+              class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group block"
             >
-              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <span class="text-2xl">🏛️</span>
+              <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm">🏛️</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-gray-800 mb-1">{{ club.name }}</h4>
+                  <p class="text-gray-600 text-xs leading-relaxed line-clamp-2">{{ club.description || 'No description provided.' }}</p>
+                </div>
               </div>
-              <h4 class="text-xl font-bold text-gray-800 mb-3">{{ club.name }}</h4>
-              <p class="text-gray-600 text-sm leading-relaxed">{{ club.description || 'No description provided.' }}</p>
-              <button class="mt-4 px-6 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white font-medium rounded-lg hover:shadow-lg transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                Join Club
-              </button>
             </RouterLink>
           </div>
 
-          <div v-else class="glossy-bg rounded-2xl shadow-lg p-12 text-center">
-            <div class="text-6xl mb-4">🏛️</div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">No Clubs Yet</h3>
-            <p class="text-gray-600">Be the first to create or join a club!</p>
+          <div v-else class="glossy-bg rounded-xl shadow-lg p-6 text-center">
+            <div class="text-3xl mb-2">🏛️</div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">No Clubs Yet</h4>
+            <p class="text-gray-600 text-sm">Be the first to create one!</p>
           </div>
 
-          <div class="text-center mt-12">
-            <RouterLink to="/clubs" class="inline-block px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+          <div class="text-center mt-4">
+            <RouterLink to="/clubs" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               Browse All Clubs
             </RouterLink>
           </div>
         </section>
 
-      </section>
+      </aside>
 
     </main>
   </div>
