@@ -184,6 +184,8 @@ const displayedClubs = computed(() => clubStore.clubs.slice(0, 3))
 const newPostContent = ref('')
 const isPosting = ref(false)
 
+const posts = computed(() => postStore.posts)
+
 const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
