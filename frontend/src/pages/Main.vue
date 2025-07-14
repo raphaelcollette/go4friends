@@ -13,6 +13,33 @@
           </div>
           
           <div class="space-y-6">
+            <!-- New Post Composer -->
+            <div class="glossy-bg rounded-2xl shadow-lg p-6">
+              <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-white font-bold text-lg">
+                    {{ userInitials }}
+                  </span>
+                </div>
+                <div class="flex-1">
+                  <textarea
+                    v-model="newPostContent"
+                    placeholder="What's happening?"
+                    rows="3"
+                    class="w-full bg-white/70 rounded-xl p-3 text-gray-800 focus:outline-none resize-none"
+                  ></textarea>
+                  <div class="flex justify-end mt-2">
+                    <button
+                      :disabled="isPosting || newPostContent.trim() === ''"
+                      @click="submitPost"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition-all"
+                    >
+                      {{ isPosting ? 'Posting...' : 'Post' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <!-- Post 1 -->
             <div class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
               <div class="flex items-start space-x-4">
@@ -246,19 +273,47 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useEventStore } from '@/stores/events'
 import { useClubStore } from '@/stores/club'
+import { usePostStore } from '@/stores/posts'
+import { useUserStore } from '@/stores/user'
 
 const eventStore = useEventStore()
 const clubStore = useClubStore()
+const postStore = usePostStore()
+const userStore = useUserStore()
 
 const displayedEvents = computed(() => eventStore.events.slice(0, 3))
 const displayedClubs = computed(() => clubStore.clubs.slice(0, 3))
 
+const newPostContent = ref('')
+const isPosting = ref(false)
+
+const submitPost = async () => {
+  if (newPostContent.value.trim() === '') return
+  isPosting.value = true
+  try {
+    await postStore.createPost(newPostContent.value)
+    newPostContent.value = ''
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isPosting.value = false
+  }
+}
+
+const userInitials = computed(() => {
+  const user = userStore.currentUser
+  if (!user) return 'U'
+  const names = user.full_name?.split(' ') || []
+  return names.slice(0, 2).map(n => n[0]?.toUpperCase()).join('') || user.username?.[0]?.toUpperCase() || 'U'
+})
+
 onMounted(async () => {
   await eventStore.fetchEvents()
   await clubStore.fetchClubs()
+  await postStore.fetchPosts()
 })
 </script>
 

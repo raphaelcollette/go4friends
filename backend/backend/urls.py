@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/events/', include('events.urls')),
     path('api/messages/', include('direct_messages.urls')),
     path('api/search/', include('search.urls')),
+    path('api/posts/', include('posts.urls')),
 ]
 
 from django.conf import settings
