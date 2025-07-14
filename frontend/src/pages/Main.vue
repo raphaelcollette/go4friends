@@ -40,144 +40,38 @@
                 </div>
               </div>
             </div>
-            <!-- Post 1 -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+            <!-- Real Posts -->
+            <div v-for="post in posts" :key="post.id" class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">JS</span>
+                  <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
                 </div>
                 <div class="flex-1">
                   <div class="flex items-center space-x-2 mb-2">
-                    <h4 class="font-bold text-gray-800">John Smith</h4>
-                    <span class="text-gray-500 text-sm">@johnsmith</span>
+                    <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                    <span class="text-gray-500 text-sm">@{{ post.username }}</span>
                     <span class="text-gray-400 text-sm">·</span>
-                    <span class="text-gray-500 text-sm">2h</span>
+                    <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
                   </div>
-                  <p class="text-gray-700 mb-3 leading-relaxed">
-                    Just finished my first week at the Computer Science Club! 💻 The projects we're working on are incredible. Can't wait to show you all what we build next! #coding #college
-                  </p>
+                  <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
                   <div class="flex items-center space-x-6 text-gray-500">
                     <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
                       <span>💬</span>
-                      <span class="text-sm">12</span>
+                      <span class="text-sm">{{ post.commentCount }}</span>
                     </button>
                     <button class="flex items-center space-x-2 hover:text-green-500 transition-colors">
                       <span>🔁</span>
-                      <span class="text-sm">3</span>
+                      <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
                     <button class="flex items-center space-x-2 hover:text-red-500 transition-colors">
                       <span>❤️</span>
-                      <span class="text-sm">24</span>
+                      <span class="text-sm">{{ post.likeCount }}</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Post 2 -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-              <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">EM</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <h4 class="font-bold text-gray-800">Emily Martinez</h4>
-                    <span class="text-gray-500 text-sm">@emartinez</span>
-                    <span class="text-gray-400 text-sm">·</span>
-                    <span class="text-gray-500 text-sm">4h</span>
-                  </div>
-                  <p class="text-gray-700 mb-3 leading-relaxed">
-                    The campus coffee shop is serving pumpkin spice lattes again! ☕🍂 Perfect fuel for those late-night study sessions. Who else is excited for fall semester?
-                  </p>
-                  <div class="w-full h-48 bg-gradient-to-br from-orange-200 to-amber-200 rounded-xl flex items-center justify-center mb-3">
-                    <span class="text-4xl">☕</span>
-                  </div>
-                  <div class="flex items-center space-x-6 text-gray-500">
-                    <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
-                      <span>💬</span>
-                      <span class="text-sm">8</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-green-500 transition-colors">
-                      <span>🔁</span>
-                      <span class="text-sm">5</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-red-500 transition-colors">
-                      <span>❤️</span>
-                      <span class="text-sm">31</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Post 3 -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-              <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">AC</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <h4 class="font-bold text-gray-800">Alex Chen</h4>
-                    <span class="text-gray-500 text-sm">@alexchen</span>
-                    <span class="text-gray-400 text-sm">·</span>
-                    <span class="text-gray-500 text-sm">6h</span>
-                  </div>
-                  <p class="text-gray-700 mb-3 leading-relaxed">
-                    Looking for study buddies for tomorrow's chemistry exam! 🧪 Anyone else procrastinating and need some motivation? Let's conquer this together! 
-                  </p>
-                  <div class="flex items-center space-x-6 text-gray-500">
-                    <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
-                      <span>💬</span>
-                      <span class="text-sm">15</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-green-500 transition-colors">
-                      <span>🔁</span>
-                      <span class="text-sm">7</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-red-500 transition-colors">
-                      <span>❤️</span>
-                      <span class="text-sm">18</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Post 4 -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
-              <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">MJ</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <h4 class="font-bold text-gray-800">Maya Johnson</h4>
-                    <span class="text-gray-500 text-sm">@mayaj</span>
-                    <span class="text-gray-400 text-sm">·</span>
-                    <span class="text-gray-500 text-sm">1d</span>
-                  </div>
-                  <p class="text-gray-700 mb-3 leading-relaxed">
-                    Just got accepted into the Photography Club! 📸 Can't wait to explore campus and capture all the beautiful moments. First assignment: sunrise over the quad tomorrow morning!
-                  </p>
-                  <div class="flex items-center space-x-6 text-gray-500">
-                    <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
-                      <span>💬</span>
-                      <span class="text-sm">9</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-green-500 transition-colors">
-                      <span>🔁</span>
-                      <span class="text-sm">2</span>
-                    </button>
-                    <button class="flex items-center space-x-2 hover:text-red-500 transition-colors">
-                      <span>❤️</span>
-                      <span class="text-sm">26</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
           </div>
         </section>
 
