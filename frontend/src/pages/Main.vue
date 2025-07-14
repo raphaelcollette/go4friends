@@ -15,30 +15,6 @@
             <p class="text-gray-600 text-xl max-w-3xl mx-auto leading-relaxed">
               Find friends, join clubs, attend events, and make your college experience unforgettable. 🚀
             </p>
-            <div class="mt-8 flex justify-center space-x-4">
-              <button class="px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-                Get Started
-              </button>
-              <button class="px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-                Learn More
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="glossy-bg rounded-2xl shadow-lg p-8 text-center">
-            <div class="text-4xl font-bold text-purple-600 mb-2">150+</div>
-            <div class="text-gray-600 font-medium">Active Clubs</div>
-          </div>
-          <div class="glossy-bg rounded-2xl shadow-lg p-8 text-center">
-            <div class="text-4xl font-bold text-blue-600 mb-2">500+</div>
-            <div class="text-gray-600 font-medium">Events This Month</div>
-          </div>
-          <div class="glossy-bg rounded-2xl shadow-lg p-8 text-center">
-            <div class="text-4xl font-bold text-green-600 mb-2">2.5K+</div>
-            <div class="text-gray-600 font-medium">Students Connected</div>
           </div>
         </div>
 
@@ -76,9 +52,9 @@
           </div>
 
           <div class="text-center mt-12">
-            <button class="px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <RouterLink to="/events" class="inline-block px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               View All Events
-            </button>
+            </RouterLink>
           </div>
         </section>
 
@@ -114,9 +90,9 @@
           </div>
 
           <div class="text-center mt-12">
-            <button class="px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <RouterLink to="/clubs" class="inline-block px-8 py-3 bg-white/80 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               Browse All Clubs
-            </button>
+            </RouterLink>
           </div>
         </section>
 
