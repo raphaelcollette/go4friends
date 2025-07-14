@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'direct_messages',
     'search',
+    'posts',
 ]
 
 
