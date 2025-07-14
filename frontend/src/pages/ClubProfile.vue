@@ -29,16 +29,14 @@
         </div>
         <div v-else class="text-gray-500 text-lg mt-4">No members yet!</div>
 
+        <div v-if="isMember" class="mt-8">
+          <button class="btn w-full" @click="openClubMessages">💬 Message Group</button>
+        </div>
         <!-- Admin + Moderator Controls -->
         <div v-if="isStaff" class="mt-8 space-y-4">
           <button class="btn w-full" @click="showCreateModal = true">📅 Create Event</button>
           <button class="btn w-full" @click="showManageModal = true">👥 Manage Members</button>
-          <button
-            class="btn w-full"
-            @click="openClubMessages"
-          >
-            💬 Message Group
-          </button>
+        
           <!-- Admin Only -->
           <button v-if="isAdmin" class="redbtn w-full" @click="showDeleteModal = true">🗑 Delete Club</button>
         </div>
@@ -198,6 +196,11 @@ watch(members, () => {
   for (const member of members.value) {
     roleChanges.value[member.user.username] = member.role
   }
+})
+
+const isMember = computed(() => {
+  const username = userStore.currentUser?.username
+  return clubStore.clubMembers.some(m => m.user.username === username)
 })
 
 
