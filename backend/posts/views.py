@@ -106,3 +106,12 @@ def undo_repost(request, post_id):
         return Response({"detail": "Repost does not exist"}, status=status.HTTP_400_BAD_REQUEST)
     repost.delete()
     return Response({"message": "Repost removed"}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def list_posts(request):
+    user = request.user
+    # Fetch posts visible to the user (adjust logic as needed)
+    posts = Post.objects.all()[:50]  # limit to latest 50 posts for example
+    serializer = PostSerializer(posts, many=True)
+    return Response(serializer.data)
