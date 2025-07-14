@@ -61,38 +61,40 @@
                     </button>
                     <!-- Like Button -->
                     <button
+                      v-if="!post.hasLiked"
                       class="flex items-center space-x-2 hover:text-red-500 transition-colors"
                       @click="likePost(post.id)"
                     >
                       <span>❤️</span>
                       <span class="text-sm">{{ post.likeCount }}</span>
                     </button>
-
                     <!-- Unlike Button -->
                     <button
+                      v-else
                       class="flex items-center space-x-2 text-red-500 transition-colors"
                       @click="unlikePost(post.id)"
                     >
                       <span>🗑️❤️</span>
-                      <span class="text-sm">Undo Like</span>
+                      <span class="text-sm">{{ post.likeCount }}</span>
                     </button>
 
                     <!-- Repost Button -->
                     <button
+                      v-if="!post.hasReposted"
                       class="flex items-center space-x-2 hover:text-green-500 transition-colors"
                       @click="repostPost(post.id)"
                     >
                       <span>🔁</span>
                       <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
-
                     <!-- Undo Repost Button -->
                     <button
+                      v-else
                       class="flex items-center space-x-2 text-green-600 transition-colors"
                       @click="undoRepostPost(post.id)"
                     >
                       <span>🗑️🔁</span>
-                      <span class="text-sm">Undo Repost</span>
+                      <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
                   </div>
                 </div>

@@ -46,7 +46,13 @@ export const usePostStore = defineStore('posts', {
     async likePost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/like/`)
-        await this.fetchPosts()
+        const index = this.posts.findIndex(p => p.id === postId)
+        if (index !== -1) {
+          const updated = { ...this.posts[index] }
+          updated.likeCount += 1
+          updated.hasLiked = true
+          this.posts.splice(index, 1, updated)
+        }
       } catch (error) {
         console.error('Failed to like post:', error)
       }
@@ -55,7 +61,13 @@ export const usePostStore = defineStore('posts', {
     async unlikePost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/unlike/`)
-        await this.fetchPosts()
+        const index = this.posts.findIndex(p => p.id === postId)
+        if (index !== -1) {
+          const updated = { ...this.posts[index] }
+          updated.likeCount = Math.max(updated.likeCount - 1, 0)
+          updated.hasLiked = false
+          this.posts.splice(index, 1, updated)
+        }
       } catch (error) {
         console.error('Failed to unlike post:', error)
       }
@@ -64,19 +76,31 @@ export const usePostStore = defineStore('posts', {
     async repostPost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/repost/`)
-        await this.fetchPosts()
+        const index = this.posts.findIndex(p => p.id === postId)
+        if (index !== -1) {
+          const updated = { ...this.posts[index] }
+          updated.repostCount += 1
+          updated.hasReposted = true
+          this.posts.splice(index, 1, updated)
+        }
       } catch (error) {
-        console.error('Failed to repost post:', error)
+        console.error('Failed to repost:', error)
       }
     },
 
     async undoRepostPost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/undo_repost/`)
-        await this.fetchPosts()
+        const index = this.posts.findIndex(p => p.id === postId)
+        if (index !== -1) {
+          const updated = { ...this.posts[index] }
+          updated.repostCount = Math.max(updated.repostCount - 1, 0)
+          updated.hasReposted = false
+          this.posts.splice(index, 1, updated)
+        }
       } catch (error) {
         console.error('Failed to undo repost:', error)
       }
-    },
+    }
   }
 })

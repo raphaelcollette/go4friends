@@ -10,12 +10,14 @@ class PostSerializer(serializers.ModelSerializer):
     commentCount = serializers.SerializerMethodField()
     likeCount = serializers.SerializerMethodField()
     repostCount = serializers.SerializerMethodField()
+    hasLiked = SerializerMethodField()
+    hasReposted = SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'authorName', 'username', 'authorInitials', 'content', 'timeAgo',
-            'commentCount', 'likeCount', 'repostCount',
+            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted',
         ]
 
     def get_authorName(self, obj):
@@ -52,6 +54,21 @@ class PostSerializer(serializers.ModelSerializer):
     def get_repostCount(self, obj):
         return obj.reposts.count()
 
+    def get_hasLiked(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return obj.likes.filter(user=user).exists()
+
+    def get_hasReposted(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return obj.reposts.filter(user=user).exists()
+
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.filter(parent__isnull=True).order_by('-created_at')
     serializer_class = PostSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
