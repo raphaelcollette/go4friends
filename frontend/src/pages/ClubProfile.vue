@@ -45,6 +45,12 @@
         >
           ✉️ Invite User
         </button>
+        <button
+          class="btn mt-6"
+          @click="openClubMessages"
+        >
+          💬 Message Group
+        </button>
       </div>
 
       <!-- Club Not Found -->
@@ -66,14 +72,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Example placement: below Members section -->
-    <button
-      class="btn mt-6"
-      @click="openClubMessages"
-    >
-      💬 Message Group
-    </button>
 
     <!-- Manage Members Modal -->
     <div v-if="showManageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
@@ -185,6 +183,14 @@ const clubName = decodeURIComponent(route.params.clubName)
 const club = computed(() => clubStore.currentClub)
 const members = computed(() => clubStore.clubMembers)
 const loading = computed(() => clubStore.loadingClub)
+
+const threads = ref([]) // fetched from API
+const clubThreadId = computed(() => {
+  const match = threads.value.find(
+    t => t.club_name === club.value.name && t.is_group
+  )
+  return match?.id || null
+})
 
 const goToProfile = (username) => router.push(`/profile/${username}`)
 
@@ -306,16 +312,23 @@ const sendInvite = async () => {
   }
 }
 
+
 const openClubMessages = () => {
-  router.push(`/messages?group=${encodeURIComponent(club.value.name)}`)
+  router.push(`/messages?thread=${clubThreadId.value}`)
 }
 
 
 onMounted(async () => {
   try {
-    await clubStore.fetchClubProfile(clubName)
+    await Promise.all([
+      clubStore.fetchClubProfile(clubName),
+      (async () => {
+        const res = await authAxios.get('/messages/threads/')
+        threads.value = res.data
+      })()
+    ])
   } catch {
-    toast.error('Could not load club.')
+    toast.error('Could not load club or threads.')
   }
 })
 </script>
