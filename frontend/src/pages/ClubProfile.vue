@@ -33,7 +33,12 @@
         <div v-if="isStaff" class="mt-8 space-y-4">
           <button class="btn w-full" @click="showCreateModal = true">📅 Create Event</button>
           <button class="btn w-full" @click="showManageModal = true">👥 Manage Members</button>
-
+          <button
+            class="btn w-full"
+            @click="openClubMessages"
+          >
+            💬 Message Group
+          </button>
           <!-- Admin Only -->
           <button v-if="isAdmin" class="redbtn w-full" @click="showDeleteModal = true">🗑 Delete Club</button>
         </div>
@@ -44,12 +49,6 @@
           @click="showInviteModal = true"
         >
           ✉️ Invite User
-        </button>
-        <button
-          class="btn mt-6"
-          @click="openClubMessages"
-        >
-          💬 Message Group
         </button>
       </div>
 
