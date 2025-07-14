@@ -90,7 +90,7 @@ export const usePostStore = defineStore('posts', {
 
     async undoRepostPost(postId) {
       try {
-        await authAxios.post(`/posts/${postId}/undo_repost/`)
+        await authAxios.delete(`/posts/${postId}/undo_repost/`)
         const index = this.posts.findIndex(p => p.id === postId)
         if (index !== -1) {
           const updated = { ...this.posts[index] }

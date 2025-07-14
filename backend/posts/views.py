@@ -43,7 +43,8 @@ def create_post(request):
     except PermissionError:
         return Response({"detail": "Permission denied for posting."}, status=status.HTTP_403_FORBIDDEN)
 
-    return Response({"id": post.id, "message": "Post created"}, status=status.HTTP_201_CREATED)
+    serializer = PostSerializer(post, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
