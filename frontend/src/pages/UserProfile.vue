@@ -69,7 +69,7 @@
           </div>
         </div>
       </section>
-      
+
       <!-- Profile Section (Right) -->
       <section class="w-80 flex-shrink-0">
         <!-- Use your existing profile template here -->
@@ -264,6 +264,38 @@ const startOrNavigateToThread = async () => {
     router.push(`/messages?thread=${res.data.thread_id}`)
   } catch {
     toast.error('Could not start chat.')
+  }
+}
+
+const likePost = async (postId) => {
+  try {
+    await postStore.likePost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const unlikePost = async (postId) => {
+  try {
+    await postStore.unlikePost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const repostPost = async (postId) => {
+  try {
+    await postStore.repostPost(postId)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const undoRepostPost = async (postId) => {
+  try {
+    await postStore.undoRepostPost(postId)
+  } catch (e) {
+    console.error(e)
   }
 }
 
