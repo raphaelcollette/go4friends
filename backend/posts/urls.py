@@ -1,5 +1,4 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 from . import views
 
 
@@ -10,4 +9,4 @@ urlpatterns = [
     path('<int:post_id>/unlike/', views.unlike_post, name='unlike_post'),
     path('<int:post_id>/repost/', views.repost_post, name='repost_post'),
     path('<int:post_id>/undo_repost/', views.undo_repost, name='undo_repost'),
-] + router.urls
+] 
