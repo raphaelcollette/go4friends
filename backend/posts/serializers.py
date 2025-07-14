@@ -10,8 +10,8 @@ class PostSerializer(serializers.ModelSerializer):
     commentCount = serializers.SerializerMethodField()
     likeCount = serializers.SerializerMethodField()
     repostCount = serializers.SerializerMethodField()
-    hasLiked = SerializerMethodField()
-    hasReposted = SerializerMethodField()
+    hasLiked = serializers.SerializerMethodField()
+    hasReposted = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
