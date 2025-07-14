@@ -12,7 +12,6 @@
             :key="post.id"
             class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
           >
-            <!-- Post content here -->
             <div class="flex items-start space-x-4">
               <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
@@ -25,13 +24,52 @@
                   <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
                 </div>
                 <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
-                <!-- Other post actions like like, repost, etc -->
+                <div class="flex items-center space-x-6 text-gray-500">
+                  <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                    <span>💬</span>
+                    <span class="text-sm">{{ post.commentCount }}</span>
+                  </button>
+
+                  <button
+                    v-if="!post.hasLiked"
+                    class="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                    @click="likePost(post.id)"
+                  >
+                    <span>❤️</span>
+                    <span class="text-sm">{{ post.likeCount }}</span>
+                  </button>
+                  <button
+                    v-else
+                    class="flex items-center space-x-2 text-red-500 transition-colors"
+                    @click="unlikePost(post.id)"
+                  >
+                    <span>🗑️❤️</span>
+                    <span class="text-sm">{{ post.likeCount }}</span>
+                  </button>
+
+                  <button
+                    v-if="!post.hasReposted"
+                    class="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                    @click="repostPost(post.id)"
+                  >
+                    <span>🔁</span>
+                    <span class="text-sm">{{ post.repostCount }}</span>
+                  </button>
+                  <button
+                    v-else
+                    class="flex items-center space-x-2 text-green-600 transition-colors"
+                    @click="undoRepostPost(post.id)"
+                  >
+                    <span>🗑️🔁</span>
+                    <span class="text-sm">{{ post.repostCount }}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
+      
       <!-- Profile Section (Right) -->
       <section class="w-80 flex-shrink-0">
         <!-- Use your existing profile template here -->
