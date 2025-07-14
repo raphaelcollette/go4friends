@@ -115,7 +115,7 @@ def list_posts(request):
         print("list_posts called by user:", request.user)
         posts = Post.objects.all()[:50]
         print(f"Fetched {posts.count()} posts")
-        serializer = PostSerializer(posts, many=True)
+        serializer = PostSerializer(posts, many=True, context={'request': request})
         print("Serialized posts data:", serializer.data[:2])  # print first 2 posts data
         return Response(serializer.data, status=200)
     except Exception as e:
