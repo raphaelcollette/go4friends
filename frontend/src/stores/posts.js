@@ -11,7 +11,7 @@ export const usePostStore = defineStore('posts', {
     async fetchPosts() {
       this.loading = true
       try {
-        const response = await authAxios.get('/api/posts/')
+        const response = await authAxios.get('/posts/')
         this.posts = response.data
       } catch (error) {
         console.error('Failed to fetch posts:', error)
@@ -22,7 +22,7 @@ export const usePostStore = defineStore('posts', {
 
     async createPost(content, isAnonymous = false, clubId = null) {
       try {
-        const response = await authAxios.post('/api/posts/create/', {
+        const response = await authAxios.post('/posts/create/', {
           content,
           is_anonymous: isAnonymous,
           club: clubId,
@@ -36,7 +36,7 @@ export const usePostStore = defineStore('posts', {
 
     async deletePost(postId) {
       try {
-        await authAxios.delete(`/api/posts/${postId}/delete/`)
+        await authAxios.delete(`/posts/${postId}/delete/`)
         this.posts = this.posts.filter(post => post.id !== postId)
       } catch (error) {
         console.error('Failed to delete post:', error)
