@@ -21,7 +21,10 @@ class PostSerializer(serializers.ModelSerializer):
     def get_authorName(self, obj):
         if obj.is_anonymous:
             return "Anonymous"
-        return obj.author.get_full_name() or obj.author.username
+        full_name = getattr(obj.author, 'full_name', None)  # or use a field if exists
+        if full_name:
+            return full_name
+        return obj.author.username
 
     def get_username(self, obj):
         if obj.is_anonymous:
@@ -31,7 +34,8 @@ class PostSerializer(serializers.ModelSerializer):
     def get_authorInitials(self, obj):
         if obj.is_anonymous:
             return "AN"
-        name = obj.author.get_full_name() or obj.author.username
+        # Try full_name attribute first, fallback to username
+        name = getattr(obj.author, 'full_name', None) or obj.author.username
         parts = name.split()
         initials = "".join([p[0].upper() for p in parts[:2]])
         return initials or "U"
