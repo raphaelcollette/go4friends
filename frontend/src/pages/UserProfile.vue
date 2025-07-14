@@ -1,96 +1,125 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
-    <main class="flex-1 flex flex-col items-center pt-24 px-6">
-      
-      <!-- Loading State -->
-      <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
+    <main class="flex-1 flex pt-24 px-6 max-w-7xl mx-auto w-full gap-8">
 
-      <!-- Private Profile -->
-      <div v-else-if="user?.private" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold text-gray-800">🔒 Private Profile</h2>
-        <p class="text-gray-600 mt-2">This user's profile is private and only visible to friends.</p>
-      </div>
-
-      <!-- User Not Found -->
-      <div v-else-if="!user" class="glossy-bg rounded-2xl shadow-md p-6 max-w-md w-full text-center">
-        <h2 class="text-2xl font-bold text-gray-800">❌ User Not Found</h2>
-        <p class="text-gray-600 mt-2">We couldn't find anyone with that username.</p>
-      </div>
-
-      <!-- Profile Card -->
-      <div v-else class="glossy-bg rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-        <div class="flex justify-center">
-          <img
-            v-if="user.profile_picture"
-            :src="user.profile_picture"
-            alt="Profile Picture"
-            class="w-28 h-28 rounded-full object-cover border-4"
-            :style="{ borderColor: 'var(--btn-primary, #6366f1)' }"
-          />
-          <div v-else class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
-            :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }">
-            {{ user.username.charAt(0).toUpperCase() }}
+      <!-- Posts Section (Left) -->
+      <section class="flex-1 flex flex-col">
+        <div v-if="loadingPosts" class="text-gray-600 text-lg">Loading posts...</div>
+        <div v-else-if="user?.private" class="text-gray-600 text-lg">Posts are hidden due to private profile.</div>
+        <div v-else>
+          <div
+            v-for="post in filteredPosts"
+            :key="post.id"
+            class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
+          >
+            <!-- Post content here -->
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center space-x-2 mb-2">
+                  <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                  <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                  <span class="text-gray-400 text-sm">·</span>
+                  <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+                </div>
+                <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
+                <!-- Other post actions like like, repost, etc -->
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <h1 class="text-3xl font-bold text-gray-800 mt-6">{{ user.full_name || user.username }}</h1>
-        <p class="text-gray-600 mt-2">@{{ user.username }}</p>
+      <!-- Profile Section (Right) -->
+      <section class="w-80 flex-shrink-0">
+        <!-- Use your existing profile template here -->
+        <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
-        <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
-        <p v-if="user.location" class="text-gray-500 text-sm mt-2">📍 {{ user.location }}</p>
+        <div v-else-if="user?.private" class="glossy-bg rounded-2xl shadow-md p-6 text-center">
+          <h2 class="text-2xl font-bold text-gray-800">🔒 Private Profile</h2>
+          <p class="text-gray-600 mt-2">This user's profile is private and only visible to friends.</p>
+        </div>
 
-        <!-- Friend Actions -->
-        <div class="mt-6" v-if="!isCurrentUser">
-          <button v-if="user.is_friend" @click="removeFriend" class="redbtn">Unfriend</button>
-          <button v-else-if="user.friend_request_sent" class="btn" disabled>Request Sent</button>
-          <button v-else @click="sendFriendRequest" class="btn">+ Add Friend</button>
+        <div v-else-if="!user" class="glossy-bg rounded-2xl shadow-md p-6 text-center">
+          <h2 class="text-2xl font-bold text-gray-800">❌ User Not Found</h2>
+          <p class="text-gray-600 mt-2">We couldn't find anyone with that username.</p>
+        </div>
 
-          <div class="mt-4">
-            <button @click="startOrNavigateToThread" class="btn">💬 Message</button>
+        <div v-else class="glossy-bg rounded-2xl shadow-lg p-8 text-center">
+          <div class="flex justify-center">
+            <img
+              v-if="user.profile_picture"
+              :src="user.profile_picture"
+              alt="Profile Picture"
+              class="w-28 h-28 rounded-full object-cover border-4"
+              :style="{ borderColor: 'var(--btn-primary, #6366f1)' }"
+            />
+            <div v-else class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
+              :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }">
+              {{ user.username.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+
+          <h1 class="text-3xl font-bold text-gray-800 mt-6">{{ user.full_name || user.username }}</h1>
+          <p class="text-gray-600 mt-2">@{{ user.username }}</p>
+
+          <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
+          <p v-if="user.location" class="text-gray-500 text-sm mt-2">📍 {{ user.location }}</p>
+
+          <!-- Friend Actions -->
+          <div class="mt-6" v-if="!isCurrentUser">
+            <button v-if="user.is_friend" @click="removeFriend" class="redbtn">Unfriend</button>
+            <button v-else-if="user.friend_request_sent" class="btn" disabled>Request Sent</button>
+            <button v-else @click="sendFriendRequest" class="btn">+ Add Friend</button>
+
+            <div class="mt-4">
+              <button @click="startOrNavigateToThread" class="btn">💬 Message</button>
+            </div>
+          </div>
+
+          <!-- Clubs -->
+          <div v-if="user.clubs?.length" class="mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
+            <div class="flex flex-wrap justify-center gap-2">
+              <RouterLink
+                v-for="club in user.clubs"
+                :key="club.id"
+                :to="`/clubs/${encodeURIComponent(club.name)}`"
+                class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition"
+              >
+                {{ club.name }}
+              </RouterLink>
+            </div>
+          </div>
+
+          <!-- Interests -->
+          <div v-if="user.interests?.length" class="mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
+            <div class="flex flex-wrap justify-center gap-2">
+              <span
+                v-for="(interest, idx) in user.interests"
+                :key="idx"
+                class="text-sm font-semibold px-3 py-1 rounded-full"
+                :style="{
+                  backgroundColor: 'var(--btn-secondary, #a5b4fc)',
+                  color: 'var(--btn-primary, #6366f1)',
+                }"
+              >
+                {{ interest }}
+              </span>
+            </div>
+          </div>
+
+          <p v-if="user.major" class="mt-2 text-gray-600 text-sm">🎓 Major: {{ user.major }}</p>
+          <p v-if="user.graduation_year" class="text-gray-600 text-sm">🎓 Class of {{ user.graduation_year }}</p>
+
+          <div class="mt-6 flex justify-center space-x-4">
+            <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
           </div>
         </div>
-
-        <!-- Clubs -->
-        <div v-if="user.clubs?.length" class="mt-8">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
-          <div class="flex flex-wrap justify-center gap-2">
-            <RouterLink
-              v-for="club in user.clubs"
-              :key="club.id"
-              :to="`/clubs/${encodeURIComponent(club.name)}`"
-              class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition"
-            >
-              {{ club.name }}
-            </RouterLink>
-          </div>
-        </div>
-
-        <!-- Interests -->
-        <div v-if="user.interests?.length" class="mt-8">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
-          <div class="flex flex-wrap justify-center gap-2">
-            <span
-              v-for="(interest, idx) in user.interests"
-              :key="idx"
-              class="text-sm font-semibold px-3 py-1 rounded-full"
-              :style="{
-                backgroundColor: 'var(--btn-secondary, #a5b4fc)',
-                color: 'var(--btn-primary, #6366f1)',
-              }"
-            >
-              {{ interest }}
-            </span>
-          </div>
-        </div>
-
-        <p v-if="user.major" class="mt-2 text-gray-600 text-sm">🎓 Major: {{ user.major }}</p>
-        <p v-if="user.graduation_year" class="text-gray-600 text-sm">🎓 Class of {{ user.graduation_year }}</p>
-
-        <div class="mt-6 flex justify-center space-x-4">
-          <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
-        </div>
-      </div>
-
+      </section>
     </main>
   </div>
 </template>
@@ -101,14 +130,17 @@ import { useRoute, useRouter } from 'vue-router'
 import { authAxios } from '@/utils/axios'
 import { useToast } from 'vue-toastification'
 import { useUserStore } from '@/stores/user'
+import { usePostStore } from '@/stores/posts'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
+const postStore = usePostStore()
 
 const user = ref(null)
 const loading = ref(true)
+const loadingPosts = ref(true)
 
 const isCurrentUser = computed(() => {
   return userStore.currentUser && user.value && userStore.currentUser.username === user.value.username
@@ -121,24 +153,18 @@ const fetchUser = async () => {
   const oneMinute = 60 * 1000
 
   try {
-    // Check cache from userStore
     const cached = userStore.profileCache[username]
-
     if (cached && (now - cached.lastFetched) < oneMinute) {
-      // 
       user.value = cached.data
     } else {
-      // 
       const res = await authAxios.get(`/users/profile/${username}/`)
       user.value = res.data
 
-      // 
       userStore.profileCache[username] = {
         data: res.data,
         lastFetched: now
       }
 
-      // 
       if (userStore.currentUser && username === userStore.currentUser.username) {
         userStore.currentUser = res.data
         localStorage.setItem('currentUser', JSON.stringify(res.data))
@@ -155,12 +181,29 @@ const fetchUser = async () => {
     loading.value = false
   }
 }
+
+const fetchPosts = async () => {
+  loadingPosts.value = true
+  try {
+    await postStore.fetchPosts()
+  } catch {
+    toast.error('Failed to load posts.')
+  } finally {
+    loadingPosts.value = false
+  }
+}
+
+const filteredPosts = computed(() => {
+  if (!user.value || user.value.private) return []
+  return postStore.posts.filter(p => p.username === user.value.username)
+})
+
 const sendFriendRequest = async () => {
   try {
     await authAxios.post('/friends/send/', { to_username: user.value.username })
     toast.success('Friend request sent!')
     user.value.friend_request_sent = true
-  } catch (error) {
+  } catch {
     toast.error('Failed to send friend request.')
   }
 }
@@ -170,7 +213,7 @@ const removeFriend = async () => {
     await authAxios.post('/friends/remove/', { username: user.value.username })
     toast.success('Friend removed.')
     user.value.is_friend = false
-  } catch (error) {
+  } catch {
     toast.error('Failed to remove friend.')
   }
 }
@@ -180,20 +223,19 @@ const startOrNavigateToThread = async () => {
     const res = await authAxios.post('/messages/threads/start-private/', {
       username: user.value.username,
     })
-    const threadId = res.data.thread_id
-    
-    // Navigate to messages with thread selection
-    router.push(`/messages?thread=${threadId}`)
-  } catch (e) {
+    router.push(`/messages?thread=${res.data.thread_id}`)
+  } catch {
     toast.error('Could not start chat.')
   }
 }
 
-onMounted(fetchUser)
-watch(() => route.params.username, fetchUser)
+onMounted(async () => {
+  await fetchUser()
+  await fetchPosts()
+})
+
+watch(() => route.params.username, async () => {
+  await fetchUser()
+  await fetchPosts()
+})
 </script>
-
-<style scoped>
-</style>
-
-
