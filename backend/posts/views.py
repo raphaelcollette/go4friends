@@ -110,8 +110,13 @@ def undo_repost(request, post_id):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def list_posts(request):
-    user = request.user
-    # Fetch posts visible to the user (adjust logic as needed)
-    posts = Post.objects.all()[:50]  # limit to latest 50 posts for example
-    serializer = PostSerializer(posts, many=True)
-    return Response(serializer.data)
+    try:
+        print("list_posts called by user:", request.user)
+        posts = Post.objects.all()[:50]
+        print(f"Fetched {posts.count()} posts")
+        serializer = PostSerializer(posts, many=True)
+        print("Serialized posts data:", serializer.data[:2])  # print first 2 posts data
+        return Response(serializer.data, status=200)
+    except Exception as e:
+        print("Error in list_posts:", e)
+        return Response({"detail": str(e)}, status=500)
