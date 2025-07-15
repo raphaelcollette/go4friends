@@ -30,7 +30,12 @@
             </button>
           </div>
 
-          <div class="space-y-6 overflow-y-auto flex-grow" style="max-height: 100%;">
+          <div 
+            ref="postsContainer" 
+            class="space-y-6 overflow-y-auto flex-grow scrollbar-hidden" 
+            style="max-height: 100%;"
+            @scroll="handleScroll"
+          >
             <!-- New Post Composer -->
             <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
               <div class="flex items-start space-x-4">
@@ -116,13 +121,24 @@
                 </div>
               </div>
             </div>
+
+            <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
+              <button
+                @click="loadMorePosts"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+              >
+                Load More
+              </button>
+            </div>
+            <div v-if="loadingMore" class="text-center text-gray-500 mt-4 select-none">Loading...</div>
+            <div v-if="allLoaded && filteredPosts.length" class="text-center text-gray-500 mt-4 select-none">No more posts</div>
           </div>
         </section>
 
       </section>
 
       <!-- Sidebar - Events and Clubs -->
-      <aside class="w-80 flex-shrink-0 space-y-8 overflow-auto" style="max-height: calc(100vh - 6rem);">
+      <aside class="w-80 flex-shrink-0 space-y-8 overflow-auto scrollbar-hidden" style="max-height: calc(100vh - 6rem);">
 
         <!-- Discover Events -->
         <section class="w-full">
@@ -211,7 +227,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useEventStore } from '@/stores/events'
 import { useClubStore } from '@/stores/club'
 import { usePostStore } from '@/stores/posts'
@@ -227,18 +243,24 @@ const toast = useToast()
 const newPostContent = ref('')
 const isPosting = ref(false)
 const activeTab = ref('public') // 'public' or 'anonymous'
+const loadingMore = ref(false)
+const allLoaded = ref(false)
+const postsPage = ref(1)
+const postsPerPage = 10
 
 const displayedEvents = computed(() => (eventStore.events ?? []).slice(0, 3))
 const displayedClubs = computed(() => (clubStore.clubs ?? []).slice(0, 3))
 
+// Posts filtered by activeTab and paginated
 const filteredPosts = computed(() => {
   const posts = postStore.posts ?? []
-  return posts.filter(p => {
+  let filtered = posts.filter(p => {
     if (p.club) return false
     if (activeTab.value === 'public') return !p.is_anonymous
     if (activeTab.value === 'anonymous') return p.is_anonymous
     return false
   })
+  return filtered.slice(0, postsPage.value * postsPerPage)
 })
 
 const submitPost = async () => {
@@ -248,6 +270,10 @@ const submitPost = async () => {
     const anonymous = activeTab.value === 'anonymous'
     await postStore.createPost(newPostContent.value, anonymous)
     newPostContent.value = ''
+    // Reset pagination after new post
+    postsPage.value = 1
+    allLoaded.value = false
+    await postStore.fetchPosts()
   } catch (e) {
     const msg = e?.response?.data?.detail || 'Failed to post.'
     toast.error(msg)
@@ -295,9 +321,56 @@ const undoRepostPost = async (postId) => {
   }
 }
 
+// Load more posts on clicking button
+const loadMorePosts = () => {
+  if (loadingMore.value || allLoaded.value) return
+  loadingMore.value = true
+  setTimeout(() => {
+    postsPage.value++
+    loadingMore.value = false
+    // Check if we've loaded all posts
+    const postsCount = (postStore.posts ?? []).filter(p => {
+      if (p.club) return false
+      if (activeTab.value === 'public') return !p.is_anonymous
+      if (activeTab.value === 'anonymous') return p.is_anonymous
+      return false
+    }).length
+    if (filteredPosts.value.length >= postsCount) {
+      allLoaded.value = true
+    }
+  }, 600) // simulate load delay
+}
+
+const postsContainer = ref(null)
+
+// Optional: Infinite scroll handler to trigger load more when near bottom
+const handleScroll = (e) => {
+  const el = e.target
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+    loadMorePosts()
+  }
+}
+
+// Reset pagination & allLoaded when tab changes
+watch(activeTab, () => {
+  postsPage.value = 1
+  allLoaded.value = false
+})
+
 onMounted(async () => {
   await eventStore.fetchEvents()
   await clubStore.fetchClubs()
   await postStore.fetchPosts()
 })
 </script>
+
+<style>
+/* Hide scrollbar */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hidden {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+</style>
