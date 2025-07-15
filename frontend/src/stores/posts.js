@@ -5,9 +5,11 @@ export const usePostStore = defineStore('posts', {
   state: () => ({
     posts: [],
     loading: false,
+    userPostsCache: {}, // { username: { posts: [], lastFetched: timestamp } }
   }),
 
   actions: {
+    // Fetch all posts (old method)
     async fetchPosts() {
       this.loading = true
       try {
@@ -15,6 +17,32 @@ export const usePostStore = defineStore('posts', {
         this.posts = response.data
       } catch (error) {
         console.error('Failed to fetch posts:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Fetch posts for a specific user with caching
+    async fetchUserPosts(username, force = false) {
+      this.loading = true
+      try {
+        const now = Date.now()
+        const cache = this.userPostsCache[username]
+        const fresh = cache && (now - cache.lastFetched) < 60000 // 60 seconds
+
+        if (!force && fresh) {
+          this.posts = cache.posts
+          return
+        }
+
+        const response = await authAxios.get(`/posts/user/${encodeURIComponent(username)}/`)
+        this.userPostsCache[username] = {
+          posts: response.data,
+          lastFetched: now,
+        }
+        this.posts = response.data
+      } catch (error) {
+        console.error('Failed to fetch user posts:', error)
       } finally {
         this.loading = false
       }
@@ -101,6 +129,6 @@ export const usePostStore = defineStore('posts', {
       } catch (error) {
         console.error('Failed to undo repost:', error)
       }
-    }
-  }
+    },
+  },
 })

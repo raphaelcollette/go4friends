@@ -223,7 +223,7 @@ const fetchUser = async () => {
 const fetchPosts = async () => {
   loadingPosts.value = true
   try {
-    await postStore.fetchPosts()
+    await postStore.fetchUserPosts(route.params.username)
   } catch {
     toast.error('Failed to load posts.')
   } finally {
