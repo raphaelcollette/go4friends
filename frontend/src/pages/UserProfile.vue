@@ -182,6 +182,8 @@ const user = ref(null)
 const loading = ref(true)
 const loadingPosts = ref(true)
 
+const friendCount = ref(null)
+
 const isCurrentUser = computed(() => {
   return userStore.currentUser && user.value && userStore.currentUser.username === user.value.username
 })
