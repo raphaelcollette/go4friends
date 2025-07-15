@@ -128,8 +128,85 @@
 
       <!-- Sidebar - Events and Clubs -->
       <aside class="w-80 flex-shrink-0 space-y-8">
-        <!-- Events and Clubs code unchanged -->
-        <!-- ... -->
+        <!-- Discover Events -->
+        <section class="w-full">
+          <div class="text-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">🎉 Upcoming Events</h3>
+            <p class="text-gray-600 text-sm">Don't miss out on campus events</p>
+          </div>
+          
+          <div v-if="displayedEvents.length > 0" class="space-y-4">
+            <div 
+              v-for="event in displayedEvents" 
+              :key="event.id"
+              class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
+            >
+              <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm">🎉</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-gray-800 mb-1">{{ event.title }}</h4>
+                  <p class="text-gray-600 text-xs flex items-center">
+                    <span class="mr-1">📍</span>
+                    {{ event.location || 'No location specified' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="glossy-bg rounded-xl shadow-lg p-6 text-center">
+            <div class="text-3xl mb-2">🎭</div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">No Events Yet</h4>
+            <p class="text-gray-600 text-sm">Check back soon!</p>
+          </div>
+
+          <div class="text-center mt-4">
+            <RouterLink to="/events" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+              View All Events
+            </RouterLink>
+          </div>
+        </section>
+
+        <!-- Join Clubs -->
+        <section class="w-full">
+          <div class="text-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">🏛️ Join Clubs</h3>
+            <p class="text-gray-600 text-sm">Connect with like-minded students</p>
+          </div>
+          
+          <div v-if="displayedClubs.length > 0" class="space-y-4">
+            <RouterLink
+              v-for="club in displayedClubs"
+              :key="club.id"
+              :to="/clubs/${encodeURIComponent(club.name)}"
+              class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group block"
+            >
+              <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm">🏛️</span>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-bold text-gray-800 mb-1">{{ club.name }}</h4>
+                  <p class="text-gray-600 text-xs leading-relaxed line-clamp-2">{{ club.description || 'No description provided.' }}</p>
+                </div>
+              </div>
+            </RouterLink>
+          </div>
+
+          <div v-else class="glossy-bg rounded-xl shadow-lg p-6 text-center">
+            <div class="text-3xl mb-2">🏛️</div>
+            <h4 class="text-lg font-bold text-gray-800 mb-1">No Clubs Yet</h4>
+            <p class="text-gray-600 text-sm">Be the first to create one!</p>
+          </div>
+
+          <div class="text-center mt-4">
+            <RouterLink to="/clubs" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+              Browse All Clubs
+            </RouterLink>
+          </div>
+        </section>
       </aside>
 
     </main>
