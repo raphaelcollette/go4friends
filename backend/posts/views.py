@@ -8,11 +8,40 @@ from clubs.models import ClubMembership
 from django.contrib.auth import get_user_model
 from posts.serializers import PostSerializer
 from better_profanity import profanity
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.decorators import throttle_classes
+
+
 User = get_user_model()
 profanity.load_censor_words()
 
+class CreatePostThrottle(UserRateThrottle):
+    rate = '10/hour'
+
+class DeletePostThrottle(UserRateThrottle):
+    rate = '30/hour'
+
+class LikePostThrottle(UserRateThrottle):
+    rate = '60/hour'
+
+class UnlikePostThrottle(UserRateThrottle):
+    rate = '60/hour'
+
+class RepostThrottle(UserRateThrottle):
+    rate = '30/hour'
+
+class UndoRepostThrottle(UserRateThrottle):
+    rate = '30/hour'
+
+class ListPostsThrottle(UserRateThrottle):
+    rate = '100/hour'
+
+class ListUserPostsThrottle(UserRateThrottle):
+    rate = '100/hour'
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([CreatePostThrottle])
 def create_post(request):
     user = request.user
     club_id = request.data.get('club')
@@ -53,6 +82,7 @@ def create_post(request):
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([DeletePostThrottle])
 def delete_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -70,6 +100,7 @@ def delete_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([LikePostThrottle])
 def like_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -81,6 +112,7 @@ def like_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([UnlikePostThrottle])
 def unlike_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -93,6 +125,7 @@ def unlike_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([RepostThrottle])
 def repost_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -104,6 +137,7 @@ def repost_post(request, post_id):
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([UndoRepostThrottle])
 def undo_repost(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -116,6 +150,7 @@ def undo_repost(request, post_id):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ListPostsThrottle])
 def list_posts(request):
     try:
         print("list_posts called by user:", request.user)
@@ -129,6 +164,7 @@ def list_posts(request):
         return Response({"detail": str(e)}, status=500)
 
 @api_view(['GET'])
+@throttle_classes([ListUserPostsThrottle])
 def list_user_posts(request, username):
     posts = Post.objects.filter(author__username=username)
     serializer = PostSerializer(posts, many=True, context={'request': request})

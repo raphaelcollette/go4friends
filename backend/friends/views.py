@@ -8,6 +8,29 @@ from .serializers import FriendRequestSerializer
 from users.serializers import UserPublicSerializer
 from rest_framework.permissions import IsAuthenticated
 from clubs.models import Club
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.decorators import throttle_classes
+
+class SendFriendRequestThrottle(UserRateThrottle):
+    rate = '10/hour'
+
+class AcceptFriendRequestThrottle(UserRateThrottle):
+    rate = '20/hour'
+
+class RejectFriendRequestThrottle(UserRateThrottle):
+    rate = '20/hour'
+
+class CancelFriendRequestThrottle(UserRateThrottle):
+    rate = '20/hour'
+
+class RemoveFriendThrottle(UserRateThrottle):
+    rate = '10/hour'
+
+class FriendSuggestionsThrottle(UserRateThrottle):
+    rate = '30/hour'
+
+class UserFriendsCountThrottle(UserRateThrottle):
+    rate = '60/hour'
 
 User = get_user_model()
 
@@ -15,6 +38,7 @@ User = get_user_model()
 
 class FriendRequestCreateAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [SendFriendRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         to_username = request.data.get('to_username')
@@ -42,6 +66,7 @@ class FriendRequestListAPIView(generics.ListAPIView):
 
 class AcceptFriendRequestAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [AcceptFriendRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         return self._handle_friend_request(request, action="accept")
@@ -69,11 +94,13 @@ class AcceptFriendRequestAPIView(generics.GenericAPIView):
             return Response({'message': 'Friend request rejected.'})
 
 class RejectFriendRequestAPIView(AcceptFriendRequestAPIView):
+    throttle_classes = [RejectFriendRequestThrottle]
     def post(self, request, *args, **kwargs):
         return self._handle_friend_request(request, action="reject")
 
 class CancelFriendRequestAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [CancelFriendRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         to_username = request.data.get('to_username')
@@ -113,6 +140,7 @@ class FriendListAPIView(generics.ListAPIView):
 
 class RemoveFriendAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [RemoveFriendThrottle]
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -136,6 +164,7 @@ class RemoveFriendAPIView(generics.GenericAPIView):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@throttle_classes([FriendSuggestionsThrottle])
 def friend_suggestions(request):
     me = request.user
 
@@ -184,6 +213,7 @@ def friend_suggestions(request):
 
 class UserFriendsCountAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [UserFriendsCountThrottle]
 
     def get(self, request, username, *args, **kwargs):
         try:

@@ -10,13 +10,26 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import get_user_model
 from direct_messages.models import Thread, ThreadParticipant
 from .utils import add_user_to_club_chat
+from rest_framework.throttling import UserRateThrottle
 
 User = get_user_model()
 
+class InlineClubCreateThrottle(UserRateThrottle):
+    rate = '5/hour'
+
+class InlineClubJoinThrottle(UserRateThrottle):
+    rate = '10/hour'
+
+class InlineClubInviteThrottle(UserRateThrottle):
+    rate = '15/hour'
+
+class InlineClubDeleteThrottle(UserRateThrottle):
+    rate = '3/hour'
 
 class ClubCreateAPIView(generics.GenericAPIView):
     serializer_class = ClubCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [InlineClubCreateThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -59,6 +72,7 @@ class ClubListAPIView(generics.ListAPIView):
 
 class ClubJoinAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [InlineClubJoinThrottle]
 
     def post(self, request, club_name, *args, **kwargs):
         club = get_object_or_404(Club, name=club_name)
@@ -148,6 +162,7 @@ from clubs.models import Club, ClubMembership
 
 class ClubDeleteAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [InlineClubDeleteThrottle]
 
     def delete(self, request, club_name, *args, **kwargs):
         try:
@@ -273,6 +288,7 @@ def my_clubs(request):
 
 class InviteUserToClubAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_classes = [InlineClubInviteThrottle]
 
     def post(self, request, club_name):
         club = get_object_or_404(Club, name=club_name)
@@ -309,14 +325,14 @@ class AcceptInviteAPIView(APIView):
         if invite.accepted:
             return Response({'message': 'Invite already accepted.'}, status=400)
 
-        # ✅ Check before creating membership
+        # Check before creating membership
         if not ClubMembership.objects.filter(user=request.user, club=invite.club).exists():
             ClubMembership.objects.create(user=request.user, club=invite.club, role='member')
 
         invite.accepted = True
         invite.save()
 
-        # ✅ Also safe to call (won't duplicate due to get_or_create inside)
+        # Also safe to call (won't duplicate due to get_or_create inside)
         from .utils import add_user_to_club_chat
         add_user_to_club_chat(invite.club, request.user)
 

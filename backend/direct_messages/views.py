@@ -10,8 +10,18 @@ from django.utils.decorators import method_decorator
 from django.db.models import Count
 from rest_framework.views import APIView
 from friends.models import FriendRequest 
+from rest_framework.throttling import UserRateThrottle
 
 User = get_user_model()
+
+class SendMessageThrottle(UserRateThrottle):
+    rate = '20/min'
+
+class StartThreadThrottle(UserRateThrottle):
+    rate = '10/min'
+
+class TogglePinThrottle(UserRateThrottle):
+    rate = '30/min'
 
 def are_friends(user1, user2):
     """Helper function to check if two users are friends"""
@@ -53,6 +63,7 @@ class MessageListAPIView(generics.ListAPIView):
 class SendMessageAPIView(generics.CreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [SendMessageThrottle]
 
     def post(self, request, *args, **kwargs):
         thread_id = kwargs.get('thread_id')
@@ -82,6 +93,7 @@ class SendMessageAPIView(generics.CreateAPIView):
 
 class StartPrivateThreadAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [StartThreadThrottle]
 
     def post(self, request):
         usernames = request.data.get('usernames') or []
@@ -131,6 +143,7 @@ class StartPrivateThreadAPIView(generics.GenericAPIView):
 
 class TogglePinMessageAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [TogglePinThrottle]
 
     def post(self, request, pk):
         message = get_object_or_404(Message, id=pk, thread__participants__user=request.user)
