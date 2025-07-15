@@ -127,3 +127,9 @@ def list_posts(request):
     except Exception as e:
         print("Error in list_posts:", e)
         return Response({"detail": str(e)}, status=500)
+
+@api_view(['GET'])
+def list_user_posts(request, username):
+    posts = Post.objects.filter(author__username=username)
+    serializer = PostSerializer(posts, many=True, context={'request': request})
+    return Response(serializer.data)
