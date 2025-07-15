@@ -12,7 +12,7 @@ User = get_user_model()
 profanity.load_censor_words()
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([permissions.IsAuthenticated])
 def create_post(request):
     user = request.user
     club_id = request.data.get('club')
