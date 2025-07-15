@@ -215,11 +215,13 @@ import { useEventStore } from '@/stores/events'
 import { useClubStore } from '@/stores/club'
 import { usePostStore } from '@/stores/posts'
 import { useUserStore } from '@/stores/user'
+import { useToast } from 'vue-toastification'
 
 const eventStore = useEventStore()
 const clubStore = useClubStore()
 const postStore = usePostStore()
 const userStore = useUserStore()
+const toast = useToast()
 
 const newPostContent = ref('')
 const isPosting = ref(false)
@@ -242,12 +244,12 @@ const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
   try {
-    // Automatically post anonymously if on anonymous tab
     const anonymous = activeTab.value === 'anonymous'
     await postStore.createPost(newPostContent.value, anonymous)
     newPostContent.value = ''
   } catch (e) {
-    console.error(e)
+    const msg = e?.response?.data?.detail || 'Failed to post.'
+    toast.error(msg)  // ← show error as toast
   } finally {
     isPosting.value = false
   }
