@@ -17,7 +17,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             'id', 'authorName', 'username', 'authorInitials', 'content', 'timeAgo',
-            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted',
+            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous',
         ]
 
     def get_authorName(self, obj):
@@ -67,7 +67,7 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.reposts.filter(user=user).exists()
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Post.objects.filter(parent__isnull=True).order_by('-created_at')
+    queryset = Post.objects.filter(parent__isnull=True, club__isnull=True).order_by('-created_at')
     serializer_class = PostSerializer
 
     def get_serializer_context(self):

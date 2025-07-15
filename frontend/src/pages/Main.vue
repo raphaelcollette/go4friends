@@ -28,7 +28,11 @@
                     rows="3"
                     class="w-full bg-white/70 rounded-xl p-3 text-gray-800 focus:outline-none resize-none"
                   ></textarea>
-                  <div class="flex justify-end mt-2">
+                  <div class="flex items-center justify-between mt-2">
+                    <label class="inline-flex items-center space-x-2 text-gray-700 select-none">
+                      <input type="checkbox" v-model="isAnonymous" />
+                      <span>Post anonymously</span>
+                    </label>
                     <button
                       :disabled="isPosting || newPostContent.trim() === ''"
                       @click="submitPost"
@@ -41,7 +45,11 @@
               </div>
             </div>
             <!-- Real Posts -->
-            <div v-for="post in posts" :key="post.id" class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+            <div
+              v-for="post in filteredPosts"
+              :key="post.id"
+              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+            >
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
@@ -211,16 +219,19 @@ const displayedEvents = computed(() => eventStore.events.slice(0, 3))
 const displayedClubs = computed(() => clubStore.clubs.slice(0, 3))
 
 const newPostContent = ref('')
+const isAnonymous = ref(false)
 const isPosting = ref(false)
 
-const posts = computed(() => postStore.posts)
+// Filter out posts with club assigned (exclude club posts)
+const filteredPosts = computed(() => postStore.posts.filter(p => !p.club))
 
 const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
   try {
-    await postStore.createPost(newPostContent.value)
+    await postStore.createPost(newPostContent.value, isAnonymous.value)
     newPostContent.value = ''
+    isAnonymous.value = false
   } catch (e) {
     console.error(e)
   } finally {
@@ -273,4 +284,3 @@ onMounted(async () => {
   await postStore.fetchPosts()
 })
 </script>
-
