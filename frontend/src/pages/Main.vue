@@ -30,38 +30,39 @@
             </button>
           </div>
 
+          <!-- Post Entry Card locked at top -->
+          <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 sticky top-0 bg-white/90 backdrop-blur-sm z-20">
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <span class="text-white font-bold text-lg">{{ userInitials }}</span>
+              </div>
+              <div class="flex-1">
+                <textarea
+                  v-model="newPostContent"
+                  placeholder="What's happening?"
+                  rows="3"
+                  class="w-full bg-white/70 rounded-xl p-3 text-gray-800 focus:outline-none resize-none"
+                ></textarea>
+                <div class="flex items-center justify-between mt-2">
+                  <button
+                    :disabled="isPosting || newPostContent.trim() === ''"
+                    @click="submitPost"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition-all"
+                  >
+                    {{ isPosting ? 'Posting...' : 'Post' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Posts container with scroll -->
           <div 
             ref="postsContainer" 
             class="space-y-6 overflow-y-auto flex-grow scrollbar-hidden" 
             style="max-height: 100%;"
             @scroll="handleScroll"
           >
-            <!-- New Post Composer -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
-              <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">{{ userInitials }}</span>
-                </div>
-                <div class="flex-1">
-                  <textarea
-                    v-model="newPostContent"
-                    placeholder="What's happening?"
-                    rows="3"
-                    class="w-full bg-white/70 rounded-xl p-3 text-gray-800 focus:outline-none resize-none"
-                  ></textarea>
-                  <div class="flex items-center justify-between mt-2">
-                    <button
-                      :disabled="isPosting || newPostContent.trim() === ''"
-                      @click="submitPost"
-                      class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition-all"
-                    >
-                      {{ isPosting ? 'Posting...' : 'Post' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Posts List -->
             <div
               v-for="post in filteredPosts"
