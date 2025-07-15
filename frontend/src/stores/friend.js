@@ -10,6 +10,7 @@ export const useFriendStore = defineStore('friend', {
     loading: false,
     lastFetched: null, // for caching
     suggestionsLastFetched: null,
+    friendCountCache: {},
   }),
 
   actions: {
@@ -93,6 +94,31 @@ export const useFriendStore = defineStore('friend', {
       } catch (error) {
         console.error('User search failed:', error)
         throw error
+      }
+    },
+
+    async fetchFriendCount(username, force = false) {
+      const oneMinute = 60 * 1000
+      const cached = this.friendCountCache[username]
+
+      if (!force && cached && (Date.now() - cached.fetchedAt) < oneMinute) {
+        return cached.count
+      }
+
+      try {
+        const res = await authAxios.get(`/friends/${encodeURIComponent(username)}/count/`)
+        this.friendCountCache[username] = {
+          count: res.data.friends_count,
+          fetchedAt: Date.now(),
+        }
+        return res.data.friends_count
+      } catch (error) {
+        console.error('Failed to fetch friend count:', error)
+        this.friendCountCache[username] = {
+          count: null,
+          fetchedAt: Date.now(),
+        }
+        return null
       }
     },
 

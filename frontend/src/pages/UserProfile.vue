@@ -171,12 +171,14 @@ import { authAxios } from '@/utils/axios'
 import { useToast } from 'vue-toastification'
 import { useUserStore } from '@/stores/user'
 import { usePostStore } from '@/stores/posts'
+import { useFriendStore } from '@/stores/friend'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
 const postStore = usePostStore()
+const friendStore = useFriendStore()
 
 const user = ref(null)
 const loading = ref(true)
@@ -236,15 +238,34 @@ const fetchPosts = async () => {
 }
 
 const fetchFriendCount = async (username) => {
+  const oneMinute = 60 * 1000
+  const now = Date.now()
+
+  if (
+    friendStore.friendCountCache?.[username] &&
+    now - friendStore.friendCountCache[username].lastFetched < oneMinute
+  ) {
+    friendCount.value = friendStore.friendCountCache[username].count
+    return
+  }
+
   try {
     const res = await authAxios.get(`/friends/${encodeURIComponent(username)}/count/`)
-    friendCount.value = res.data.friends_count
+    const count = res.data.friends_count
+
+    if (!friendStore.friendCountCache) friendStore.friendCountCache = {}
+
+    friendStore.friendCountCache[username] = {
+      count,
+      lastFetched: now,
+    }
+
+    friendCount.value = count
   } catch {
     toast.error('Failed to load friends count.')
     friendCount.value = null
   }
 }
-
 const filteredPosts = computed(() => {
   if (!user.value || user.value.private) return []
   return postStore.posts.filter(p => p.username === user.value.username)
