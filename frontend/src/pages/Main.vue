@@ -1,19 +1,19 @@
 <template>
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background);">
-    <main class="flex-1 flex pt-24 px-6 max-w-7xl mx-auto w-full gap-8">
+    <main class="flex-1 flex pt-24 px-6 max-w-7xl mx-auto w-full gap-8" style="height: calc(100vh - 6rem);">
 
       <!-- Main Content - Posts Feed -->
-      <section class="flex-1 flex flex-col">
+      <section class="flex-1 flex flex-col h-full">
 
         <!-- Social Feed Section -->
-        <section class="w-full">
-          <div class="text-center mb-8">
+        <section class="w-full flex flex-col flex-grow overflow-hidden">
+          <div class="text-center mb-8 flex-shrink-0">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">📱 Campus Feed</h2>
             <p class="text-gray-600 text-lg">Stay connected with what's happening around campus</p>
           </div>
 
           <!-- Tabs -->
-          <div class="flex justify-center space-x-4 mb-6">
+          <div class="flex justify-center space-x-4 mb-6 flex-shrink-0">
             <button
               @click="activeTab = 'public'"
               :class="activeTab === 'public' ? 'border-b-2 border-blue-600 font-semibold' : 'text-gray-600 hover:text-gray-800'"
@@ -30,9 +30,9 @@
             </button>
           </div>
 
-          <div class="space-y-6">
+          <div class="space-y-6 overflow-y-auto flex-grow" style="max-height: 100%;">
             <!-- New Post Composer -->
-            <div class="glossy-bg rounded-2xl shadow-lg p-6">
+            <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <span class="text-white font-bold text-lg">{{ userInitials }}</span>
@@ -61,7 +61,7 @@
             <div
               v-for="post in filteredPosts"
               :key="post.id"
-              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
             >
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -116,24 +116,24 @@
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
       </section>
 
       <!-- Sidebar - Events and Clubs -->
-      <aside class="w-80 flex-shrink-0 space-y-8">
+      <aside class="w-80 flex-shrink-0 space-y-8 overflow-auto" style="max-height: calc(100vh - 6rem);">
+
         <!-- Discover Events -->
         <section class="w-full">
           <div class="text-center mb-6">
             <h3 class="text-2xl font-bold text-gray-800 mb-2">🎉 Upcoming Events</h3>
             <p class="text-gray-600 text-sm">Don't miss out on campus events</p>
           </div>
-          
+
           <div v-if="displayedEvents.length > 0" class="space-y-4">
-            <div 
-              v-for="event in displayedEvents" 
+            <div
+              v-for="event in displayedEvents"
               :key="event.id"
               class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group"
             >
@@ -171,7 +171,7 @@
             <h3 class="text-2xl font-bold text-gray-800 mb-2">🏛️ Join Clubs</h3>
             <p class="text-gray-600 text-sm">Connect with like-minded students</p>
           </div>
-          
+
           <div v-if="displayedClubs.length > 0" class="space-y-4">
             <RouterLink
               v-for="club in displayedClubs"
@@ -203,6 +203,7 @@
             </RouterLink>
           </div>
         </section>
+
       </aside>
 
     </main>
@@ -249,7 +250,7 @@ const submitPost = async () => {
     newPostContent.value = ''
   } catch (e) {
     const msg = e?.response?.data?.detail || 'Failed to post.'
-    toast.error(msg)  // ← show error as toast
+    toast.error(msg)
   } finally {
     isPosting.value = false
   }
