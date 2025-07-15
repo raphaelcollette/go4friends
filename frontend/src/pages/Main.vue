@@ -45,10 +45,6 @@
                     class="w-full bg-white/70 rounded-xl p-3 text-gray-800 focus:outline-none resize-none"
                   ></textarea>
                   <div class="flex items-center justify-between mt-2">
-                    <label class="inline-flex items-center space-x-2 text-gray-700 select-none">
-                      <input type="checkbox" v-model="isAnonymous" />
-                      <span>Post anonymously</span>
-                    </label>
                     <button
                       :disabled="isPosting || newPostContent.trim() === ''"
                       @click="submitPost"
@@ -180,7 +176,7 @@
             <RouterLink
               v-for="club in displayedClubs"
               :key="club.id"
-              :to="/clubs/${encodeURIComponent(club.name)}"
+              :to="`/clubs/${encodeURIComponent(club.name)}`"
               class="glossy-bg p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group block"
             >
               <div class="flex items-start space-x-3">
@@ -226,7 +222,6 @@ const postStore = usePostStore()
 const userStore = useUserStore()
 
 const newPostContent = ref('')
-const isAnonymous = ref(false)
 const isPosting = ref(false)
 const activeTab = ref('public') // 'public' or 'anonymous'
 
@@ -243,9 +238,10 @@ const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
   try {
-    await postStore.createPost(newPostContent.value, isAnonymous.value)
+    // Automatically post anonymously if on anonymous tab
+    const anonymous = activeTab.value === 'anonymous'
+    await postStore.createPost(newPostContent.value, anonymous)
     newPostContent.value = ''
-    isAnonymous.value = false
   } catch (e) {
     console.error(e)
   } finally {
