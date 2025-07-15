@@ -7,7 +7,8 @@ from .views import (
     RejectFriendRequestAPIView,
     CancelFriendRequestAPIView,
     RemoveFriendAPIView,
-    friend_suggestions
+    friend_suggestions,
+    UserFriendsCountAPIView,
 )
 
 urlpatterns = [

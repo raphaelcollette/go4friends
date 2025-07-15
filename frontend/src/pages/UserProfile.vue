@@ -132,10 +132,7 @@
             </div>
           </div>
 
-          <div class="flex flex-col justify-center items-center bg-gray-50 rounded-2xl p-4 shadow-md sm:col-span-1">
-            <p class="text-4xl font-extrabold text-gray-900">{{ friendCount !== null ? friendCount : '...' }}</p>
-            <p class="text-sm font-medium text-gray-600 mt-1">Friends</p>
-          </div>
+          <p class="text-gray-600 mt-4 text-sm">👥 Friends: {{ friendCount !== null ? friendCount : 'Loading...' }}</p>
 
           <!-- Interests -->
           <div v-if="user.interests?.length" class="mt-8">
