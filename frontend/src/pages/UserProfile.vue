@@ -132,6 +132,11 @@
             </div>
           </div>
 
+          <div class="flex flex-col justify-center items-center bg-gray-50 rounded-2xl p-4 shadow-md sm:col-span-1">
+            <p class="text-4xl font-extrabold text-gray-900">{{ friendCount !== null ? friendCount : '...' }}</p>
+            <p class="text-sm font-medium text-gray-600 mt-1">Friends</p>
+          </div>
+
           <!-- Interests -->
           <div v-if="user.interests?.length" class="mt-8">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Interests</h2>
@@ -231,6 +236,16 @@ const fetchPosts = async () => {
   }
 }
 
+const fetchFriendCount = async (username) => {
+  try {
+    const res = await authAxios.get(`/friends/${encodeURIComponent(username)}/count/`)
+    friendCount.value = res.data.friends_count
+  } catch {
+    toast.error('Failed to load friends count.')
+    friendCount.value = null
+  }
+}
+
 const filteredPosts = computed(() => {
   if (!user.value || user.value.private) return []
   return postStore.posts.filter(p => p.username === user.value.username)
@@ -302,10 +317,16 @@ const undoRepostPost = async (postId) => {
 onMounted(async () => {
   await fetchUser()
   await fetchPosts()
+  if (user.value?.username) {
+    await fetchFriendCount(user.value.username)
+  }
 })
 
-watch(() => route.params.username, async () => {
+watch(() => route.params.username, async (newUsername) => {
   await fetchUser()
   await fetchPosts()
+  if (newUsername) {
+    await fetchFriendCount(newUsername)
+  }
 })
 </script>

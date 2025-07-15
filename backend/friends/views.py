@@ -181,3 +181,19 @@ def friend_suggestions(request):
             suggestions.append(data)
 
     return Response(suggestions)
+
+class UserFriendsCountAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, username, *args, **kwargs):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        friends = FriendRequest.objects.filter(
+            Q(from_user=user) | Q(to_user=user),
+            status='accepted'
+        )
+        count = friends.count()
+        return Response({'friends_count': count})

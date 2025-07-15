@@ -21,5 +21,6 @@ urlpatterns = [
     
     path('friends/', FriendListAPIView.as_view(), name='friend-list'),
     path('remove/', RemoveFriendAPIView.as_view(), name='friend-remove'),
+    path('<str:username>/count/', UserFriendsCountAPIView.as_view(), name='user_friends_count'),
     
 ]
