@@ -225,8 +225,12 @@ const newPostContent = ref('')
 const isPosting = ref(false)
 const activeTab = ref('public') // 'public' or 'anonymous'
 
+const displayedEvents = computed(() => (eventStore.events ?? []).slice(0, 3))
+const displayedClubs = computed(() => (clubStore.clubs ?? []).slice(0, 3))
+
 const filteredPosts = computed(() => {
-  return postStore.posts.filter(p => {
+  const posts = postStore.posts ?? []
+  return posts.filter(p => {
     if (p.club) return false
     if (activeTab.value === 'public') return !p.is_anonymous
     if (activeTab.value === 'anonymous') return p.is_anonymous
