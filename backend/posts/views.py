@@ -7,13 +7,12 @@ from .models import Post, Like, Repost
 from clubs.models import ClubMembership
 from django.contrib.auth import get_user_model
 from posts.serializers import PostSerializer
-from profanity_check import predict_prob
 from better_profanity import profanity
 User = get_user_model()
 profanity.load_censor_words()
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def create_post(request):
     user = request.user
     club_id = request.data.get('club')
@@ -21,8 +20,8 @@ def create_post(request):
     is_anonymous = request.data.get('is_anonymous', False)
     parent_id = request.data.get('parent')
 
-    # Profanity check
-    if profanity.contains_profanity(content) or predict_prob([content])[0] > 0.7:
+    # Profanity check using better_profanity only
+    if profanity.contains_profanity(content):
         return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
 
     club = None
