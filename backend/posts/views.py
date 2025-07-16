@@ -164,8 +164,12 @@ def list_posts(request):
         return Response({"detail": str(e)}, status=500)
 
 @api_view(['GET'])
-#@throttle_classes([ListUserPostsThrottle])
 def list_user_posts(request, username):
-    posts = Post.objects.filter(author__username=username)
+    authored_posts = Post.objects.filter(author__username=username)
+    reposted_post_ids = Repost.objects.filter(user__username=username).values_list('post_id', flat=True)
+    reposted_posts = Post.objects.filter(id__in=reposted_post_ids)
+
+    posts = (authored_posts | reposted_posts).distinct().order_by('-created_at')
+
     serializer = PostSerializer(posts, many=True, context={'request': request})
     return Response(serializer.data)
