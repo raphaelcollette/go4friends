@@ -10,6 +10,8 @@ from posts.serializers import PostSerializer
 from better_profanity import profanity
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import throttle_classes
+from itertools import chain
+from operator import attrgetter
 
 
 User = get_user_model()
@@ -164,10 +166,15 @@ def list_posts(request):
         return Response({"detail": str(e)}, status=500)
 
 @api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def list_user_posts(request, username):
     authored = Post.objects.filter(author__username=username)
     reposted = Post.objects.filter(reposts__user__username=username)
-    posts = authored.union(reposted).distinct().order_by('-created_at')
-    
-    serializer = PostSerializer(posts, many=True, context={'request': request})
+
+    combined = list(chain(authored, reposted))
+    # Remove duplicates (if user reposted own post)
+    unique_posts = {post.id: post for post in combined}.values()
+    sorted_posts = sorted(unique_posts, key=attrgetter('created_at'), reverse=True)
+
+    serializer = PostSerializer(sorted_posts, many=True, context={'request': request})
     return Response(serializer.data)
