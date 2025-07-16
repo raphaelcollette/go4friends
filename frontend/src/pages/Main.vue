@@ -361,18 +361,20 @@ const handleScroll = (e) => {
 }
 
 const canDeletePost = (post) => {
-  if (!userStore.currentUser) return false
+  if (!userStore.currentUser) {
+    console.log('No current user')
+    return false
+  }
 
-  // Extract current username
   const currentUsername = userStore.currentUser.username
+  console.log('Checking delete for post author:', post.author?.username, 'current user:', currentUsername)
 
   if (post.club) {
-    // Assuming clubStore.memberships is an array of {club: {...}, role: 'admin'|'moderator'|...}
     const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
+    console.log('Club membership:', membership)
     return membership && ['moderator', 'admin'].includes(membership.role)
   }
 
-  // Check author username (adjust for object shape)
   return post.author?.username === currentUsername
 }
 
