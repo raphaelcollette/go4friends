@@ -117,6 +117,15 @@
                       <span>🗑️🔁</span>
                       <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
+                    <!-- Delete button -->
+                    <button
+                      v-if="canDeletePost(post)"
+                      @click="deletePostHandler(post.id)"
+                      class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                      title="Delete post"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
               </div>
@@ -348,6 +357,27 @@ const handleScroll = (e) => {
   const el = e.target
   if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
     loadMorePosts()
+  }
+}
+
+const canDeletePost = (post) => {
+  if (!userStore.currentUser) return false
+  // If post belongs to club, user must be moderator/admin in that club
+  if (post.club) {
+    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
+    return membership && ['moderator', 'admin'].includes(membership.role)
+  }
+  // Otherwise only the author can delete
+  return post.author === userStore.currentUser.username
+}
+
+const deletePostHandler = async (postId) => {
+  try {
+    await postStore.deletePost(postId)
+    toast.success('Post deleted')
+  } catch (e) {
+    const msg = e?.response?.data?.detail || 'Failed to delete post'
+    toast.error(msg)
   }
 }
 
