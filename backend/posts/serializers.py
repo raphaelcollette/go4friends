@@ -12,12 +12,13 @@ class PostSerializer(serializers.ModelSerializer):
     repostCount = serializers.SerializerMethodField()
     hasLiked = serializers.SerializerMethodField()
     hasReposted = serializers.SerializerMethodField()
+    reposted_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'authorName', 'username', 'authorInitials', 'content', 'timeAgo',
-            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous',
+            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous', 'reposted_by'
         ]
 
     def get_authorName(self, obj):
@@ -65,6 +66,15 @@ class PostSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         return obj.reposts.filter(user=user).exists()
+
+    def get_reposted_by(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return None
+        repost = obj.reposts.filter(user=user).first()
+        if repost:
+            return user.username
+        return None
 
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.filter(parent__isnull=True, club__isnull=True).order_by('-created_at')
