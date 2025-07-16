@@ -243,10 +243,6 @@ import { usePostStore } from '@/stores/posts'
 import { useUserStore } from '@/stores/user'
 import { useToast } from 'vue-toastification'
 
-console.log('Author username:', post.author?.username)
-console.log('Current user:', userStore.currentUser?.username)
-console.log('Can delete:', canDeletePost(post))
-
 const eventStore = useEventStore()
 const clubStore = useClubStore()
 const postStore = usePostStore()
