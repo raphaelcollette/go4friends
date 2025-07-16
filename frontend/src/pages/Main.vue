@@ -243,6 +243,10 @@ import { usePostStore } from '@/stores/posts'
 import { useUserStore } from '@/stores/user'
 import { useToast } from 'vue-toastification'
 
+console.log('Author username:', post.author?.username)
+console.log('Current user:', userStore.currentUser?.username)
+console.log('Can delete:', canDeletePost(post))
+
 const eventStore = useEventStore()
 const clubStore = useClubStore()
 const postStore = usePostStore()
@@ -362,13 +366,18 @@ const handleScroll = (e) => {
 
 const canDeletePost = (post) => {
   if (!userStore.currentUser) return false
-  // If post belongs to club, user must be moderator/admin in that club
+
+  // Extract current username
+  const currentUsername = userStore.currentUser.username
+
   if (post.club) {
+    // Assuming clubStore.memberships is an array of {club: {...}, role: 'admin'|'moderator'|...}
     const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
     return membership && ['moderator', 'admin'].includes(membership.role)
   }
-  // Otherwise only the author can delete
-  return post.author === userStore.currentUser.username
+
+  // Check author username (adjust for object shape)
+  return post.author?.username === currentUsername
 }
 
 const deletePostHandler = async (postId) => {
