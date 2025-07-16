@@ -63,6 +63,14 @@
                     <span>🗑️🔁</span>
                     <span class="text-sm">{{ post.repostCount }}</span>
                   </button>
+                  <button
+                      v-if="canDeletePost(post)"
+                      @click="deletePostHandler(post.id)"
+                      class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                      title="Delete post"
+                    >
+                      🗑️
+                  </button>
                 </div>
               </div>
             </div>
@@ -332,6 +340,29 @@ const undoRepostPost = async (postId) => {
   } catch (e) {
     console.error(e)
   }
+}
+
+const deletePostHandler = async (postId) => {
+  try {
+    await postStore.deletePost(postId)
+    toast.success('Post deleted')
+  } catch (e) {
+    const msg = e?.response?.data?.detail || 'Failed to delete post'
+    toast.error(msg)
+  }
+}
+
+const canDeletePost = (post) => {
+  if (!userStore.currentUser) return false
+
+  const currentUsername = userStore.currentUser.username
+
+  if (post.club) {
+    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
+    return membership && ['moderator', 'admin'].includes(membership.role)
+  }
+
+  return post.username === currentUsername
 }
 
 onMounted(async () => {
