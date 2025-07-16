@@ -9,7 +9,6 @@ export const usePostStore = defineStore('posts', {
   }),
 
   actions: {
-    // Fetch all posts (old method)
     async fetchPosts() {
       this.loading = true
       try {
@@ -22,13 +21,12 @@ export const usePostStore = defineStore('posts', {
       }
     },
 
-    // Fetch posts for a specific user with caching
     async fetchUserPosts(username, force = false) {
       this.loading = true
       try {
         const now = Date.now()
         const cache = this.userPostsCache[username]
-        const fresh = cache && (now - cache.lastFetched) < 60000 // 60 seconds
+        const fresh = cache && (now - cache.lastFetched) < 60000
 
         if (!force && fresh) {
           this.posts = cache.posts
@@ -73,11 +71,13 @@ export const usePostStore = defineStore('posts', {
 
     async likePost(postId) {
       try {
-        const res = await authAxios.post(`/posts/${postId}/like/`)
-        const updatedPost = res.data
+        await authAxios.post(`/posts/${postId}/like/`)
         const index = this.posts.findIndex(p => p.id === postId)
         if (index !== -1) {
-          this.posts.splice(index, 1, updatedPost)
+          const post = this.posts[index]
+          post.hasLiked = true
+          post.likeCount = (post.likeCount || 0) + 1
+          this.posts.splice(index, 1, { ...post })
         }
       } catch (error) {
         console.error('Failed to like post:', error)
@@ -86,11 +86,13 @@ export const usePostStore = defineStore('posts', {
 
     async unlikePost(postId) {
       try {
-        const res = await authAxios.post(`/posts/${postId}/unlike/`)
-        const updatedPost = res.data
+        await authAxios.post(`/posts/${postId}/unlike/`)
         const index = this.posts.findIndex(p => p.id === postId)
         if (index !== -1) {
-          this.posts.splice(index, 1, updatedPost)
+          const post = this.posts[index]
+          post.hasLiked = false
+          post.likeCount = Math.max((post.likeCount || 1) - 1, 0)
+          this.posts.splice(index, 1, { ...post })
         }
       } catch (error) {
         console.error('Failed to unlike post:', error)
@@ -99,11 +101,13 @@ export const usePostStore = defineStore('posts', {
 
     async repostPost(postId) {
       try {
-        const res = await authAxios.post(`/posts/${postId}/repost/`)
-        const updatedPost = res.data
+        await authAxios.post(`/posts/${postId}/repost/`)
         const index = this.posts.findIndex(p => p.id === postId)
         if (index !== -1) {
-          this.posts.splice(index, 1, updatedPost)
+          const post = this.posts[index]
+          post.hasReposted = true
+          post.repostCount = (post.repostCount || 0) + 1
+          this.posts.splice(index, 1, { ...post })
         }
       } catch (error) {
         console.error('Failed to repost:', error)
@@ -112,11 +116,13 @@ export const usePostStore = defineStore('posts', {
 
     async undoRepostPost(postId) {
       try {
-        const res = await authAxios.delete(`/posts/${postId}/undo_repost/`)
-        const updatedPost = res.data
+        await authAxios.delete(`/posts/${postId}/undo_repost/`)
         const index = this.posts.findIndex(p => p.id === postId)
         if (index !== -1) {
-          this.posts.splice(index, 1, updatedPost)
+          const post = this.posts[index]
+          post.hasReposted = false
+          post.repostCount = Math.max((post.repostCount || 1) - 1, 0)
+          this.posts.splice(index, 1, { ...post })
         }
       } catch (error) {
         console.error('Failed to undo repost:', error)
