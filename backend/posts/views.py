@@ -41,7 +41,7 @@ class ListUserPostsThrottle(UserRateThrottle):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([CreatePostThrottle])
+#@throttle_classes([CreatePostThrottle])
 def create_post(request):
     user = request.user
     club_id = request.data.get('club')
@@ -82,7 +82,7 @@ def create_post(request):
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([DeletePostThrottle])
+#@throttle_classes([DeletePostThrottle])
 def delete_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -100,7 +100,7 @@ def delete_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([LikePostThrottle])
+#@throttle_classes([LikePostThrottle])
 def like_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -112,7 +112,7 @@ def like_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([UnlikePostThrottle])
+#@throttle_classes([UnlikePostThrottle])
 def unlike_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -125,7 +125,7 @@ def unlike_post(request, post_id):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([RepostThrottle])
+#@throttle_classes([RepostThrottle])
 def repost_post(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -137,7 +137,7 @@ def repost_post(request, post_id):
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([UndoRepostThrottle])
+#@throttle_classes([UndoRepostThrottle])
 def undo_repost(request, post_id):
     user = request.user
     post = get_object_or_404(Post, id=post_id)
@@ -150,7 +150,7 @@ def undo_repost(request, post_id):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-@throttle_classes([ListPostsThrottle])
+#@throttle_classes([ListPostsThrottle])
 def list_posts(request):
     try:
         print("list_posts called by user:", request.user)
@@ -164,7 +164,7 @@ def list_posts(request):
         return Response({"detail": str(e)}, status=500)
 
 @api_view(['GET'])
-@throttle_classes([ListUserPostsThrottle])
+#@throttle_classes([ListUserPostsThrottle])
 def list_user_posts(request, username):
     posts = Post.objects.filter(author__username=username)
     serializer = PostSerializer(posts, many=True, context={'request': request})

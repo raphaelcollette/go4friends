@@ -38,7 +38,7 @@ User = get_user_model()
 
 class FriendRequestCreateAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [SendFriendRequestThrottle]
+   # throttle_classes = [SendFriendRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         to_username = request.data.get('to_username')
@@ -94,13 +94,13 @@ class AcceptFriendRequestAPIView(generics.GenericAPIView):
             return Response({'message': 'Friend request rejected.'})
 
 class RejectFriendRequestAPIView(AcceptFriendRequestAPIView):
-    throttle_classes = [RejectFriendRequestThrottle]
+    #throttle_classes = [RejectFriendRequestThrottle]
     def post(self, request, *args, **kwargs):
         return self._handle_friend_request(request, action="reject")
 
 class CancelFriendRequestAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [CancelFriendRequestThrottle]
+   # throttle_classes = [CancelFriendRequestThrottle]
 
     def post(self, request, *args, **kwargs):
         to_username = request.data.get('to_username')
@@ -140,7 +140,7 @@ class FriendListAPIView(generics.ListAPIView):
 
 class RemoveFriendAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [RemoveFriendThrottle]
+    #throttle_classes = [RemoveFriendThrottle]
 
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
@@ -164,7 +164,7 @@ class RemoveFriendAPIView(generics.GenericAPIView):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([FriendSuggestionsThrottle])
+#@throttle_classes([FriendSuggestionsThrottle])
 def friend_suggestions(request):
     me = request.user
 
@@ -213,7 +213,7 @@ def friend_suggestions(request):
 
 class UserFriendsCountAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [UserFriendsCountThrottle]
+   # throttle_classes = [UserFriendsCountThrottle]
 
     def get(self, request, username, *args, **kwargs):
         try:

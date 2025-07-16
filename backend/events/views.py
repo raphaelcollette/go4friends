@@ -46,7 +46,7 @@ class EventCreateAPIView(generics.GenericAPIView):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-    throttle_classes = [CreateEventThrottle]
+   # throttle_classes = [CreateEventThrottle]
 
     def post(self, request, *args, **kwargs):
         club_name = request.data.get('club_name')
@@ -151,7 +151,7 @@ class ClubEventListAPIView(generics.ListAPIView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([RSVPEventThrottle])
+#@throttle_classes([RSVPEventThrottle])
 def rsvp_event(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
@@ -162,7 +162,7 @@ def rsvp_event(request, event_id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([CancelRSVPThrottle])
+#@throttle_classes([CancelRSVPThrottle])
 def cancel_rsvp(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
@@ -173,7 +173,7 @@ def cancel_rsvp(request, event_id):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([DeleteEventThrottle])
+#@throttle_classes([DeleteEventThrottle])
 def delete_event(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
@@ -192,7 +192,7 @@ def delete_event(request, event_id):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-@throttle_classes([UpdateEventThrottle])
+#@throttle_classes([UpdateEventThrottle])
 def update_event(request, event_id):
     try:
         event = Event.objects.get(id=event_id)
@@ -215,7 +215,7 @@ def update_event(request, event_id):
 
 class SuggestedEventsAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    throttle_classes = [SuggestedEventsThrottle]
+    #throttle_classes = [SuggestedEventsThrottle]
 
     def get(self, request):
         me = request.user
@@ -261,7 +261,7 @@ class SuggestedEventsAPIView(APIView):
 
 class EventDetailAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [EventDetailThrottle]
+    #throttle_classes = [EventDetailThrottle]
 
     def get(self, request, event_id):
         try:

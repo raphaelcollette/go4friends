@@ -29,7 +29,7 @@ class InlineClubDeleteThrottle(UserRateThrottle):
 class ClubCreateAPIView(generics.GenericAPIView):
     serializer_class = ClubCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [InlineClubCreateThrottle]
+    #throttle_classes = [InlineClubCreateThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -72,7 +72,7 @@ class ClubListAPIView(generics.ListAPIView):
 
 class ClubJoinAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [InlineClubJoinThrottle]
+    #throttle_classes = [InlineClubJoinThrottle]
 
     def post(self, request, club_name, *args, **kwargs):
         club = get_object_or_404(Club, name=club_name)
@@ -162,7 +162,7 @@ from clubs.models import Club, ClubMembership
 
 class ClubDeleteAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [InlineClubDeleteThrottle]
+    #throttle_classes = [InlineClubDeleteThrottle]
 
     def delete(self, request, club_name, *args, **kwargs):
         try:
@@ -288,7 +288,7 @@ def my_clubs(request):
 
 class InviteUserToClubAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    throttle_classes = [InlineClubInviteThrottle]
+    #throttle_classes = [InlineClubInviteThrottle]
 
     def post(self, request, club_name):
         club = get_object_or_404(Club, name=club_name)
