@@ -29,10 +29,13 @@
                 <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
 
                 <div class="flex items-center space-x-6 text-gray-500 mb-4">
+                  <!-- Comment count (no action) -->
                   <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
                     <span>💬</span>
                     <span class="text-sm">{{ post.commentCount }}</span>
                   </button>
+
+                  <!-- Like / Unlike -->
                   <button
                     v-if="!post.hasLiked"
                     class="flex items-center space-x-2 hover:text-red-500 transition-colors"
@@ -49,6 +52,8 @@
                     <span>🗑️❤️</span>
                     <span class="text-sm">{{ post.likeCount }}</span>
                   </button>
+
+                  <!-- Repost / Undo Repost -->
                   <button
                     v-if="!post.hasReposted"
                     class="flex items-center space-x-2 hover:text-green-500 transition-colors"
@@ -64,6 +69,16 @@
                   >
                     <span>🗑️🔁</span>
                     <span class="text-sm">{{ post.repostCount }}</span>
+                  </button>
+
+                  <!-- Delete button if allowed -->
+                  <button
+                    v-if="canDeletePost(post)"
+                    @click="deletePostHandler(post.id)"
+                    class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                    title="Delete post"
+                  >
+                    🗑️
                   </button>
                 </div>
 
@@ -106,6 +121,54 @@
                           <span class="text-gray-500 text-xs">{{ reply.timeAgo }}</span>
                         </div>
                         <p class="text-gray-700 leading-relaxed">{{ reply.content }}</p>
+
+                        <div class="flex items-center space-x-6 text-gray-500 mt-2">
+                          <!-- Like / Unlike -->
+                          <button
+                            v-if="!reply.hasLiked"
+                            class="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                            @click.stop="likePost(reply.id, reply)"
+                          >
+                            <span>❤️</span>
+                            <span class="text-sm">{{ reply.likeCount }}</span>
+                          </button>
+                          <button
+                            v-else
+                            class="flex items-center space-x-2 text-red-500 transition-colors"
+                            @click.stop="unlikePost(reply.id, reply)"
+                          >
+                            <span>🗑️❤️</span>
+                            <span class="text-sm">{{ reply.likeCount }}</span>
+                          </button>
+
+                          <!-- Repost / Undo Repost -->
+                          <button
+                            v-if="!reply.hasReposted"
+                            class="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                            @click.stop="repostPost(reply.id, reply)"
+                          >
+                            <span>🔁</span>
+                            <span class="text-sm">{{ reply.repostCount }}</span>
+                          </button>
+                          <button
+                            v-else
+                            class="flex items-center space-x-2 text-green-600 transition-colors"
+                            @click.stop="undoRepostPost(reply.id, reply)"
+                          >
+                            <span>🗑️🔁</span>
+                            <span class="text-sm">{{ reply.repostCount }}</span>
+                          </button>
+
+                          <!-- Delete button -->
+                          <button
+                            v-if="canDeletePost(reply)"
+                            @click.stop="deletePostHandler(reply.id, true)"
+                            class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete reply"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -138,10 +201,21 @@ const replies = ref([])
 const replyContent = ref('')
 const isReplying = ref(false)
 
-const likePost = async (postId) => {
+const currentUsername = ref('')
+
+// Utility: check if current user can delete post/reply
+const canDeletePost = (item) => {
+  if (!currentUsername.value) return false
+  return item.username === currentUsername.value
+}
+
+const likePost = async (postId, target = null) => {
   try {
     await authAxios.post(`/posts/${postId}/like/`)
-    if (post.value && post.value.id === postId) {
+    if (target) {
+      target.hasLiked = true
+      target.likeCount = (target.likeCount || 0) + 1
+    } else if (post.value && post.value.id === postId) {
       post.value.hasLiked = true
       post.value.likeCount = (post.value.likeCount || 0) + 1
     }
@@ -150,10 +224,13 @@ const likePost = async (postId) => {
   }
 }
 
-const unlikePost = async (postId) => {
+const unlikePost = async (postId, target = null) => {
   try {
     await authAxios.post(`/posts/${postId}/unlike/`)
-    if (post.value && post.value.id === postId) {
+    if (target) {
+      target.hasLiked = false
+      target.likeCount = Math.max((target.likeCount || 1) - 1, 0)
+    } else if (post.value && post.value.id === postId) {
       post.value.hasLiked = false
       post.value.likeCount = Math.max((post.value.likeCount || 1) - 1, 0)
     }
@@ -162,10 +239,13 @@ const unlikePost = async (postId) => {
   }
 }
 
-const repostPost = async (postId) => {
+const repostPost = async (postId, target = null) => {
   try {
     await authAxios.post(`/posts/${postId}/repost/`)
-    if (post.value && post.value.id === postId) {
+    if (target) {
+      target.hasReposted = true
+      target.repostCount = (target.repostCount || 0) + 1
+    } else if (post.value && post.value.id === postId) {
       post.value.hasReposted = true
       post.value.repostCount = (post.value.repostCount || 0) + 1
     }
@@ -174,12 +254,28 @@ const repostPost = async (postId) => {
   }
 }
 
-const undoRepostPost = async (postId) => {
+const undoRepostPost = async (postId, target = null) => {
   try {
     await authAxios.delete(`/posts/${postId}/undo_repost/`)
-    if (post.value && post.value.id === postId) {
+    if (target) {
+      target.hasReposted = false
+      target.repostCount = Math.max((target.repostCount || 1) - 1, 0)
+    } else if (post.value && post.value.id === postId) {
       post.value.hasReposted = false
       post.value.repostCount = Math.max((post.value.repostCount || 1) - 1, 0)
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const deletePostHandler = async (postId, isReply = false) => {
+  try {
+    await authAxios.delete(`/posts/${postId}/`)
+    if (isReply) {
+      replies.value = replies.value.filter(r => r.id !== postId)
+    } else if (post.value && post.value.id === postId) {
+      post.value = null
     }
   } catch (e) {
     console.error(e)
@@ -213,6 +309,13 @@ const submitReply = async () => {
 }
 
 onMounted(async () => {
+  try {
+    const userRes = await authAxios.get('/users/me/')
+    currentUsername.value = userRes.data.username
+  } catch {
+    currentUsername.value = null
+  }
+
   try {
     const response = await authAxios.get(`/posts/${route.params.id}/`)
     post.value = response.data
