@@ -23,29 +23,29 @@ export const usePostStore = defineStore('posts', {
     },
 
     async fetchUserPosts(username, force = false) {
-    this.loading = true
-    try {
-      const now = Date.now()
-      const cache = this.userPostsCache[username]
-      const fresh = cache && (now - cache.lastFetched) < 60000
+      this.loading = true
+      try {
+        const now = Date.now()
+        const cache = this.userPostsCache[username]
+        const fresh = cache && (now - cache.lastFetched) < 60000
 
-      if (!force && fresh) {
-        this.userPosts = cache.posts
-        return
-      }
+        if (!force && fresh) {
+          this.userPosts = cache.posts
+          return
+        }
 
-      const response = await authAxios.get(`/posts/user/${encodeURIComponent(username)}/`)
-      this.userPostsCache[username] = {
-        posts: response.data,
-        lastFetched: now,
+        const response = await authAxios.get(`/posts/user/${encodeURIComponent(username)}/`)
+        this.userPostsCache[username] = {
+          posts: response.data,
+          lastFetched: now,
+        }
+        this.userPosts = response.data
+      } catch (error) {
+        console.error('Failed to fetch user posts:', error)
+      } finally {
+        this.loading = false
       }
-      this.userPosts = response.data
-    } catch (error) {
-      console.error('Failed to fetch user posts:', error)
-    } finally {
-      this.loading = false
-    }
-  },
+    },
 
     async createPost(content, isAnonymous = false, clubId = null) {
       try {
@@ -65,6 +65,7 @@ export const usePostStore = defineStore('posts', {
       try {
         await authAxios.delete(`/posts/${postId}/delete/`)
         this.posts = this.posts.filter(post => post.id !== postId)
+        this.userPosts = this.userPosts.filter(post => post.id !== postId)
       } catch (error) {
         console.error('Failed to delete post:', error)
       }
@@ -73,13 +74,17 @@ export const usePostStore = defineStore('posts', {
     async likePost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/like/`)
-        const index = this.posts.findIndex(p => p.id === postId)
-        if (index !== -1) {
-          const post = this.posts[index]
-          post.hasLiked = true
-          post.likeCount = (post.likeCount || 0) + 1
-          this.posts.splice(index, 1, { ...post })
+        const updatePostArray = (arr) => {
+          const index = arr.findIndex(p => p.id === postId)
+          if (index !== -1) {
+            const post = arr[index]
+            post.hasLiked = true
+            post.likeCount = (post.likeCount || 0) + 1
+            arr.splice(index, 1, { ...post })
+          }
         }
+        updatePostArray(this.posts)
+        updatePostArray(this.userPosts)
       } catch (error) {
         console.error('Failed to like post:', error)
       }
@@ -88,13 +93,17 @@ export const usePostStore = defineStore('posts', {
     async unlikePost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/unlike/`)
-        const index = this.posts.findIndex(p => p.id === postId)
-        if (index !== -1) {
-          const post = this.posts[index]
-          post.hasLiked = false
-          post.likeCount = Math.max((post.likeCount || 1) - 1, 0)
-          this.posts.splice(index, 1, { ...post })
+        const updatePostArray = (arr) => {
+          const index = arr.findIndex(p => p.id === postId)
+          if (index !== -1) {
+            const post = arr[index]
+            post.hasLiked = false
+            post.likeCount = Math.max((post.likeCount || 1) - 1, 0)
+            arr.splice(index, 1, { ...post })
+          }
         }
+        updatePostArray(this.posts)
+        updatePostArray(this.userPosts)
       } catch (error) {
         console.error('Failed to unlike post:', error)
       }
@@ -103,13 +112,17 @@ export const usePostStore = defineStore('posts', {
     async repostPost(postId) {
       try {
         await authAxios.post(`/posts/${postId}/repost/`)
-        const index = this.posts.findIndex(p => p.id === postId)
-        if (index !== -1) {
-          const post = this.posts[index]
-          post.hasReposted = true
-          post.repostCount = (post.repostCount || 0) + 1
-          this.posts.splice(index, 1, { ...post })
+        const updatePostArray = (arr) => {
+          const index = arr.findIndex(p => p.id === postId)
+          if (index !== -1) {
+            const post = arr[index]
+            post.hasReposted = true
+            post.repostCount = (post.repostCount || 0) + 1
+            arr.splice(index, 1, { ...post })
+          }
         }
+        updatePostArray(this.posts)
+        updatePostArray(this.userPosts)
       } catch (error) {
         console.error('Failed to repost:', error)
       }
@@ -118,13 +131,17 @@ export const usePostStore = defineStore('posts', {
     async undoRepostPost(postId) {
       try {
         await authAxios.delete(`/posts/${postId}/undo_repost/`)
-        const index = this.posts.findIndex(p => p.id === postId)
-        if (index !== -1) {
-          const post = this.posts[index]
-          post.hasReposted = false
-          post.repostCount = Math.max((post.repostCount || 1) - 1, 0)
-          this.posts.splice(index, 1, { ...post })
+        const updatePostArray = (arr) => {
+          const index = arr.findIndex(p => p.id === postId)
+          if (index !== -1) {
+            const post = arr[index]
+            post.hasReposted = false
+            post.repostCount = Math.max((post.repostCount || 1) - 1, 0)
+            arr.splice(index, 1, { ...post })
+          }
         }
+        updatePostArray(this.posts)
+        updatePostArray(this.userPosts)
       } catch (error) {
         console.error('Failed to undo repost:', error)
       }
