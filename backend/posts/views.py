@@ -12,6 +12,7 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import throttle_classes
 from itertools import chain
 from operator import attrgetter
+from django.http import JsonResponse
 
 
 User = get_user_model()
