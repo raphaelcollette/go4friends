@@ -168,11 +168,10 @@ def list_posts(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def list_user_posts(request, username):
-    authored = Post.objects.filter(author__username=username)
-    reposted = Post.objects.filter(reposts__user__username=username)
+    authored = Post.objects.filter(author__username=username, parent__isnull=True)
+    reposted = Post.objects.filter(reposts__user__username=username, parent__isnull=True)
 
     combined = list(chain(authored, reposted))
-    # Remove duplicates (if user reposted own post)
     unique_posts = {post.id: post for post in combined}.values()
     sorted_posts = sorted(unique_posts, key=attrgetter('created_at'), reverse=True)
 

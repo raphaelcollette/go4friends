@@ -10,9 +10,9 @@
           <div
             v-for="post in filteredPosts"
             :key="post.id"
-            class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
+            class="glossy-bg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 mb-6 cursor-pointer"
           >
-            <router-link :to="`/posts/${post.id}`" class="block text-inherit no-underline">
+            <router-link :to="`/posts/${post.id}`" class="block text-inherit no-underline px-6 pt-6">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
@@ -29,7 +29,7 @@
               </div>
             </router-link>
 
-            <div class="flex items-center space-x-6 text-gray-500 mt-3">
+            <div class="flex items-center space-x-6 text-gray-500 px-6 pb-4">
               <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors" disabled>
                 <span>💬</span>
                 <span class="text-sm">{{ post.commentCount }}</span>
@@ -68,6 +68,7 @@
                 <span>🗑️🔁</span>
                 <span class="text-sm">{{ post.repostCount }}</span>
               </button>
+
               <button
                 v-if="canDeletePost(post)"
                 @click="deletePostHandler(post.id)"
