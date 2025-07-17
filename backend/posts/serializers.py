@@ -13,12 +13,13 @@ class PostSerializer(serializers.ModelSerializer):
     hasLiked = serializers.SerializerMethodField()
     hasReposted = serializers.SerializerMethodField()
     reposted_by = serializers.SerializerMethodField()
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Post
         fields = [
             'id', 'authorName', 'username', 'authorInitials', 'content', 'timeAgo',
-            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous', 'reposted_by'
+            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous', 'reposted_by', 'parent'
         ]
 
     def get_authorName(self, obj):
