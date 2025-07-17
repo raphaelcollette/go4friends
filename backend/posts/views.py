@@ -185,3 +185,22 @@ def get_post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     serializer = PostSerializer(post, context={'request': request})
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def list_post_replies(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    replies = post.replies.all().order_by('created_at')
+    data = []
+    for reply in replies:
+        data.append({
+            'id': reply.id,
+            'authorName': reply.author.username if not reply.is_anonymous else 'Anonymous',
+            'username': reply.author.username if not reply.is_anonymous else None,
+            'authorInitials': ''.join([n[0].upper() for n in reply.author.username.split()]) if not reply.is_anonymous else 'A',
+            'content': reply.content,
+            'created_at': reply.created_at.isoformat(),
+            'is_anonymous': reply.is_anonymous,
+            'parent_id': reply.parent.id if reply.parent else None,
+        })
+    return JsonResponse(data, safe=False)
