@@ -153,14 +153,13 @@ def undo_repost(request, post_id):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
-#@throttle_classes([ListPostsThrottle])
 def list_posts(request):
     try:
         print("list_posts called by user:", request.user)
-        posts = Post.objects.all()[:50]
+        posts = Post.objects.filter(parent__isnull=True)[:50]
         print(f"Fetched {posts.count()} posts")
         serializer = PostSerializer(posts, many=True, context={'request': request})
-        print("Serialized posts data:", serializer.data[:2])  # print first 2 posts data
+        print("Serialized posts data:", serializer.data[:2])
         return Response(serializer.data, status=200)
     except Exception as e:
         print("Error in list_posts:", e)
