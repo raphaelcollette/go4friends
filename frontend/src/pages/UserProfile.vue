@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background); background-size: cover; background-position: center;">
     <main class="flex-1 flex pt-24 px-6 max-w-7xl mx-auto w-full gap-8">
 
@@ -12,67 +12,70 @@
             :key="post.id"
             class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
           >
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center space-x-2 mb-2">
-                  <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
-                  <span class="text-gray-500 text-sm">@{{ post.username }}</span>
-                  <span class="text-gray-400 text-sm">·</span>
-                  <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+            <router-link :to="`/posts/${post.id}`" class="block text-inherit no-underline">
+              <div class="flex items-start space-x-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
                 </div>
-                <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
-                <div class="flex items-center space-x-6 text-gray-500">
-                  <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
-                    <span>💬</span>
-                    <span class="text-sm">{{ post.commentCount }}</span>
-                  </button>
-
-                  <button
-                    v-if="!post.hasLiked"
-                    class="flex items-center space-x-2 hover:text-red-500 transition-colors"
-                    @click="likePost(post.id)"
-                  >
-                    <span>❤️</span>
-                    <span class="text-sm">{{ post.likeCount }}</span>
-                  </button>
-                  <button
-                    v-else
-                    class="flex items-center space-x-2 text-red-500 transition-colors"
-                    @click="unlikePost(post.id)"
-                  >
-                    <span>🗑️❤️</span>
-                    <span class="text-sm">{{ post.likeCount }}</span>
-                  </button>
-
-                  <button
-                    v-if="!post.hasReposted"
-                    class="flex items-center space-x-2 hover:text-green-500 transition-colors"
-                    @click="repostPost(post.id)"
-                  >
-                    <span>🔁</span>
-                    <span class="text-sm">{{ post.repostCount }}</span>
-                  </button>
-                  <button
-                    v-else
-                    class="flex items-center space-x-2 text-green-600 transition-colors"
-                    @click="undoRepostPost(post.id)"
-                  >
-                    <span>🗑️🔁</span>
-                    <span class="text-sm">{{ post.repostCount }}</span>
-                  </button>
-                  <button
-                      v-if="canDeletePost(post)"
-                      @click="deletePostHandler(post.id)"
-                      class="ml-4 text-red-600 hover:text-red-800 transition-colors"
-                      title="Delete post"
-                    >
-                      🗑️
-                  </button>
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                    <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                    <span class="text-gray-400 text-sm">·</span>
+                    <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+                  </div>
+                  <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
                 </div>
               </div>
+            </router-link>
+
+            <div class="flex items-center space-x-6 text-gray-500 mt-3">
+              <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors" disabled>
+                <span>💬</span>
+                <span class="text-sm">{{ post.commentCount }}</span>
+              </button>
+
+              <button
+                v-if="!post.hasLiked"
+                class="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                @click="likePost(post.id)"
+              >
+                <span>❤️</span>
+                <span class="text-sm">{{ post.likeCount }}</span>
+              </button>
+              <button
+                v-else
+                class="flex items-center space-x-2 text-red-500 transition-colors"
+                @click="unlikePost(post.id)"
+              >
+                <span>🗑️❤️</span>
+                <span class="text-sm">{{ post.likeCount }}</span>
+              </button>
+
+              <button
+                v-if="!post.hasReposted"
+                class="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                @click="repostPost(post.id)"
+              >
+                <span>🔁</span>
+                <span class="text-sm">{{ post.repostCount }}</span>
+              </button>
+              <button
+                v-else
+                class="flex items-center space-x-2 text-green-600 transition-colors"
+                @click="undoRepostPost(post.id)"
+              >
+                <span>🗑️🔁</span>
+                <span class="text-sm">{{ post.repostCount }}</span>
+              </button>
+              <button
+                v-if="canDeletePost(post)"
+                @click="deletePostHandler(post.id)"
+                class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                title="Delete post"
+              >
+                🗑️
+              </button>
             </div>
           </div>
         </div>
@@ -80,7 +83,6 @@
 
       <!-- Profile Section (Right) -->
       <section class="w-80 flex-shrink-0">
-        <!-- Use your existing profile template here -->
         <div v-if="loading" class="text-gray-600 text-lg">Loading profile...</div>
 
         <div v-else-if="user?.private" class="glossy-bg rounded-2xl shadow-md p-6 text-center">
@@ -129,14 +131,14 @@
           <div v-if="user.clubs?.length" class="mt-8">
             <h2 class="text-xl font-bold text-gray-800 mb-4">Clubs</h2>
             <div class="flex flex-wrap justify-center gap-2">
-              <RouterLink
+              <router-link
                 v-for="club in user.clubs"
                 :key="club.id"
                 :to="`/clubs/${encodeURIComponent(club.name)}`"
                 class="bg-purple-100 text-purple-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-purple-200 transition"
               >
                 {{ club.name }}
-              </RouterLink>
+              </router-link>
             </div>
           </div>
 
@@ -164,7 +166,7 @@
           <p v-if="user.graduation_year" class="text-gray-600 text-sm">🎓 Class of {{ user.graduation_year }}</p>
 
           <div class="mt-6 flex justify-center space-x-4">
-            <RouterLink to="/friends" class="btn">Back to Friends</RouterLink>
+            <router-link to="/friends" class="btn">Back to Friends</router-link>
           </div>
         </div>
       </section>
@@ -274,9 +276,10 @@ const fetchFriendCount = async (username) => {
     friendCount.value = null
   }
 }
+
 const filteredPosts = computed(() => {
   if (!user.value || user.value.private) return []
-  return postStore.userPosts
+  return postStore.userPosts.filter(post => !post.parent)
 })
 
 const sendFriendRequest = async () => {
