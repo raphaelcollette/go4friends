@@ -276,10 +276,7 @@ const fetchFriendCount = async (username) => {
 }
 const filteredPosts = computed(() => {
   if (!user.value || user.value.private) return []
-
-  return postStore.posts.filter(p =>
-    p.username === user.value.username || p.reposted_by === user.value.username
-  )
+  return postStore.userPosts
 })
 
 const sendFriendRequest = async () => {

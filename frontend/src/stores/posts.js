@@ -4,6 +4,7 @@ import { authAxios } from '@/utils/axios'
 export const usePostStore = defineStore('posts', {
   state: () => ({
     posts: [],
+    userPosts: [],
     loading: false,
     userPostsCache: {}, // { username: { posts: [], lastFetched: timestamp } }
   }),
@@ -22,29 +23,29 @@ export const usePostStore = defineStore('posts', {
     },
 
     async fetchUserPosts(username, force = false) {
-      this.loading = true
-      try {
-        const now = Date.now()
-        const cache = this.userPostsCache[username]
-        const fresh = cache && (now - cache.lastFetched) < 60000
+    this.loading = true
+    try {
+      const now = Date.now()
+      const cache = this.userPostsCache[username]
+      const fresh = cache && (now - cache.lastFetched) < 60000
 
-        if (!force && fresh) {
-          this.posts = cache.posts
-          return
-        }
-
-        const response = await authAxios.get(`/posts/user/${encodeURIComponent(username)}/`)
-        this.userPostsCache[username] = {
-          posts: response.data,
-          lastFetched: now,
-        }
-        this.posts = response.data
-      } catch (error) {
-        console.error('Failed to fetch user posts:', error)
-      } finally {
-        this.loading = false
+      if (!force && fresh) {
+        this.userPosts = cache.posts
+        return
       }
-    },
+
+      const response = await authAxios.get(`/posts/user/${encodeURIComponent(username)}/`)
+      this.userPostsCache[username] = {
+        posts: response.data,
+        lastFetched: now,
+      }
+      this.userPosts = response.data
+    } catch (error) {
+      console.error('Failed to fetch user posts:', error)
+    } finally {
+      this.loading = false
+    }
+  },
 
     async createPost(content, isAnonymous = false, clubId = null) {
       try {
