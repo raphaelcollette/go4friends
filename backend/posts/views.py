@@ -178,3 +178,10 @@ def list_user_posts(request, username):
 
     serializer = PostSerializer(sorted_posts, many=True, context={'request': request})
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    serializer = PostSerializer(post, context={'request': request})
+    return Response(serializer.data)

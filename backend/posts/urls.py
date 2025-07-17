@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:post_id>/repost/', views.repost_post, name='repost_post'),
     path('<int:post_id>/undo_repost/', views.undo_repost, name='undo_repost'),
     path('user/<str:username>/', views.list_user_posts, name='list_user_posts'),
+    path('<int:post_id>/', views.get_post_detail, name='get_post_detail'),
 ] 

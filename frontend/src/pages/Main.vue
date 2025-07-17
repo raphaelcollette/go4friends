@@ -63,10 +63,11 @@
             </div>
 
             <!-- Posts List -->
-            <div
+            <RouterLink
               v-for="post in filteredPosts"
               :key="post.id"
-              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
+              :to="`/posts/${post.id}`"
+              class="block glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
             >
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -129,7 +130,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </RouterLink>
 
             <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
               <button

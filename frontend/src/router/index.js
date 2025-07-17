@@ -89,6 +89,11 @@ const routes = [
     component: EventProfile,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/posts/:id',
+    name: 'PostDetail',
+    component: () => import('@/views/PostDetail.vue')
+}
 ]
 
 const router = createRouter({
