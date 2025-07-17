@@ -92,7 +92,7 @@ const routes = [
   {
     path: '/posts/:id',
     name: 'PostDetail',
-    component: () => import('@/views/PostDetail.vue')
+    component: () => import('@/pages/PostDetail.vue')
 }
 ]
 
