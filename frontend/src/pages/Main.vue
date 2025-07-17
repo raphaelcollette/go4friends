@@ -63,33 +63,44 @@
             </div>
 
             <!-- Posts List -->
-            <RouterLink
+            <div
               v-for="post in filteredPosts"
               :key="post.id"
-              :to="`/posts/${post.id}`"
-              class="block glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
+              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
             >
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center space-x-2 mb-2">
-                    <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
-                    <span class="text-gray-500 text-sm">@{{ post.username }}</span>
-                    <span class="text-gray-400 text-sm">·</span>
-                    <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
-                  </div>
-                  <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
-                  <div class="flex items-center space-x-6 text-gray-500">
-                    <button class="flex items-center space-x-2 hover:text-blue-500 transition-colors">
+                  <!-- RouterLink wraps only clickable area -->
+                  <RouterLink
+                    :to="`/posts/${post.id}`"
+                    class="block"
+                  >
+                    <div class="flex items-center space-x-2 mb-2">
+                      <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                      <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                      <span class="text-gray-400 text-sm">·</span>
+                      <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+                    </div>
+                    <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
+                  </RouterLink>
+
+                  <!-- Action buttons outside of RouterLink -->
+                  <div class="flex items-center space-x-6 text-gray-500 mt-2">
+                    <button
+                      class="flex items-center space-x-2 hover:text-blue-500 transition-colors"
+                      @click.stop
+                    >
                       <span>💬</span>
                       <span class="text-sm">{{ post.commentCount }}</span>
                     </button>
+
                     <button
                       v-if="!post.hasLiked"
                       class="flex items-center space-x-2 hover:text-red-500 transition-colors"
-                      @click="likePost(post.id)"
+                      @click.stop="likePost(post.id)"
                     >
                       <span>❤️</span>
                       <span class="text-sm">{{ post.likeCount }}</span>
@@ -97,15 +108,16 @@
                     <button
                       v-else
                       class="flex items-center space-x-2 text-red-500 transition-colors"
-                      @click="unlikePost(post.id)"
+                      @click.stop="unlikePost(post.id)"
                     >
                       <span>🗑️❤️</span>
                       <span class="text-sm">{{ post.likeCount }}</span>
                     </button>
+
                     <button
                       v-if="!post.hasReposted"
                       class="flex items-center space-x-2 hover:text-green-500 transition-colors"
-                      @click="repostPost(post.id)"
+                      @click.stop="repostPost(post.id)"
                     >
                       <span>🔁</span>
                       <span class="text-sm">{{ post.repostCount }}</span>
@@ -113,15 +125,15 @@
                     <button
                       v-else
                       class="flex items-center space-x-2 text-green-600 transition-colors"
-                      @click="undoRepostPost(post.id)"
+                      @click.stop="undoRepostPost(post.id)"
                     >
                       <span>🗑️🔁</span>
                       <span class="text-sm">{{ post.repostCount }}</span>
                     </button>
-                    <!-- Delete button -->
+
                     <button
                       v-if="canDeletePost(post)"
-                      @click="deletePostHandler(post.id)"
+                      @click.stop="deletePostHandler(post.id)"
                       class="ml-4 text-red-600 hover:text-red-800 transition-colors"
                       title="Delete post"
                     >
@@ -130,7 +142,8 @@
                   </div>
                 </div>
               </div>
-            </RouterLink>
+            </div>
+
 
             <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
               <button
