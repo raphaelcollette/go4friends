@@ -266,13 +266,13 @@ const filteredPosts = computed(() => {
   const posts = postStore.posts ?? []
   let filtered = posts.filter(p => {
     if (p.club) return false
+    if (p.parent) return false       // Exclude replies here
     if (activeTab.value === 'public') return !p.is_anonymous
     if (activeTab.value === 'anonymous') return p.is_anonymous
     return false
   })
   return filtered.slice(0, postsPage.value * postsPerPage)
 })
-
 const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
