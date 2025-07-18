@@ -69,9 +69,16 @@
               class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
             >
               <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
-                </div>
+                <RouterLink :to="`/profile/${post.username}`" class="flex-shrink-0">
+                    <div v-if="post.profile_picture">
+                      <img :src="post.profile_picture" alt="Profile Picture"
+                          class="w-12 h-12 rounded-full object-cover border-2 border-purple-400" />
+                    </div>
+                    <div v-else
+                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {{ post.authorInitials }}
+                    </div>
+                </RouterLink>
                 <div class="flex-1">
                   <!-- RouterLink wraps only clickable area -->
                   <RouterLink
@@ -79,8 +86,12 @@
                     class="block"
                   >
                     <div class="flex items-center space-x-2 mb-2">
-                      <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
-                      <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                      <RouterLink :to="`/profile/${post.username}`" class="flex items-center space-x-2 mb-2 hover:underline">
+                        <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                        <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                        <span class="text-gray-400 text-sm">·</span>
+                        <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+                      </RouterLink>
                       <span class="text-gray-400 text-sm">·</span>
                       <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
                     </div>
