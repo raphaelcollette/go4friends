@@ -70,8 +70,8 @@
             >
               <div class="flex items-start space-x-4">
                 <RouterLink :to="`/profile/${post.username}`" class="flex-shrink-0">
-                    <div v-if="post.user.profile_picture">
-                      <img :src="post.user.profile_picture" alt="Profile Picture"
+                    <div v-if="post.user.profile_picture_url">
+                      <img :src="post.user.profile_picture_url" alt="Profile Picture"
                           class="w-12 h-12 rounded-full object-cover border-2 border-purple-400" />
                     </div>
                     <div v-else

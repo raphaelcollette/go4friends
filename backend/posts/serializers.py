@@ -8,7 +8,7 @@ User = get_user_model()
 class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'full_name', 'profile_picture']
+        fields = ['username', 'full_name', 'profile_picture_url']
 
 
 class PostSerializer(serializers.ModelSerializer):
