@@ -39,8 +39,19 @@
             <!-- New Post Composer -->
             <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
               <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">{{ userInitials }}</span>
+                <div class="w-12 h-12 flex-shrink-0">
+                  <img
+                    v-if="user.profile_picture_url"
+                    :src="user.profile_picture_url"
+                    alt="Profile Picture"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+                  />
+                  <div
+                    v-else
+                    class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white font-bold text-lg">{{ userInitials }}</span>
+                  </div>
                 </div>
                 <div class="flex-1">
                   <textarea
@@ -90,7 +101,6 @@
                         <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
                         <span class="text-gray-500 text-sm">@{{ post.username }}</span>
                         <span class="text-gray-400 text-sm">·</span>
-                        <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
                       </RouterLink>
                       <span class="text-gray-400 text-sm">·</span>
                       <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>

@@ -14,8 +14,19 @@
           >
             <router-link :to="`/posts/${post.id}`" class="block text-inherit no-underline px-6 pt-6">
               <div class="flex items-start space-x-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
+                <div class="w-12 h-12 flex-shrink-0">
+                  <img
+                    v-if="post.profile_picture_url"
+                    :src="post.profile_picture_url"
+                    alt="Profile Picture"
+                    class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+                  />
+                  <div
+                    v-else
+                    class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white font-bold text-lg">{{ post.authorInitials }}</span>
+                  </div>
                 </div>
                 <div class="flex-1">
                   <div class="flex items-center space-x-2 mb-2">
