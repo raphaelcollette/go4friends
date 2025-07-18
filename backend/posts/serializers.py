@@ -1,6 +1,15 @@
 from rest_framework import serializers, viewsets
 from django.utils.timesince import timesince
 from .models import Post
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class UserSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'full_name', 'profile_picture']
+
 
 class PostSerializer(serializers.ModelSerializer):
     authorName = serializers.SerializerMethodField()
@@ -14,6 +23,7 @@ class PostSerializer(serializers.ModelSerializer):
     hasReposted = serializers.SerializerMethodField()
     reposted_by = serializers.SerializerMethodField()
     parent = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = UserSummarySerializer(source='author', read_only=True)
 
     class Meta:
         model = Post
