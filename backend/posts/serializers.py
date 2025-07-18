@@ -87,6 +87,12 @@ class PostSerializer(serializers.ModelSerializer):
             return user.username
         return None
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.is_anonymous:
+            data['user'] = None
+        return data
+
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Post.objects.filter(parent__isnull=True, club__isnull=True).order_by('-created_at')
     serializer_class = PostSerializer

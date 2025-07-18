@@ -40,12 +40,23 @@
             <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 flex-shrink-0">
+                  <!-- Show anonymous initials if posting anonymously -->
+                  <div
+                    v-if="activeTab === 'anonymous'"
+                    class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center"
+                  >
+                    <span class="text-white font-bold text-lg">AN</span>
+                  </div>
+
+                  <!-- Show user profile picture if not anonymous and available -->
                   <img
-                    v-if="currentUser && currentUser.profile_picture_url"
+                    v-else-if="currentUser && currentUser.profile_picture_url"
                     :src="currentUser.profile_picture_url"
                     alt="Profile Picture"
                     class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
                   />
+
+                  <!-- Fallback initials if no profile picture and not anonymous -->
                   <div
                     v-else
                     class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center"
@@ -164,7 +175,6 @@
               </div>
             </div>
 
-
             <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
               <button
                 @click="loadMorePosts"
@@ -268,6 +278,7 @@
     </main>
   </div>
 </template>
+
 
 
 <script setup>
