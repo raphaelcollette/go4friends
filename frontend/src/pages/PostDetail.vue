@@ -14,7 +14,17 @@
 
           <div v-else-if="post" class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
             <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <div v-if="post.user?.profile_picture_url" class="flex-shrink-0">
+                <img
+                  :src="post.user.profile_picture_url"
+                  alt="Profile Picture"
+                  class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+                />
+              </div>
+              <div
+                v-else
+                class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+              >
                 <span class="text-white font-bold text-lg">{{ post.authorInitials || 'A' }}</span>
               </div>
               <div class="flex-1">
@@ -102,7 +112,17 @@
                     class="border-t pt-4"
                   >
                     <div class="flex items-start space-x-4">
-                      <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div v-if="reply.user?.profile_picture_url" class="flex-shrink-0">
+                        <img
+                          :src="reply.user.profile_picture_url"
+                          alt="Profile Picture"
+                          class="w-10 h-10 rounded-full object-cover border-2 border-purple-400"
+                        />
+                      </div>
+                      <div
+                        v-else
+                        class="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0"
+                      >
                         <span class="text-white font-semibold">{{ reply.authorInitials || 'A' }}</span>
                       </div>
                       <div class="flex-1">
@@ -183,6 +203,7 @@
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
