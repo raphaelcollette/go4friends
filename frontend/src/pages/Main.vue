@@ -57,11 +57,9 @@
                   />
 
                   <!-- Fallback initials if no profile picture and not anonymous -->
-                  <div
-                    v-else
-                    class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center"
-                  >
-                    <span class="text-white font-bold text-lg">{{ userInitials }}</span>
+                  <div class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
+                      :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }">
+                    {{ userInitials }}
                   </div>
                 </div>
                 <div class="flex-1">
@@ -75,7 +73,7 @@
                     <button
                       :disabled="isPosting || newPostContent.trim() === ''"
                       @click="submitPost"
-                      class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 transition-all"
+                      class="btn px-4 py-2 rounded-lg shadow-md disabled:opacity-50 transition-all"
                     >
                       {{ isPosting ? 'Posting...' : 'Post' }}
                     </button>
@@ -178,7 +176,7 @@
             <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
               <button
                 @click="loadMorePosts"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                class="btn px-6 py-2 text-white rounded-lg shadow transition"
               >
                 Load More
               </button>
