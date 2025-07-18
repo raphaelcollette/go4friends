@@ -141,6 +141,10 @@ const submitChangeUsername = async () => {
   }
 }
 
+const toggleChangeUsername = () => {
+  showChangeUsername.value = !showChangeUsername.value
+}
+
 const submitChangePassword = async () => {
   if (newPassword.value.length < 8) {
     toast.error('New password must be at least 8 characters.')
