@@ -24,15 +24,13 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 
     def get_from_profile_picture(self, obj):
         user = obj.from_user
-        request = self.context.get('request')
-        if user.profile_picture and request:
-            return request.build_absolute_uri(user.profile_picture.url)
+        if user.profile_picture_url:
+            return user.profile_picture_url
         return None
 
     def get_to_profile_picture(self, obj):
         user = obj.to_user
-        request = self.context.get('request')
-        if user.profile_picture and request:
-            return request.build_absolute_uri(user.profile_picture.url)
+        if user.profile_picture_url:
+            return user.profile_picture_url
         return None
 
