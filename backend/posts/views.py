@@ -165,18 +165,14 @@ def list_posts(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def list_user_posts(request, username):
-    # Use union with queryset to avoid Python-level merging and sorting
-    authored_qs = Post.objects.filter(author__username=username, parent__isnull=True, is_anonymous=False)
-    reposted_qs = Post.objects.filter(reposts__user__username=username, parent__isnull=True, is_anonymous=False)
-    combined_qs = authored_qs.union(reposted_qs).select_related('author').order_by('-created_at')
-    # union may lose order; if so, fallback to querysets + Python sorting remains necessary
+    # Filter posts authored or reposted by user, top-level and not anonymous
+    posts = Post.objects.filter(
+        Q(author__username=username) | Q(reposts__user__username=username),
+        parent__isnull=True,
+        is_anonymous=False,
+    ).distinct().select_related('author').prefetch_related('reposts').order_by('-created_at')
 
-    # If union order lost, fallback:
-    # combined = list(chain(authored_qs, reposted_qs))
-    # unique_posts = {post.id: post for post in combined}.values()
-    # sorted_posts = sorted(unique_posts, key=attrgetter('created_at'), reverse=True)
-
-    serializer = PostSerializer(combined_qs, many=True, context={'request': request})
+    serializer = PostSerializer(posts, many=True, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['GET'])
