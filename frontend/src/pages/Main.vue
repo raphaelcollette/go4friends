@@ -102,7 +102,6 @@
                         <span class="text-gray-500 text-sm">@{{ post.username }}</span>
                         <span class="text-gray-400 text-sm">·</span>
                       </RouterLink>
-                      <span class="text-gray-400 text-sm">·</span>
                       <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
                     </div>
                     <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
