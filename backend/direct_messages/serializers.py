@@ -30,7 +30,7 @@ class ThreadParticipantSerializer(serializers.ModelSerializer):
 class ThreadSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
-    club_name = serializers.SerializerMethodField()  # 👈 NEW
+    club_name = serializers.SerializerMethodField() 
     is_group = serializers.BooleanField(read_only=True)
 
     class Meta:

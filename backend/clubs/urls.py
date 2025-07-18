@@ -19,7 +19,7 @@ urlpatterns = [
     # User-specific clubs
     path('my/', views.my_clubs, name='my-clubs'),
 
-    # 🆕 Invite system
+    # Invite system
     path('<str:club_name>/invite/', views.InviteUserToClubAPIView.as_view(), name='club-invite'),
     path('invites/', views.ListClubInvitesAPIView.as_view(), name='list-invites'),
     path('invites/<int:invite_id>/accept/', views.AcceptInviteAPIView.as_view(), name='accept-invite'),
