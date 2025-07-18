@@ -23,7 +23,8 @@
               </div>
               <div
                 v-else
-                class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0"
+                class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
               >
                 <span class="text-white font-bold text-lg">{{ post.authorInitials || 'A' }}</span>
               </div>
@@ -121,7 +122,8 @@
                       </div>
                       <div
                         v-else
-                        class="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center flex-shrink-0"
+                        class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                        :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
                       >
                         <span class="text-white font-semibold">{{ reply.authorInitials || 'A' }}</span>
                       </div>
