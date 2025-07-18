@@ -6,7 +6,7 @@ from django.db.models import Q
 User = get_user_model()
 
 class UserPublicSerializer(serializers.ModelSerializer):
-    profile_picture = serializers.SerializerMethodField()
+    profile_picture_url = serializers.SerializerMethodField()  
     clubs = serializers.SerializerMethodField()
     is_friend = serializers.SerializerMethodField()
     friend_request_sent = serializers.SerializerMethodField()
@@ -19,7 +19,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
             'full_name',
             'bio',
             'location',
-            'profile_picture',
+            'profile_picture_url',  
             'clubs',
             'is_friend',
             'friend_request_sent',
@@ -48,10 +48,10 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
         return rep
 
-    def get_profile_picture(self, obj):
-        request = self.context.get('request')
+    def get_profile_picture_url(self, obj):
         if obj.profile_picture_url:
             return obj.profile_picture_url
+        request = self.context.get('request')
         if obj.profile_picture and request:
             return request.build_absolute_uri(obj.profile_picture.url)
         return None
