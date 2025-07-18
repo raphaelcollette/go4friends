@@ -7,7 +7,7 @@ from clubs.models import Club, ClubMembership
 User = get_user_model()
 # Create your models here.
 class Post(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='posts')
     club = models.ForeignKey(Club, null=True, blank=True, on_delete=models.CASCADE, related_name='posts')
     is_anonymous = models.BooleanField(default=False)
     content = models.TextField()

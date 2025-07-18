@@ -68,7 +68,7 @@ def create_post(request):
         parent = get_object_or_404(Post, id=parent_id)
 
     post = Post(
-        author=user,
+        author=None if is_anonymous else user,
         club=club,
         content=content,
         is_anonymous=is_anonymous,
