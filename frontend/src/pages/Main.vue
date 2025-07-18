@@ -41,8 +41,8 @@
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 flex-shrink-0">
                   <img
-                    v-if="user && user.profile_picture_url"
-                    :src="user.profile_picture_url"
+                    v-if="currentUser && user.profile_picture_url"
+                    :src="currentUser.profile_picture_url"
                     alt="Profile Picture"
                     class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
                   />
@@ -295,6 +295,8 @@ const postsPerPage = 10
 
 const displayedEvents = computed(() => (eventStore.events ?? []).slice(0, 3))
 const displayedClubs = computed(() => (clubStore.clubs ?? []).slice(0, 3))
+
+const currentUser = userStore.currentUser
 
 // Posts filtered by activeTab and paginated
 const filteredPosts = computed(() => {
