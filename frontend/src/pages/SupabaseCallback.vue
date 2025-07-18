@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/supabase'
-import { base } from '@/axios'
+import { base } from '@/utils/axios'
 
 const router = useRouter()
 
