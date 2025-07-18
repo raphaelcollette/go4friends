@@ -57,9 +57,12 @@
                   />
 
                   <!-- Fallback initials if no profile picture and not anonymous -->
-                  <div class="w-28 h-28 rounded-full flex items-center justify-center text-4xl text-white"
-                      :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }">
-                    {{ userInitials }}
+                  <div
+                    v-else
+                    class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                    :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
+                  >
+                    <span>{{ userInitials }}</span>
                   </div>
                 </div>
                 <div class="flex-1">
