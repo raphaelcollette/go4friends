@@ -180,7 +180,22 @@ const createClub = async () => {
     userStore.clearProfileCache(userStore.currentUser.username)
   } catch (error) {
     console.error('Create club error:', error)
-    toast.error('Failed to create club.')
+
+    const data = error?.response?.data
+    const nameError = data?.name?.[0]
+    const descriptionError = data?.description?.[0]
+
+    if (nameError?.includes('inappropriate')) {
+      toast.error('Club name contains inappropriate language.')
+    } else if (descriptionError?.includes('inappropriate')) {
+      toast.error('Club description contains inappropriate language.')
+    } else if (nameError) {
+      toast.error(nameError)
+    } else if (descriptionError) {
+      toast.error(descriptionError)
+    } else {
+      toast.error('Failed to create club.')
+    }
   }
 }
 

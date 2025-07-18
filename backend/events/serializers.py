@@ -39,3 +39,8 @@ class EventSerializer(serializers.ModelSerializer):
         if profanity.contains_profanity(value):
             raise serializers.ValidationError("Event description contains inappropriate language.")
         return value
+
+    def validate_location(self, value):
+        if profanity.contains_profanity(value):
+            raise serializers.ValidationError("Event location contains inappropriate language.")
+        return value

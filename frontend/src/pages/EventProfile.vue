@@ -68,7 +68,7 @@
   const fetchEventProfile = async () => {
   loading.value = true
   try {
-    const data = await eventStore.fetchEventDetail(route.params.eventId) // ✅ use cache
+    const data = await eventStore.fetchEventDetail(route.params.eventId) // use cache
     event.value = data.event
     attendees.value = data.attendees
   } catch (error) {
