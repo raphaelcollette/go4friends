@@ -34,10 +34,11 @@
             <button type="submit" class="btn w-full">
               Sign in
             </button>
-            <button @click="loginWithGoogle" class="btn btn-google">
-              Sign in with Google
-            </button>
           </form>
+
+          <button @click="loginWithGoogle" class="btn btn-google">
+              Sign in with Google
+          </button>
 
           <div class="pt-8">
             <p class="text-center text-gray-600 text-sm">
