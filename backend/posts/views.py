@@ -13,6 +13,7 @@ from rest_framework.decorators import throttle_classes
 from itertools import chain
 from operator import attrgetter
 from django.http import JsonResponse 
+from django.db.models import Q, Prefetch
 
 
 User = get_user_model()
@@ -155,33 +156,33 @@ def undo_repost(request, post_id):
 @permission_classes([permissions.IsAuthenticated])
 def list_posts(request):
     try:
-        print("list_posts called by user:", request.user)
-        posts = Post.objects.filter(parent__isnull=True)[:50]
-        print(f"Fetched {posts.count()} posts")
+        posts = Post.objects.filter(parent__isnull=True).select_related('author').prefetch_related('reposts')[:50]
         serializer = PostSerializer(posts, many=True, context={'request': request})
-        print("Serialized posts data:", serializer.data[:2])
         return Response(serializer.data, status=200)
     except Exception as e:
-        print("Error in list_posts:", e)
         return Response({"detail": str(e)}, status=500)
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def list_user_posts(request, username):
-    authored = Post.objects.filter(author__username=username, parent__isnull=True, is_anonymous=False)
-    reposted = Post.objects.filter(reposts__user__username=username, parent__isnull=True, is_anonymous=False)
+    # Use union with queryset to avoid Python-level merging and sorting
+    authored_qs = Post.objects.filter(author__username=username, parent__isnull=True, is_anonymous=False)
+    reposted_qs = Post.objects.filter(reposts__user__username=username, parent__isnull=True, is_anonymous=False)
+    combined_qs = authored_qs.union(reposted_qs).select_related('author').order_by('-created_at')
+    # union may lose order; if so, fallback to querysets + Python sorting remains necessary
 
-    combined = list(chain(authored, reposted))
-    unique_posts = {post.id: post for post in combined}.values()
-    sorted_posts = sorted(unique_posts, key=attrgetter('created_at'), reverse=True)
+    # If union order lost, fallback:
+    # combined = list(chain(authored_qs, reposted_qs))
+    # unique_posts = {post.id: post for post in combined}.values()
+    # sorted_posts = sorted(unique_posts, key=attrgetter('created_at'), reverse=True)
 
-    serializer = PostSerializer(sorted_posts, many=True, context={'request': request})
+    serializer = PostSerializer(combined_qs, many=True, context={'request': request})
     return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post.objects.select_related('author').prefetch_related('reposts'), id=post_id)
     serializer = PostSerializer(post, context={'request': request})
     return Response(serializer.data)
 
@@ -189,10 +190,10 @@ def get_post_detail(request, post_id):
 @permission_classes([permissions.IsAuthenticated])
 def list_post_replies(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    replies = post.replies.all().order_by('created_at')
-    data = []
-    for reply in replies:
-        data.append({
+    # Prefetch author to reduce DB hits
+    replies = post.replies.select_related('author').order_by('created_at')
+    data = [
+        {
             'id': reply.id,
             'authorName': reply.author.username if not reply.is_anonymous else 'Anonymous',
             'username': reply.author.username if not reply.is_anonymous else None,
@@ -201,5 +202,7 @@ def list_post_replies(request, post_id):
             'created_at': reply.created_at.isoformat(),
             'is_anonymous': reply.is_anonymous,
             'parent_id': reply.parent.id if reply.parent else None,
-        })
+        }
+        for reply in replies
+    ]
     return JsonResponse(data, safe=False)
