@@ -199,3 +199,34 @@ def delete_account(request):
     user = request.user
     user.delete()
     return Response({"message": "Account deleted successfully."}, status=status.HTTP_200_OK)
+
+from rest_framework.views import APIView
+
+class SupabaseLoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        full_name = request.data.get('full_name')
+        supabase_id = request.data.get('supabase_id')
+
+        if not email or not supabase_id:
+            return Response({'error': 'Missing email or supabase_id'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate username from email prefix; ensure uniqueness
+        base_username = email.split('@')[0]
+        username = base_username
+        suffix = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{suffix}"
+            suffix += 1
+
+        user, created = User.objects.get_or_create(email=email, defaults={
+            'username': username,
+            'full_name': full_name or '',
+            'is_active': True,
+        })
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh)
+        })

@@ -34,6 +34,9 @@
             <button type="submit" class="btn w-full">
               Sign in
             </button>
+            <button @click="loginWithGoogle" class="btn btn-google">
+              Sign in with Google
+            </button>
           </form>
 
           <div class="pt-8">
@@ -54,6 +57,7 @@ import { base } from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { jwtDecode } from 'jwt-decode'
+import { supabase } from '@/supabase'
 
 const username = ref('')
 const password = ref('')
@@ -76,7 +80,7 @@ const login = async () => {
     localStorage.setItem('access_token', res.data.access)
     localStorage.setItem('refresh_token', res.data.refresh)
 
-    // ✅ Decode access token to extract username
+    // Decode access token to extract username
     const decoded = jwtDecode(res.data.access)
     localStorage.setItem('currentUsername', decoded.username)
 
@@ -86,7 +90,18 @@ const login = async () => {
     toast.error('Login failed. Please check your username/password.')
   }
 }
+
+const loginWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://go4friends.vercel.app/auth/callback',
+  },
+  })
+  if (error) console.error('OAuth error:', error.message)
+}
 </script>
+
 
 <style scoped>
 /* Layout */
