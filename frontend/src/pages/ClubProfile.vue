@@ -19,7 +19,13 @@
           >
             <div class="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-purple-200">
               <img v-if="member.user.profile_picture_url" :src="member.user.profile_picture_url" alt="Profile" class="w-full h-full object-cover" />
-              <div v-else class="text-2xl text-white font-bold">{{ member.user.username?.charAt(0).toUpperCase() }}</div>
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-white text-2xl font-bold"
+                :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
+              >
+                {{ member.user.username?.charAt(0).toUpperCase() }}
+              </div>
             </div>
             <p class="mt-3 font-semibold text-gray-800">
               {{ member.user.username }}
@@ -29,7 +35,7 @@
         </div>
         <div v-else class="text-gray-500 text-lg mt-4">No members yet!</div>
 
-        <div v-if="isMember" class="mt-8">
+        <div v-if="isMember" class="mt-8 space-y-4">
           <button class="btn w-full" @click="openClubMessages">💬 Message Group</button>
         </div>
         <!-- Admin + Moderator Controls -->
