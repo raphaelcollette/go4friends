@@ -1,6 +1,11 @@
 <template>
-  <div class="page-container">
-    <p>Logging in...</p>
+  <div class="flex flex-col min-h-screen w-screen overflow-x-hidden" style="background-image: var(--page-background);">
+    <main class="flex-1 flex items-center justify-center px-6 max-w-7xl mx-auto w-full">
+      <section class="text-center glossy-bg p-8 rounded-2xl shadow-xl">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">🔐 Logging In</h2>
+        <p class="text-gray-600 text-lg">Please wait while we authenticate your session...</p>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -18,25 +23,26 @@ onMounted(async () => {
 
   const user = data.session.user
 
-  const res = await base.post('/users/supabase-login/', {
-    email: user.email,
-    full_name: user.user_metadata.full_name,
-    supabase_id: user.id,
-  })
+  try {
+    const res = await base.post('/users/supabase-login/', {
+      email: user.email,
+      full_name: user.user_metadata.full_name,
+      supabase_id: user.id,
+    })
 
-  localStorage.setItem('access_token', res.data.access)
-  localStorage.setItem('refresh_token', res.data.refresh)
-  router.push('/main')
+    localStorage.setItem('access_token', res.data.access)
+    localStorage.setItem('refresh_token', res.data.refresh)
+    router.push('/main')
+  } catch (e) {
+    console.error('Login failed:', e)
+  }
 })
 </script>
 
 <style scoped>
-.page-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 70vh;
-  font-size: 1.5rem;
-  color: #555;
+.glossy-bg {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>

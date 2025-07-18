@@ -39,6 +39,10 @@
               <RouterLink to="/login" class="text-[color:var(--btn-primary)] font-medium hover:text-[color:var(--btn-primary-hover)]">
                 Log in
               </RouterLink>
+
+              <button @click="loginWithGoogle" class="btn btn-google">
+                Sign in with Google
+              </button>
             </p>
           </div>
         </div>
@@ -88,6 +92,16 @@ const signup = async () => {
       toast.error('Signup failed. Please try again.')
     }
   }
+}
+
+const loginWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://go4friends.vercel.app/auth/callback',
+  },
+  })
+  if (error) console.error('OAuth error:', error.message)
 }
 </script>
 
