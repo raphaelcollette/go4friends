@@ -404,17 +404,18 @@ const handleScroll = () => {
 }
 
 const canDeletePost = (post) => {
-  if (!userStore.currentUser) return false
+  if (!userStore.currentUser) return false;
 
-  const currentUsername = userStore.currentUser.username
+  const currentUsername = userStore.currentUser.username;
 
   if (post.club) {
-    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
-    return membership && ['moderator', 'admin'].includes(membership.role)
+    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id);
+    return membership && ['moderator', 'admin'].includes(membership.role);
   }
 
-  return post.username === currentUsername
-}
+  // Use author_username to check ownership, works for anonymous posts too
+  return post.author_username === currentUsername;
+};
 
 const deletePostHandler = async (postId) => {
   try {
