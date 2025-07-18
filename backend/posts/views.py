@@ -68,7 +68,7 @@ def create_post(request):
         parent = get_object_or_404(Post, id=parent_id)
 
     post = Post(
-        author=None if is_anonymous else user,
+        author=user,  # always assign the user as author
         club=club,
         content=content,
         is_anonymous=is_anonymous,
@@ -168,8 +168,8 @@ def list_posts(request):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def list_user_posts(request, username):
-    authored = Post.objects.filter(author__username=username, parent__isnull=True)
-    reposted = Post.objects.filter(reposts__user__username=username, parent__isnull=True)
+    authored = Post.objects.filter(author__username=username, parent__isnull=True, is_anonymous=False)
+    reposted = Post.objects.filter(reposts__user__username=username, parent__isnull=True, is_anonymous=False)
 
     combined = list(chain(authored, reposted))
     unique_posts = {post.id: post for post in combined}.values()
