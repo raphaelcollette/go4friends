@@ -40,7 +40,6 @@
             <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 flex-shrink-0">
-                  <!-- Show anonymous initials if posting anonymously -->
                   <div
                     v-if="activeTab === 'anonymous'"
                     class="w-12 h-12 rounded-full flex items-center justify-center"
@@ -49,7 +48,6 @@
                     <span class="text-white font-bold text-lg">AN</span>
                   </div>
 
-                  <!-- Show user profile picture if not anonymous and available -->
                   <img
                     v-else-if="currentUser && currentUser.profile_picture_url"
                     :src="currentUser.profile_picture_url"
@@ -57,7 +55,6 @@
                     class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
                   />
 
-                  <!-- Fallback initials if no profile picture and not anonymous -->
                   <div
                     v-else
                     class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
@@ -86,17 +83,41 @@
               </div>
             </div>
 
+            <!-- Skeleton Loader -->
+            <template v-if="loadingPosts">
+              <div
+                v-for="n in 5"
+                :key="n"
+                class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 animate-pulse"
+              >
+                <div class="flex items-start space-x-4">
+                  <div class="w-12 h-12 rounded-full bg-gray-300"></div>
+                  <div class="flex-1 space-y-3 py-1">
+                    <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                    <div class="space-y-2">
+                      <div class="h-4 bg-gray-300 rounded"></div>
+                      <div class="h-4 bg-gray-300 rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
             <!-- Posts List -->
-            <div
-              v-for="post in filteredPosts"
-              :key="post.id"
-              class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
-            >
-              <div class="flex items-start space-x-4">
-                <RouterLink :to="`/profile/${post.username}`" class="flex-shrink-0">
+            <template v-else>
+              <div
+                v-for="post in filteredPosts"
+                :key="post.id"
+                class="glossy-bg rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 mb-6"
+              >
+                <div class="flex items-start space-x-4">
+                  <RouterLink :to="`/profile/${post.username}`" class="flex-shrink-0">
                     <div v-if="post.user && post.user.profile_picture_url">
-                      <img :src="post.user.profile_picture_url" alt="Profile Picture"
-                          class="w-12 h-12 rounded-full object-cover border-2 border-purple-400" />
+                      <img
+                        :src="post.user.profile_picture_url"
+                        alt="Profile Picture"
+                        class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
+                      />
                     </div>
                     <div
                       v-else
@@ -105,80 +126,82 @@
                     >
                       {{ post.authorInitials }}
                     </div>
-                </RouterLink>
-                <div class="flex-1">
-                  <!-- RouterLink wraps only clickable area -->
-                  <RouterLink
-                    :to="`/posts/${post.id}`"
-                    class="block"
-                  >
-                    <div class="flex items-center space-x-2 mb-2">
-                      <RouterLink :to="`/profile/${post.username}`" class="flex items-center space-x-2 mb-2 hover:underline">
-                        <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
-                        <span class="text-gray-500 text-sm">@{{ post.username }}</span>
-                        <span class="text-gray-400 text-sm">·</span>
-                        <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
-                      </RouterLink>
-                    </div>
-                    <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
                   </RouterLink>
+                  <div class="flex-1">
+                    <RouterLink
+                      :to="`/posts/${post.id}`"
+                      class="block"
+                    >
+                      <div class="flex items-center space-x-2 mb-2">
+                        <RouterLink
+                          :to="`/profile/${post.username}`"
+                          class="flex items-center space-x-2 mb-2 hover:underline"
+                        >
+                          <h4 class="font-bold text-gray-800">{{ post.authorName }}</h4>
+                          <span class="text-gray-500 text-sm">@{{ post.username }}</span>
+                          <span class="text-gray-400 text-sm">·</span>
+                          <span class="text-gray-500 text-sm">{{ post.timeAgo }}</span>
+                        </RouterLink>
+                      </div>
+                      <p class="text-gray-700 mb-3 leading-relaxed">{{ post.content }}</p>
+                    </RouterLink>
 
-                  <!-- Action buttons outside of RouterLink -->
-                  <div class="flex items-center space-x-6 text-gray-500 mt-2">
-                    <button
-                      class="flex items-center space-x-2 hover:text-blue-500 transition-colors"
-                      @click.stop
-                    >
-                      <span>💬</span>
-                      <span class="text-sm">{{ post.commentCount }}</span>
-                    </button>
+                    <div class="flex items-center space-x-6 text-gray-500 mt-2">
+                      <button
+                        class="flex items-center space-x-2 hover:text-blue-500 transition-colors"
+                        @click.stop
+                      >
+                        <span>💬</span>
+                        <span class="text-sm">{{ post.commentCount }}</span>
+                      </button>
 
-                    <button
-                      v-if="!post.hasLiked"
-                      class="flex items-center space-x-2 hover:text-red-500 transition-colors"
-                      @click.stop="likePost(post.id)"
-                    >
-                      <span>❤️</span>
-                      <span class="text-sm">{{ post.likeCount }}</span>
-                    </button>
-                    <button
-                      v-else
-                      class="flex items-center space-x-2 text-red-500 transition-colors"
-                      @click.stop="unlikePost(post.id)"
-                    >
-                      <span>🗑️❤️</span>
-                      <span class="text-sm">{{ post.likeCount }}</span>
-                    </button>
+                      <button
+                        v-if="!post.hasLiked"
+                        class="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                        @click.stop="likePost(post.id)"
+                      >
+                        <span>❤️</span>
+                        <span class="text-sm">{{ post.likeCount }}</span>
+                      </button>
+                      <button
+                        v-else
+                        class="flex items-center space-x-2 text-red-500 transition-colors"
+                        @click.stop="unlikePost(post.id)"
+                      >
+                        <span>🗑️❤️</span>
+                        <span class="text-sm">{{ post.likeCount }}</span>
+                      </button>
 
-                    <button
-                      v-if="!post.hasReposted"
-                      class="flex items-center space-x-2 hover:text-green-500 transition-colors"
-                      @click.stop="repostPost(post.id)"
-                    >
-                      <span>🔁</span>
-                      <span class="text-sm">{{ post.repostCount }}</span>
-                    </button>
-                    <button
-                      v-else
-                      class="flex items-center space-x-2 text-green-600 transition-colors"
-                      @click.stop="undoRepostPost(post.id)"
-                    >
-                      <span>🗑️🔁</span>
-                      <span class="text-sm">{{ post.repostCount }}</span>
-                    </button>
+                      <button
+                        v-if="!post.hasReposted"
+                        class="flex items-center space-x-2 hover:text-green-500 transition-colors"
+                        @click.stop="repostPost(post.id)"
+                      >
+                        <span>🔁</span>
+                        <span class="text-sm">{{ post.repostCount }}</span>
+                      </button>
+                      <button
+                        v-else
+                        class="flex items-center space-x-2 text-green-600 transition-colors"
+                        @click.stop="undoRepostPost(post.id)"
+                      >
+                        <span>🗑️🔁</span>
+                        <span class="text-sm">{{ post.repostCount }}</span>
+                      </button>
 
-                    <button
-                      v-if="canDeletePost(post)"
-                      @click.stop="deletePostHandler(post.id)"
-                      class="ml-4 text-red-600 hover:text-red-800 transition-colors"
-                      title="Delete post"
-                    >
-                      🗑️
-                    </button>
+                      <button
+                        v-if="canDeletePost(post)"
+                        @click.stop="deletePostHandler(post.id)"
+                        class="ml-4 text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete post"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </template>
 
             <div v-if="loadingMore" class="text-center text-gray-500 mt-4 select-none">Loading...</div>
             <div v-if="allLoaded && filteredPosts.length" class="text-center text-gray-500 mt-4 select-none">No more posts</div>
@@ -189,7 +212,6 @@
 
       <!-- Sidebar - Events and Clubs -->
       <aside class="w-80 flex-shrink-0 space-y-8 overflow-auto scrollbar-hidden" style="max-height: calc(100vh - 6rem);">
-
         <!-- Discover Events -->
         <section class="w-full">
           <div class="text-center mb-6">
@@ -225,7 +247,10 @@
           </div>
 
           <div class="text-center mt-4">
-            <RouterLink to="/events" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <RouterLink
+              to="/events"
+              class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
               View All Events
             </RouterLink>
           </div>
@@ -264,22 +289,21 @@
           </div>
 
           <div class="text-center mt-4">
-            <RouterLink to="/clubs" class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+            <RouterLink
+              to="/clubs"
+              class="inline-block px-6 py-2 bg-white/80 text-gray-700 font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+            >
               Browse All Clubs
             </RouterLink>
           </div>
         </section>
-
       </aside>
-
     </main>
   </div>
 </template>
 
-
-
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useEventStore } from '@/stores/events'
 import { useClubStore } from '@/stores/club'
 import { usePostStore } from '@/stores/posts'
@@ -299,24 +323,25 @@ const loadingMore = ref(false)
 const allLoaded = ref(false)
 const postsPage = ref(1)
 const postsPerPage = 10
+const loadingPosts = ref(true)
 
 const displayedEvents = computed(() => (eventStore.events ?? []).slice(0, 3))
 const displayedClubs = computed(() => (clubStore.clubs ?? []).slice(0, 3))
 
 const currentUser = userStore.currentUser
 
-// Posts filtered by activeTab and paginated
 const filteredPosts = computed(() => {
   const posts = postStore.posts ?? []
   let filtered = posts.filter(p => {
     if (p.club) return false
-    if (p.parent) return false       // Exclude replies here
+    if (p.parent) return false
     if (activeTab.value === 'public') return !p.is_anonymous
     if (activeTab.value === 'anonymous') return p.is_anonymous
     return false
   })
   return filtered.slice(0, postsPage.value * postsPerPage)
 })
+
 const submitPost = async () => {
   if (newPostContent.value.trim() === '') return
   isPosting.value = true
@@ -324,10 +349,11 @@ const submitPost = async () => {
     const anonymous = activeTab.value === 'anonymous'
     await postStore.createPost(newPostContent.value, anonymous)
     newPostContent.value = ''
-    // Reset pagination after new post
     postsPage.value = 1
     allLoaded.value = false
+    loadingPosts.value = true
     await postStore.fetchPosts()
+    loadingPosts.value = false
   } catch (e) {
     const msg = e?.response?.data?.detail || 'Failed to post.'
     toast.error(msg)
@@ -375,14 +401,12 @@ const undoRepostPost = async (postId) => {
   }
 }
 
-// Load more posts on clicking button
 const loadMorePosts = () => {
   if (loadingMore.value || allLoaded.value) return
   loadingMore.value = true
   setTimeout(() => {
     postsPage.value++
     loadingMore.value = false
-    // Check if we've loaded all posts
     const postsCount = (postStore.posts ?? []).filter(p => {
       if (p.club) return false
       if (activeTab.value === 'public') return !p.is_anonymous
@@ -392,12 +416,11 @@ const loadMorePosts = () => {
     if (filteredPosts.value.length >= postsCount) {
       allLoaded.value = true
     }
-  }, 600) // simulate load delay
+  }, 600)
 }
 
 const postsContainer = ref(null)
 
-// Optional: Infinite scroll handler to trigger load more when near bottom
 const handleScroll = () => {
   const el = postsContainer.value
   if (!el) return
@@ -408,18 +431,17 @@ const handleScroll = () => {
 }
 
 const canDeletePost = (post) => {
-  if (!userStore.currentUser) return false;
+  if (!userStore.currentUser) return false
 
-  const currentUsername = userStore.currentUser.username;
+  const currentUsername = userStore.currentUser.username
 
   if (post.club) {
-    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id);
-    return membership && ['moderator', 'admin'].includes(membership.role);
+    const membership = clubStore.memberships?.find(m => m.club.id === post.club.id)
+    return membership && ['moderator', 'admin'].includes(membership.role)
   }
 
-  // Use author_username to check ownership, works for anonymous posts too
-  return post.author_username === currentUsername;
-};
+  return post.author_username === currentUsername
+}
 
 const deletePostHandler = async (postId) => {
   try {
@@ -431,10 +453,12 @@ const deletePostHandler = async (postId) => {
   }
 }
 
-// Reset pagination & allLoaded when tab changes
 watch(activeTab, async () => {
   postsPage.value = 1
   allLoaded.value = false
+  loadingPosts.value = true
+  await postStore.fetchPosts()
+  loadingPosts.value = false
   await nextTick()
   handleScroll()
 })
@@ -442,8 +466,9 @@ watch(activeTab, async () => {
 onMounted(async () => {
   await eventStore.fetchEvents()
   await clubStore.fetchClubs()
+  loadingPosts.value = true
   await postStore.fetchPosts()
-// Trigger scroll check in case content is already short
+  loadingPosts.value = false
   requestAnimationFrame(() => handleScroll())
 })
 </script>
