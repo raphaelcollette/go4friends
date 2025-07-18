@@ -252,7 +252,27 @@ const createEvent = async () => {
     eventImage.value = null
   } catch (err) {
     console.error('Create event error:', err.response?.data || err.message || err)
-    toast.error('Failed to create event.')
+
+    const data = err?.response?.data
+    const titleError = data?.title?.[0]
+    const descriptionError = data?.description?.[0]
+    const locationError = data?.location?.[0]
+
+    if (titleError?.includes('inappropriate')) {
+      toast.error('Event title contains inappropriate language.')
+    } else if (descriptionError?.includes('inappropriate')) {
+      toast.error('Event description contains inappropriate language.')
+    } else if (locationError?.includes('inappropriate')) {
+      toast.error('Event location contains inappropriate language.')
+    } else if (titleError) {
+      toast.error(titleError)
+    } else if (descriptionError) {
+      toast.error(descriptionError)
+    } else if (locationError) {
+      toast.error(locationError)
+    } else {
+      toast.error('Failed to create event.')
+    }
   }
 }
 

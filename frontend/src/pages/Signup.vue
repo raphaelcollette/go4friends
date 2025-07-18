@@ -74,7 +74,19 @@ const signup = async () => {
     toast.success('Account created! You can now log in.')
     router.push('/login')
   } catch (error) {
-    toast.error('Signup failed. Please try again.')
+    const data = error?.response?.data
+
+    if (data?.error === 'Username already taken.') {
+      toast.error('Username already taken.')
+    } else if (data?.error === 'Email already registered.') {
+      toast.error('Email already registered.')
+    } else if (data?.detail === 'Profanity detected in post content.') {
+      toast.error('Username contains inappropriate language.')
+    } else if (data?.error === 'All fields are required.') {
+      toast.error('All fields are required.')
+    } else {
+      toast.error('Signup failed. Please try again.')
+    }
   }
 }
 </script>

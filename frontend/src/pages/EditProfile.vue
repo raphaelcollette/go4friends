@@ -157,7 +157,16 @@ const updateProfile = async () => {
     router.push(`/profile/${userStore.currentUser.username}`)
   } catch (error) {
     console.error('Failed to update profile:', error)
-    toast.error('Failed to update profile.')
+
+    const detail = error?.response?.data?.detail
+
+    if (detail === "Profanity detected in post content.") {
+      toast.error("Profile update failed: inappropriate language detected.")
+    } else if (error?.response?.data?.error) {
+      toast.error(error.response.data.error)
+    } else {
+      toast.error('Failed to update profile.')
+    }
   }
 }
 
