@@ -41,7 +41,7 @@
               <div class="flex items-start space-x-4">
                 <div class="w-12 h-12 flex-shrink-0">
                   <img
-                    v-if="currentUser && user.profile_picture_url"
+                    v-if="currentUser && currentUser.profile_picture_url"
                     :src="currentUser.profile_picture_url"
                     alt="Profile Picture"
                     class="w-12 h-12 rounded-full object-cover border-2 border-purple-400"
