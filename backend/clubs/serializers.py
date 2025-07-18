@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from .models import Club, ClubMembership, ClubInvite
 from users.serializers import UserPublicSerializer
+from better_profanity import profanity
 
+profanity.load_censor_words()
 
 class ClubSerializer(serializers.ModelSerializer):
     """
@@ -81,18 +83,22 @@ class ClubMembershipSerializer(serializers.ModelSerializer):
 class ClubCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating new clubs.
-    Ensures name uniqueness.
+    Ensures name uniqueness and blocks profanity.
     """
     class Meta:
         model = Club
         fields = ['name', 'description', 'is_private']
 
     def validate_name(self, value):
-        """
-        Validates that the club name is unique.
-        """
         if Club.objects.filter(name=value).exists():
             raise serializers.ValidationError("A club with this name already exists.")
+        if profanity.contains_profanity(value):
+            raise serializers.ValidationError("Club name contains inappropriate language.")
+        return value
+
+    def validate_description(self, value):
+        if profanity.contains_profanity(value):
+            raise serializers.ValidationError("Club description contains inappropriate language.")
         return value
 
 

@@ -15,8 +15,10 @@ from django.db.models import Q
 import json
 from rest_framework.decorators import parser_classes
 from storage3.exceptions import StorageApiError
+from better_profanity import profanity
 
 User = get_user_model()
+profanity.load_censor_words()
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -37,6 +39,9 @@ def signup(request):
 
     if User.objects.filter(username=username).exists():
         return Response({"error": "Username already taken."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if profanity.contains_profanity(username):
+        return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
 
     if User.objects.filter(email=email).exists():
         return Response({"error": "Email already registered."}, status=status.HTTP_400_BAD_REQUEST)
@@ -79,6 +84,9 @@ def update_me(request):
     graduation_year = request.data.get('graduation_year')
     is_private = request.data.get('is_private')
 
+    if profanity.contains_profanity(full_name) or profanity.contains_profanity(bio) or profanity.contains_profanity(location) or profanity.contains_profanity(interests) or profanity.contains_profanity(major) or profanity.contains_profanity(graduation_year):
+        return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
+    
     if full_name is not None:
         user.full_name = full_name
     if bio is not None:
