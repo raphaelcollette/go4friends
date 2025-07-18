@@ -93,7 +93,8 @@ const routes = [
   {
     path: '/posts/:id',
     name: 'PostDetail',
-    component: () => import('@/pages/PostDetail.vue')
+    component: () => import('@/pages/PostDetail.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/auth/callback',

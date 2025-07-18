@@ -1,3 +1,9 @@
+<template>
+  <div class="page-container">
+    <p>Logging in...</p>
+  </div>
+</template>
+
 <script setup>
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -24,6 +30,13 @@ onMounted(async () => {
 })
 </script>
 
-<template>
-  <div>Logging in...</div>
-</template>
+<style scoped>
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+  font-size: 1.5rem;
+  color: #555;
+}
+</style>
