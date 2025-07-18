@@ -97,7 +97,7 @@ class PostSerializer(serializers.ModelSerializer):
             data.pop('author_username', None)
         return data
 
-     def get_author_username(self, obj):
+    def get_author_username(self, obj):
         request = self.context.get('request')
         if obj.author and request and request.user == obj.author:
             return obj.author.username
