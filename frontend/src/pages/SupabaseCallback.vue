@@ -14,8 +14,10 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { supabase } from '@/supabase'
 import { base } from '@/utils/axios'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 onMounted(async () => {
   const { data, error } = await supabase.auth.getSession()
@@ -32,17 +34,13 @@ onMounted(async () => {
 
     localStorage.setItem('access_token', res.data.access)
     localStorage.setItem('refresh_token', res.data.refresh)
+
+    // 🧠 Refresh user state after login
+    await userStore.fetchCurrentUser()
+
     router.push('/main')
   } catch (e) {
     console.error('Login failed:', e)
   }
 })
 </script>
-
-<style scoped>
-.glossy-bg {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-</style>

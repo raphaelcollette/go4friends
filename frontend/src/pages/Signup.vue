@@ -56,6 +56,7 @@ import { ref, onMounted } from 'vue'
 import { base } from '@/utils/axios'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { supabase } from '@/supabase'
 
 const email = ref('')
 const username = ref('')
