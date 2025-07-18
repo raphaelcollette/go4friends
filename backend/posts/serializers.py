@@ -29,7 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             'id', 'authorName', 'username', 'authorInitials', 'content', 'timeAgo',
-            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous', 'reposted_by', 'parent'
+            'commentCount', 'likeCount', 'repostCount', 'hasLiked', 'hasReposted', 'is_anonymous', 'reposted_by', 'parent', 'user'
         ]
 
     def get_authorName(self, obj):
