@@ -12,6 +12,7 @@ import Clubs from '@/pages/Clubs.vue'
 import ClubProfile from '@/pages/ClubProfile.vue'
 import MessageScreen from '@/pages/MessageScreen.vue'
 import EventProfile from '@/pages/EventProfile.vue'
+import SupabaseCallback from '@/pages/SupabaseCallback.vue'
 
 const routes = [
   {
@@ -93,7 +94,12 @@ const routes = [
     path: '/posts/:id',
     name: 'PostDetail',
     component: () => import('@/pages/PostDetail.vue')
-}
+  },
+  {
+    path: '/auth/callback',
+    name: 'SupabaseCallback',
+    component: SupabaseCallback,
+  }
 ]
 
 const router = createRouter({
