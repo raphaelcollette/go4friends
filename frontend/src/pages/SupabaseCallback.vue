@@ -35,7 +35,7 @@ onMounted(async () => {
     localStorage.setItem('access_token', res.data.access)
     localStorage.setItem('refresh_token', res.data.refresh)
 
-    // 🧠 Refresh user state after login
+    // Refresh user state after login
     await userStore.fetchCurrentUser()
 
     router.push('/main')

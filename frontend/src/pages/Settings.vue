@@ -9,12 +9,18 @@
             <h2 class="text-lg font-semibold text-gray-700">Account</h2>
             <button @click="editProfile" class="btn w-full mt-2">Edit Profile</button>
             <button @click="toggleChangePassword" class="btn w-full mt-2">Change Password</button>
+            <button @click="toggleChangeUsername" class="btn w-full mt-2">Change Username</button>
           </div>
 
           <div v-if="showChangePassword" class="space-y-4 mt-4">
             <input v-model="oldPassword" type="password" placeholder="Current Password" class="input w-full" />
             <input v-model="newPassword" type="password" placeholder="New Password (min 8 chars)" class="input w-full" />
             <button @click="submitChangePassword" class="btn w-full mt-2">Submit Password Change</button>
+          </div>
+
+          <div v-if="showChangeUsername" class="space-y-4 mt-4">
+            <input v-model="newUsername" type="text" placeholder="New Username" class="input w-full" />
+            <button @click="submitChangeUsername" class="btn w-full mt-2">Submit Username Change</button>
           </div>
 
           <div>
@@ -94,6 +100,8 @@ const router = useRouter()
 const toast = useToast()
 const userStore = useUserStore()
 
+const showChangeUsername = ref(false)
+const newUsername = ref('')
 const showChangePassword = ref(false)
 const oldPassword = ref('')
 const newPassword = ref('')
@@ -116,6 +124,21 @@ const applyTheme = () => {
 
 const toggleChangePassword = () => {
   showChangePassword.value = !showChangePassword.value
+}
+
+const submitChangeUsername = async () => {
+  if (!newUsername.value.trim()) {
+    toast.error('Username cannot be empty.')
+    return
+  }
+  try {
+    await authAxios.patch('/users/me/update/', { username: newUsername.value })
+    toast.success('Username updated!')
+    userStore.fetchCurrentUser()
+    showChangeUsername.value = false
+  } catch {
+    toast.error('Failed to update username.')
+  }
 }
 
 const submitChangePassword = async () => {

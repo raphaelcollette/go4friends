@@ -76,6 +76,7 @@ supabase = create_client(supabase_url, supabase_key)
 def update_me(request):
     user = request.user
 
+    username = request.data.get('username')
     full_name = request.data.get('full_name')
     bio = request.data.get('bio')
     location = request.data.get('location')
@@ -85,9 +86,17 @@ def update_me(request):
     graduation_year = request.data.get('graduation_year')
     is_private = request.data.get('is_private')
 
-    if profanity.contains_profanity(full_name) or profanity.contains_profanity(bio) or profanity.contains_profanity(location) or profanity.contains_profanity(interests) or profanity.contains_profanity(major) or profanity.contains_profanity(graduation_year):
-        return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
-    
+    # Profanity checks
+    for field in [username, full_name, bio, location, interests, major, graduation_year]:
+        if field and profanity.contains_profanity(field):
+            return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Username validation
+    if username:
+        if User.objects.filter(username=username).exclude(id=user.id).exists():
+            return Response({"error": "Username already taken."}, status=status.HTTP_400_BAD_REQUEST)
+        user.username = username
+
     if full_name is not None:
         user.full_name = full_name
     if bio is not None:
@@ -132,6 +141,7 @@ def update_me(request):
 
     user.save()
     return Response({"message": "Profile updated successfully!"})
+
 
 
 @api_view(['GET'])
