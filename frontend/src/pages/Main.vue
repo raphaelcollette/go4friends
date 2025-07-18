@@ -30,11 +30,11 @@
             </button>
           </div>
 
-          <div 
-            ref="postsContainer" 
-            class="space-y-6 overflow-y-auto flex-grow scrollbar-hidden" 
-            style="max-height: 100%;"
-            @scroll="handleScroll"
+          <div
+            ref="postsContainer"
+            class="space-y-6 overflow-y-auto scrollbar-hidden"
+            style="height: 100%;"
+            @scroll.passive="handleScroll"
           >
             <!-- New Post Composer -->
             <div class="glossy-bg rounded-2xl shadow-lg p-6 mb-6 flex-shrink-0">
@@ -176,14 +176,6 @@
               </div>
             </div>
 
-            <div v-if="!loadingMore && !allLoaded" class="flex justify-center mt-4">
-              <button
-                @click="loadMorePosts"
-                class="btn px-6 py-2 text-white rounded-lg shadow transition"
-              >
-                Load More
-              </button>
-            </div>
             <div v-if="loadingMore" class="text-center text-gray-500 mt-4 select-none">Loading...</div>
             <div v-if="allLoaded && filteredPosts.length" class="text-center text-gray-500 mt-4 select-none">No more posts</div>
           </div>
@@ -402,9 +394,11 @@ const loadMorePosts = () => {
 const postsContainer = ref(null)
 
 // Optional: Infinite scroll handler to trigger load more when near bottom
-const handleScroll = (e) => {
-  const el = e.target
-  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
+const handleScroll = () => {
+  const el = postsContainer.value
+  if (!el) return
+  const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 50
+  if (nearBottom && !loadingMore.value && !allLoaded.value) {
     loadMorePosts()
   }
 }
@@ -433,15 +427,19 @@ const deletePostHandler = async (postId) => {
 }
 
 // Reset pagination & allLoaded when tab changes
-watch(activeTab, () => {
+watch(activeTab, async () => {
   postsPage.value = 1
   allLoaded.value = false
+  await nextTick()
+  handleScroll()
 })
 
 onMounted(async () => {
   await eventStore.fetchEvents()
   await clubStore.fetchClubs()
   await postStore.fetchPosts()
+// Trigger scroll check in case content is already short
+  requestAnimationFrame(() => handleScroll())
 })
 </script>
 
