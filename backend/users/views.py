@@ -16,6 +16,7 @@ import json
 from rest_framework.decorators import parser_classes
 from storage3.exceptions import StorageApiError
 from better_profanity import profanity
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 profanity.load_censor_words()
