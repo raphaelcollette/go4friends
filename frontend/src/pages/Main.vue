@@ -97,8 +97,11 @@
                       <img :src="post.user.profile_picture_url" alt="Profile Picture"
                           class="w-12 h-12 rounded-full object-cover border-2 border-purple-400" />
                     </div>
-                    <div v-else
-                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div
+                      v-else
+                      class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                      :style="{ backgroundColor: 'var(--btn-primary, #6366f1)' }"
+                    >
                       {{ post.authorInitials }}
                     </div>
                 </RouterLink>
