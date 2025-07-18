@@ -133,9 +133,12 @@ const submitChangeUsername = async () => {
   }
   try {
     await authAxios.patch('/users/me/update/', { username: newUsername.value })
-    toast.success('Username updated!')
-    userStore.fetchCurrentUser()
-    showChangeUsername.value = false
+    toast.success('Username updated! Logging out...')
+    // Clear user data and tokens
+    localStorage.removeItem('access_token')
+    userStore.reset()
+    // Redirect to login
+    router.push('/login')
   } catch {
     toast.error('Failed to update username.')
   }
