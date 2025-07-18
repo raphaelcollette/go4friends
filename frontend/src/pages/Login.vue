@@ -95,7 +95,7 @@ const loginWithGoogle = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://rxgzmcgdxiempasmgido.supabase.co/auth/v1/callback',
+      redirectTo: 'https://go4friends.vercel.app/main',
   },
   })
   if (error) console.error('OAuth error:', error.message)
