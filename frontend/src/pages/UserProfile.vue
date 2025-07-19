@@ -148,6 +148,11 @@
             <p v-if="user.bio" class="mt-4 text-gray-700 italic">{{ user.bio }}</p>
             <p v-if="user.location" class="text-gray-500 text-sm mt-2">📍 {{ user.location }}</p>
 
+            <!-- Edit Profile Button -->
+            <div class="mt-4" v-if="isCurrentUser">
+              <button @click="router.push('/profile/edit')" class="btn w-full">Edit Profile</button>
+            </div>
+
             <!-- Friend Actions -->
             <div class="mt-6" v-if="!isCurrentUser">
               <button v-if="user.is_friend" @click="removeFriend" class="redbtn">Unfriend</button>
