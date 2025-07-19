@@ -8,7 +8,7 @@
     <!-- Right Side: Text + Buttons with background -->
     <div class="w-1/2 h-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex flex-col justify-center items-center p-16">
       <h1 class="text-6xl font-bold leading-tight mb-6 text-gray-800 text-center">
-        whatsurmajor?
+        go4friends
       </h1>
       <p class="text-2xl text-gray-600 mb-10 text-center">
         find friends on campus! 
