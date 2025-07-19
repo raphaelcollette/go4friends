@@ -9,12 +9,7 @@ from django.contrib.auth import get_user_model
 from posts.serializers import PostSerializer
 from better_profanity import profanity
 from rest_framework.throttling import UserRateThrottle
-from rest_framework.decorators import throttle_classes
-from itertools import chain
-from operator import attrgetter
-from django.http import JsonResponse 
-from django.db.models import Q, Prefetch
-
+from django.db.models import Q, Count, Exists, OuterRef, Subquery
 
 User = get_user_model()
 profanity.load_censor_words()
@@ -53,13 +48,12 @@ def create_post(request):
     is_anonymous = request.data.get('is_anonymous', False)
     parent_id = request.data.get('parent')
 
-    # Profanity check using better_profanity only
     if profanity.contains_profanity(content):
         return Response({"detail": "Profanity detected in post content."}, status=status.HTTP_400_BAD_REQUEST)
 
     club = None
     if club_id:
-        club = get_object_or_404(Club, id=club_id)
+        club = get_object_or_404(ClubMembership.model.club.field.related_model, id=club_id)
         membership = ClubMembership.objects.filter(user=user, club=club).first()
         if not membership or membership.role not in ['moderator', 'admin']:
             return Response({"detail": "No permission to post in this club."}, status=status.HTTP_403_FORBIDDEN)
@@ -69,7 +63,7 @@ def create_post(request):
         parent = get_object_or_404(Post, id=parent_id)
 
     post = Post(
-        author=user,  # always assign the user as author
+        author=user,
         club=club,
         content=content,
         is_anonymous=is_anonymous,
@@ -82,7 +76,6 @@ def create_post(request):
 
     serializer = PostSerializer(post, context={'request': request})
     return Response(serializer.data, status=status.HTTP_201_CREATED)
-
 
 @api_view(['DELETE'])
 @permission_classes([permissions.IsAuthenticated])
@@ -154,9 +147,24 @@ def undo_repost(request, post_id):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+#@throttle_classes([ListPostsThrottle])
 def list_posts(request):
+    user = request.user
     try:
-        posts = Post.objects.filter(parent__isnull=True).select_related('author').prefetch_related('reposts')[:50]
+        likes_subquery = Like.objects.filter(post=OuterRef('pk'), user=user)
+        reposts_subquery = Repost.objects.filter(post=OuterRef('pk'), user=user)
+
+        posts = Post.objects.filter(parent__isnull=True).annotate(
+            comment_count=Count('replies', distinct=True),
+            like_count=Count('likes', distinct=True),
+            repost_count=Count('reposts', distinct=True),
+            has_liked=Exists(likes_subquery),
+            has_reposted=Exists(reposts_subquery),
+            reposted_by_username=Subquery(
+                Repost.objects.filter(post=OuterRef('pk'), user=user).values('user__username')[:1]
+            ),
+        ).select_related('author').order_by('-created_at')[:50]
+
         serializer = PostSerializer(posts, many=True, context={'request': request})
         return Response(serializer.data, status=200)
     except Exception as e:
@@ -164,13 +172,27 @@ def list_posts(request):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+#@throttle_classes([ListUserPostsThrottle])
 def list_user_posts(request, username):
-    # Filter posts authored or reposted by user, top-level and not anonymous
+    user = request.user
+
+    likes_subquery = Like.objects.filter(post=OuterRef('pk'), user=user)
+    reposts_subquery = Repost.objects.filter(post=OuterRef('pk'), user=user)
+
     posts = Post.objects.filter(
         Q(author__username=username) | Q(reposts__user__username=username),
         parent__isnull=True,
         is_anonymous=False,
-    ).distinct().select_related('author').prefetch_related('reposts').order_by('-created_at')
+    ).distinct().annotate(
+        comment_count=Count('replies', distinct=True),
+        like_count=Count('likes', distinct=True),
+        repost_count=Count('reposts', distinct=True),
+        has_liked=Exists(likes_subquery),
+        has_reposted=Exists(reposts_subquery),
+        reposted_by_username=Subquery(
+            Repost.objects.filter(post=OuterRef('pk'), user=user).values('user__username')[:1]
+        ),
+    ).select_related('author').order_by('-created_at')
 
     serializer = PostSerializer(posts, many=True, context={'request': request})
     return Response(serializer.data)
@@ -178,7 +200,22 @@ def list_user_posts(request, username):
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def get_post_detail(request, post_id):
-    post = get_object_or_404(Post.objects.select_related('author').prefetch_related('reposts'), id=post_id)
+    user = request.user
+
+    likes_subquery = Like.objects.filter(post=OuterRef('pk'), user=user)
+    reposts_subquery = Repost.objects.filter(post=OuterRef('pk'), user=user)
+
+    post = get_object_or_404(Post.objects.annotate(
+        comment_count=Count('replies', distinct=True),
+        like_count=Count('likes', distinct=True),
+        repost_count=Count('reposts', distinct=True),
+        has_liked=Exists(likes_subquery),
+        has_reposted=Exists(reposts_subquery),
+        reposted_by_username=Subquery(
+            Repost.objects.filter(post=OuterRef('pk'), user=user).values('user__username')[:1]
+        ),
+    ).select_related('author'), id=post_id)
+
     serializer = PostSerializer(post, context={'request': request})
     return Response(serializer.data)
 
@@ -186,7 +223,6 @@ def get_post_detail(request, post_id):
 @permission_classes([permissions.IsAuthenticated])
 def list_post_replies(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    # Prefetch author to reduce DB hits
     replies = post.replies.select_related('author').order_by('created_at')
     data = [
         {
