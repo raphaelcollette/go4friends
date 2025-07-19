@@ -28,6 +28,11 @@
               <input id="password" type="password" v-model="password" class="login-input" placeholder="Create a password" />
             </div>
 
+            <div class="space-y-2">
+              <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <input id="confirmPassword" type="password" v-model="confirmPassword" class="login-input" placeholder="Re-enter your password" />
+            </div>
+
             <button type="submit" class="btn btn-primary">
               <span class="btn-content">
                 <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,12 +91,18 @@ const password = ref('')
 const showForm = ref(false)
 const router = useRouter()
 const toast = useToast()
+const confirmPassword = ref('')
 
 onMounted(() => {
   showForm.value = true
 })
 
 const signup = async () => {
+  if (password.value !== confirmPassword.value) {
+    toast.error('Passwords do not match.')
+    return
+  }
+
   try {
     await base.post('users/signup/', {
       email: email.value,
