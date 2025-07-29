@@ -305,8 +305,11 @@ onMounted(async () => {
   await handleThreadAutoSelection()
 
   pollingInterval = setInterval(async () => {
-    await messageStore.fetchThreads(true) // force refresh threads every 15 seconds
-  }, 15000) // 15000ms = 15 seconds
+    await messageStore.fetchThreads(true)
+    if (activeThreadId.value) {
+      await messageStore.fetchMessages(activeThreadId.value, true) // force re-fetch messages
+    }
+  }, 15000)
 })
 
 onUnmounted(() => {
