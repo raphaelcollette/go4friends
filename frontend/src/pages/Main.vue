@@ -347,13 +347,26 @@ const submitPost = async () => {
   isPosting.value = true
   try {
     const anonymous = activeTab.value === 'anonymous'
-    await postStore.createPost(newPostContent.value, anonymous)
+    const newPost = await postStore.createPost(newPostContent.value, anonymous)
+
     newPostContent.value = ''
     postsPage.value = 1
     allLoaded.value = false
-    loadingPosts.value = true
-    await postStore.fetchPosts()
-    loadingPosts.value = false
+
+    // Inject immediately into UI
+    postStore.posts.unshift(newPost)
+    postStore.userPosts.unshift(newPost)
+
+    const authorUsername = newPost.username || newPost.user?.username
+    if (authorUsername && postStore.userPostsCache[authorUsername]) {
+      postStore.userPostsCache[authorUsername].posts.unshift(newPost)
+      postStore.userPostsCache[authorUsername].lastFetched = Date.now()
+    }
+
+    // Do not await fetch again — that causes visual delay
+    // Optional: silently refresh in background
+    postStore.fetchPosts(true).catch(() => {})
+    postStore.fetchUserPosts(authorUsername, true).catch(() => {})
   } catch (e) {
     const msg = e?.response?.data?.detail || 'Failed to post.'
     toast.error(msg)

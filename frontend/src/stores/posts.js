@@ -57,7 +57,28 @@ export const usePostStore = defineStore('posts', {
           is_anonymous: isAnonymous,
           club: clubId,
         })
-        this.posts.unshift(response.data)
+
+        const newPost = response.data
+        this.posts.unshift(newPost)
+
+        const username = newPost.username || newPost.user?.username
+        if (username) {
+          // Update live userPosts list
+          this.userPosts.unshift(newPost)
+
+          // Update cached userPosts
+          if (!this.userPostsCache[username]) {
+            this.userPostsCache[username] = {
+              posts: [newPost],
+              lastFetched: Date.now(),
+            }
+          } else {
+            this.userPostsCache[username].posts.unshift(newPost)
+            this.userPostsCache[username].lastFetched = Date.now()
+          }
+        }
+
+        return newPost
       } catch (error) {
         console.error('Failed to create post:', error)
         throw error
