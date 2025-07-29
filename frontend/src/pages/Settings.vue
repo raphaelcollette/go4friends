@@ -65,7 +65,7 @@
 
           <div class="pt-6 border-t border-white/30">
             <p class="text-xs text-gray-500 mt-4 text-center">
-              go4friends app v1.0 — Built with ❤️ by You
+              go4friends app v1.0 — Built by RC
             </p>
           </div>
         </div>

@@ -10,6 +10,7 @@ from posts.serializers import PostSerializer
 from better_profanity import profanity
 from rest_framework.throttling import UserRateThrottle
 from django.db.models import Q, Count, Exists, OuterRef, Subquery
+from django.http import JsonResponse
 
 User = get_user_model()
 profanity.load_censor_words()
