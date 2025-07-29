@@ -229,22 +229,11 @@ const goToEvent = (id) => {
 
 const goToClass = async (classId) => {
   try {
-    const res = await authAxios.post('/messages/class-thread/', { class_id: classId });
-    const threadId = res.data.id;
-    activeThreadId.value = threadId;
-    await messageStore.fetchThreads(true);
-
-    // Wait for threads to update
-    await new Promise(r => setTimeout(r, 100)); // 100ms delay
-
-    if (messageStore.threads.some(t => t.id === threadId)) {
-      await selectThread(threadId);
-      router.push({ path: '/messages', query: { thread: threadId } });
-      showDropdown.value = false;
-    } else {
-      toast.error('Thread not found after refresh');
-    }
-  } catch (error) {
+    const res = await authAxios.post('/messages/class-thread/', {
+      class_id: classId,
+    });
+    router.push(`/messages?thread=${res.data.id}`);
+  } catch {
     toast.error('Failed to open class chat');
   }
 };
