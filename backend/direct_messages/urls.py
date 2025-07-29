@@ -15,4 +15,5 @@ urlpatterns = [
     path('threads/<int:thread_id>/send/', SendMessageAPIView.as_view(), name='send-message'),       # Send message to thread
     path('threads/start-private/', StartPrivateThreadAPIView.as_view(), name='start-private-thread'), # Start private DM
     path('messages/<int:pk>/pin/', TogglePinMessageAPIView.as_view(), name='toggle-pin-message'),
+    path('class-thread/', get_or_create_class_thread, name='get_or_create_class_thread'),
 ]

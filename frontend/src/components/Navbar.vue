@@ -227,10 +227,19 @@ const goToEvent = (id) => {
   router.push(`/events`) // (or `/events/${id}` if you add event detail pages)
 }
 
-const goToClass = (id) => {
-  showDropdown.value = false
-  router.push(`/classes/${id}`) // or wherever your class detail page lives
-}
+const goToClass = async (classId) => {
+  try {
+    const res = await authAxios.post('messages/class-thread/', { class_id: classId });
+    const threadId = res.data.id;
+    activeThreadId.value = threadId;
+    await messageStore.fetchThreads(true);
+    await selectThread(threadId);
+    router.push({ path: '/messages', query: { thread: threadId } });
+    showDropdown.value = false;
+  } catch (error) {
+    toast.error('Failed to open class chat');
+  }
+};
 
 // Notifications handlers
 const toggleDropdown = async () => {

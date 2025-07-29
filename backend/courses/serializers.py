@@ -4,4 +4,4 @@ from .models import ClassInfo
 class ClassInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClassInfo
-        fields = ['descr', 'full_name']
+        fields = ['id', 'descr', 'full_name']

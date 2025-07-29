@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from .models import Thread, ThreadParticipant, Message
+from .models import Thread, ThreadParticipant, Message, ClassInfo
 from .serializers import MessageSerializer, ThreadSerializer
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
@@ -11,6 +11,8 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from friends.models import FriendRequest 
 from rest_framework.throttling import UserRateThrottle
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 
@@ -150,3 +152,24 @@ class TogglePinMessageAPIView(APIView):
         message.pinned = not message.pinned
         message.save()
         return Response({'status': 'pinned' if message.pinned else 'unpinned'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_or_create_class_thread(request):
+    class_id = request.data.get('class_id')
+    if not class_id:
+        return Response({'error': 'class_id is required'}, status=400)
+
+    class_obj = get_object_or_404(ClassInfo, id=class_id)
+
+    thread = Thread.objects.filter(class_info=class_obj).first()
+    if not thread:
+        thread = Thread.objects.create(class_info=class_obj, name=class_obj.full_name, is_group=True)
+        ThreadParticipant.objects.create(thread=thread, user=request.user)
+    else:
+        # If thread exists, ensure user is participant
+        if not ThreadParticipant.objects.filter(thread=thread, user=request.user).exists():
+            ThreadParticipant.objects.create(thread=thread, user=request.user)
+
+    serializer = ThreadSerializer(thread, context={'request': request})
+    return Response(serializer.data)

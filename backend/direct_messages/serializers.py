@@ -31,11 +31,12 @@ class ThreadSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
     club_name = serializers.SerializerMethodField() 
+    class_info = ClassInfoSerializer(read_only=True)
     is_group = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Thread
-        fields = ['id', 'name', 'is_group', 'participants', 'last_message', 'created_at', 'club_name']
+        fields = ['id', 'name', 'is_group', 'participants', 'last_message', 'created_at', 'club_name', 'class_info']
 
     def get_participants(self, obj):
         participants = ThreadParticipant.objects.filter(thread=obj).select_related('user')
