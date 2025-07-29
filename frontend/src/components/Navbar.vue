@@ -73,6 +73,18 @@
                 {{ event.title }}
               </div>
             </div>
+            <!-- Classes -->
+            <div v-if="results.classes && results.classes.length" class="p-2 border-t border-gray-200">
+              <div class="text-xs text-gray-500 mb-1">Classes</div>
+              <div
+                v-for="cls in results.classes"
+                :key="cls.id"
+                @click="goToClass(cls.id)"
+                class="px-3 py-2 hover:bg-purple-50 cursor-pointer rounded text-sm"
+              >
+                {{ cls.descr }} — {{ cls.full_name }}
+              </div>
+            </div>
           </div>
           <div v-else class="p-4 text-sm text-gray-500 text-center">No results found.</div>
         </template>
@@ -210,6 +222,11 @@ const goToClub = (clubName) => {
 const goToEvent = (id) => {
   showDropdown.value = false
   router.push(`/events`) // (or `/events/${id}` if you add event detail pages)
+}
+
+const goToClass = (id) => {
+  showDropdown.value = false
+  router.push(`/classes/${id}`) // or wherever your class detail page lives
 }
 
 // Notifications handlers
