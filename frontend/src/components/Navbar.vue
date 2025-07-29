@@ -233,9 +233,17 @@ const goToClass = async (classId) => {
     const threadId = res.data.id;
     activeThreadId.value = threadId;
     await messageStore.fetchThreads(true);
-    await selectThread(threadId);
-    router.push({ path: '/messages', query: { thread: threadId } });
-    showDropdown.value = false;
+
+    // Wait for threads to update
+    await new Promise(r => setTimeout(r, 100)); // 100ms delay
+
+    if (messageStore.threads.some(t => t.id === threadId)) {
+      await selectThread(threadId);
+      router.push({ path: '/messages', query: { thread: threadId } });
+      showDropdown.value = false;
+    } else {
+      toast.error('Thread not found after refresh');
+    }
   } catch (error) {
     toast.error('Failed to open class chat');
   }
