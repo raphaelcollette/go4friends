@@ -11,6 +11,8 @@ from better_profanity import profanity
 from rest_framework.throttling import UserRateThrottle
 from django.db.models import Q, Count, Exists, OuterRef, Subquery
 from django.http import JsonResponse
+from django.utils.timesince import timesince
+from django.utils.timezone import now
 
 User = get_user_model()
 profanity.load_censor_words()
@@ -225,6 +227,8 @@ def get_post_detail(request, post_id):
 def list_post_replies(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     replies = post.replies.select_related('author').order_by('created_at')
+    current_time = now()
+
     data = [
         {
             'id': reply.id,
@@ -232,7 +236,7 @@ def list_post_replies(request, post_id):
             'username': reply.author.username if not reply.is_anonymous else None,
             'authorInitials': ''.join([n[0].upper() for n in reply.author.username.split()]) if not reply.is_anonymous else 'A',
             'content': reply.content,
-            'created_at': reply.created_at.isoformat(),
+            'timeAgo': timesince(reply.created_at, current_time) + ' ago',
             'is_anonymous': reply.is_anonymous,
             'parent_id': reply.parent.id if reply.parent else None,
         }
