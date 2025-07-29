@@ -15,6 +15,8 @@
           >
             <div class="font-semibold">
               <span v-if="thread.club_name">{{ thread.club_name }}</span>
+              <span v-else-if="thread.class_name">{{ thread.class_name }}</span>
+              <span v-else-if="thread.name">{{ thread.name }}</span>
               <span v-else>{{ getOtherUsernames(thread.participants) }}</span>
             </div>
             <div class="text-xs text-gray-600 truncate">{{ thread.last_message?.message || 'No messages yet' }}</div>
