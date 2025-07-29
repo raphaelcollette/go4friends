@@ -6,6 +6,7 @@ from .views import (
     SendMessageAPIView,
     StartPrivateThreadAPIView,
     TogglePinMessageAPIView,
+    get_or_create_class_thread
 )
 
 urlpatterns = [

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Thread, ThreadParticipant, Message
+from courses.serializers import ClassInfoSerializer
 
 User = get_user_model()
 

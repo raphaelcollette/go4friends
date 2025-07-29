@@ -8,7 +8,7 @@ class Thread(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)  # Optional, used for group chats
     is_group = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    class_info = models.ForeignKey('ClassInfo', null=True, blank=True, on_delete=models.SET_NULL, related_name='threads')
+    class_info = models.ForeignKey('courses.ClassInfo', null=True, blank=True, on_delete=models.SET_NULL, related_name='threads')
 
     def __str__(self):
         return self.name or f"Thread {self.id}"

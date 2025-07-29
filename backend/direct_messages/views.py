@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from .models import Thread, ThreadParticipant, Message, ClassInfo
+from .models import Thread, ThreadParticipant, Message
 from .serializers import MessageSerializer, ThreadSerializer
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
@@ -13,6 +13,7 @@ from friends.models import FriendRequest
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from courses.models import ClassInfo
 
 User = get_user_model()
 
