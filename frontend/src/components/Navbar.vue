@@ -229,7 +229,7 @@ const goToEvent = (id) => {
 
 const goToClass = async (classId) => {
   try {
-    const res = await authAxios.post('messages/class-thread/', { class_id: classId });
+    const res = await authAxios.post('/messages/class-thread/', { class_id: classId });
     const threadId = res.data.id;
     activeThreadId.value = threadId;
     await messageStore.fetchThreads(true);
