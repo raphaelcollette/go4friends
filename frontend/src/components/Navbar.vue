@@ -206,7 +206,10 @@ const handleSearch = () => {
 }
 
 const hasResults = computed(() =>
-  results.value.users.length || results.value.clubs.length || results.value.events.length
+  results.value.users.length ||
+  results.value.clubs.length ||
+  results.value.events.length ||
+  (results.value.classes && results.value.classes.length)
 )
 
 const goToUser = (username) => {
