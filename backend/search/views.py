@@ -8,6 +8,8 @@ from events.models import Event
 from users.serializers import UserPublicSerializer
 from clubs.serializers import ClubSerializer
 from events.serializers import EventSerializer
+from courses.models import ClassInfo
+from courses.serializers import ClassInfoSerializer
 
 class GlobalSearchAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -32,8 +34,14 @@ class GlobalSearchAPIView(APIView):
             Q(location__icontains=query)
         )[:5]
 
+        classes = ClassInfo.objects.filter(
+            Q(descr__icontains=query) |
+            Q(full_name__icontains=query)
+        )[:5]
+
         return Response({
             'users': UserPublicSerializer(users, many=True, context={'request': request}).data,
             'clubs': ClubSerializer(clubs, many=True).data,
             'events': EventSerializer(events, many=True).data,
+            'classes': ClassInfoSerializer(classes, many=True).data,
         })

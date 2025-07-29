@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'direct_messages',
     'search',
     'posts',
+    'courses',
 ]
 
 
