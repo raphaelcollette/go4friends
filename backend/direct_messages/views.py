@@ -14,6 +14,7 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from courses.models import ClassInfo
+from django.core.exceptions import ObjectDoesNotExist
 
 User = get_user_model()
 
@@ -70,10 +71,15 @@ class SendMessageAPIView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         thread_id = kwargs.get('thread_id')
-        thread = get_object_or_404(Thread, id=thread_id, participants__user=request.user)
+        thread = get_object_or_404(Thread.objects.select_related('class_info', 'club'), id=thread_id, participants__user=request.user)
 
-        # Only enforce friendship for non-class, non-club threads
-        if not thread.class_info and not thread.club:
+        has_class_info = hasattr(thread, 'class_info') and thread.class_info is not None
+        try:
+            has_club = thread.club is not None
+        except ObjectDoesNotExist:
+            has_club = False
+
+        if not has_class_info and not has_club:
             other_participants = thread.participants.exclude(user=request.user)
             for participant in other_participants:
                 if not are_friends(request.user, participant.user):
