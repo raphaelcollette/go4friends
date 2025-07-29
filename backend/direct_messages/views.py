@@ -66,22 +66,22 @@ class MessageListAPIView(generics.ListAPIView):
 class SendMessageAPIView(generics.CreateAPIView):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
-    #throttle_classes = [SendMessageThrottle]
+    # throttle_classes = [SendMessageThrottle]
 
     def post(self, request, *args, **kwargs):
         thread_id = kwargs.get('thread_id')
         thread = get_object_or_404(Thread, id=thread_id, participants__user=request.user)
-        
-        # Check if user is friends with all other participants in the thread
-        other_participants = thread.participants.exclude(user=request.user)
-        for participant in other_participants:
-            if not are_friends(request.user, participant.user):
-                return Response({
-                    'error': f'You can only send messages to friends. You are not friends with {participant.user.username}.'
-                }, status=status.HTTP_403_FORBIDDEN)
-        
-        message = request.data.get('message')
 
+        # Only enforce friendship for non-class, non-club threads
+        if not thread.class_info and not thread.club:
+            other_participants = thread.participants.exclude(user=request.user)
+            for participant in other_participants:
+                if not are_friends(request.user, participant.user):
+                    return Response({
+                        'error': f'You can only send messages to friends. You are not friends with {participant.user.username}.'
+                    }, status=status.HTTP_403_FORBIDDEN)
+
+        message = request.data.get('message')
         if not message:
             return Response({'error': 'Message cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,7 +92,6 @@ class SendMessageAPIView(generics.CreateAPIView):
         )
 
         return Response(MessageSerializer(msg).data, status=status.HTTP_201_CREATED)
-
 
 class StartPrivateThreadAPIView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
