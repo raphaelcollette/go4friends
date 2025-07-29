@@ -7,14 +7,17 @@ export const usePostStore = defineStore('posts', {
     userPosts: [],
     loading: false,
     userPostsCache: {}, // { username: { posts: [], lastFetched: timestamp } }
+    postsFetched: false,
   }),
 
   actions: {
-    async fetchPosts() {
+    async fetchPosts(force = false) {
+      if (this.postsFetched && !force) return
       this.loading = true
       try {
         const response = await authAxios.get('/posts/')
         this.posts = response.data
+        this.postsFetched = true
       } catch (error) {
         console.error('Failed to fetch posts:', error)
       } finally {
